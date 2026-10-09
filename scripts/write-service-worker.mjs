@@ -16,7 +16,7 @@ if (process.env.GITHUB_PAGES === "true") {
   }
 
   const core = [
-    "index.html", "bd/index.html", "share/index.html",
+    "index.html", "index.txt", "bd/index.html", "bd/index.txt", "share/index.html", "share/index.txt",
     "data/world.geojson", "data/bd-districts.geojson", "data/bd-context.geojson",
     "data/bd-rivers.geojson", "data/palestine-outline.geojson",
     "maplibre/maplibre-gl-worker.mjs", "maplibre/maplibre-gl-shared.mjs",
@@ -30,6 +30,7 @@ if (process.env.GITHUB_PAGES === "true") {
   }
 
   const digest = createHash("sha256");
+  digest.update(await readFile(new URL(import.meta.url)));
   for (const file of core) digest.update(await readFile(path.join(root, file)));
   const cacheName = `atlas-core-${digest.digest("hex").slice(0, 12)}`;
   const urls = core.map((file) => `${base}/${file === "index.html" ? "" : file === "bd/index.html" ? "bd/" : file === "share/index.html" ? "share/" : file}`);
@@ -74,9 +75,16 @@ self.addEventListener('fetch', (event) => {
     }
     const cached = await cache.match(request);
     if (cached) return cached;
-    const response = await fetch(request);
-    if (response.ok) await cache.put(request, response.clone());
-    return response;
+    try {
+      const response = await fetch(request);
+      if (response.ok) await cache.put(request, response.clone());
+      return response;
+    } catch {
+      const route = url.pathname.endsWith('/') ? url.pathname : url.pathname + '/';
+      const payload = await cache.match(url.origin + route + 'index.txt');
+      if (payload) return payload;
+      return Response.error();
+    }
   })());
 });
 `;
