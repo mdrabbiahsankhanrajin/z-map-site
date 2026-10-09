@@ -16,7 +16,7 @@ if (process.env.GITHUB_PAGES === "true") {
   }
 
   const core = [
-    "index.html", "index.txt", "bd/index.html", "bd/index.txt", "discover/index.html", "discover/index.txt", "planner/index.html", "planner/index.txt", "insights/index.html", "insights/index.txt", "share/index.html", "share/index.txt",
+    "index.html", "index.txt", "bd/index.html", "bd/index.txt", "discover/index.html", "discover/index.txt", "planner/index.html", "planner/index.txt", "insights/index.html", "insights/index.txt", "share/index.html", "share/index.txt", "credits/index.html", "credits/index.txt",
     "data/world.geojson", "data/bd-districts.geojson", "data/bd-context.geojson",
     "data/bd-rivers.geojson", "data/palestine-outline.geojson",
     "maplibre/maplibre-gl-worker.mjs", "maplibre/maplibre-gl-shared.mjs",
@@ -36,7 +36,7 @@ if (process.env.GITHUB_PAGES === "true") {
   digest.update(await readFile(new URL(import.meta.url)));
   for (const file of core) digest.update(await readFile(path.join(root, file)));
   const cacheName = `atlas-core-${digest.digest("hex").slice(0, 12)}`;
-  const urls = core.map((file) => `${base}/${file === "index.html" ? "" : file === "bd/index.html" ? "bd/" : file === "discover/index.html" ? "discover/" : file === "planner/index.html" ? "planner/" : file === "insights/index.html" ? "insights/" : file === "share/index.html" ? "share/" : file}`);
+  const urls = core.map((file) => `${base}/${file === "index.html" ? "" : file === "bd/index.html" ? "bd/" : file === "discover/index.html" ? "discover/" : file === "planner/index.html" ? "planner/" : file === "insights/index.html" ? "insights/" : file === "share/index.html" ? "share/" : file === "credits/index.html" ? "credits/" : file}`);
 
   const worker = `const CACHE = ${JSON.stringify(cacheName)};
 const SCOPE = new URL('.', self.location.href).pathname;

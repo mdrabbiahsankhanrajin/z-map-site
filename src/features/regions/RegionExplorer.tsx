@@ -102,6 +102,7 @@ export function RegionExplorer({ country }: { country: Place }) {
         <div className="bulk-actions"><button type="button" disabled={shownIds.length === 0} onClick={() => setSelected((current) => [...new Set([...current, ...shownIds])])}>Mark shown visited</button><button type="button" disabled={!shownIds.some((id) => selected.includes(id))} onClick={() => setSelected((current) => current.filter((id) => !shownIds.includes(id)))}>Clear shown</button></div>
         {!compact && <RegionList {...listProps} />}
         <details className="theme-section"><summary>Map style</summary><div className="theme-options">{(Object.keys(themes) as ThemeId[]).map((id) => <button key={id} type="button" className={`theme-option ${theme === id ? "is-selected" : ""}`} aria-pressed={theme === id} onClick={() => setTheme(id)}><span className="theme-swatch" style={{ background: `linear-gradient(135deg, ${themes[id].ocean} 48%, ${themes[id].land} 48%)` }} /><span>{themes[id].label}</span></button>)}</div></details>
+        <Link className="map-credits-link" href="/credits">Map credits</Link>
       </aside>
       <section className="map-area" aria-label={`${country.name} regions map`}>
         {loaded ? <MapAdapter scope="regions" places={regions} sourceUrl={sourceUrl} overview={country} selectedIds={selected} activeId={activeId} theme={theme} onSelect={pick} /> : <div className="map-state" role="status">{error ? "Regions unavailable. Return to the World map." : <><span>Loading region boundaries</span><small>Local atlas data</small></>}</div>}
@@ -116,13 +117,14 @@ export function RegionExplorer({ country }: { country: Place }) {
           {active?.type && <p className="division-detail">{active.type} · {country.name}</p>}
           <p className="detail-description">{active ? "Mark this region if you have visited it." : "Tap the map, search, or browse the region list."}</p>
           {active && <button className={`visit-action ${selected.includes(active.id) ? "is-marked" : ""}`} type="button" aria-pressed={selected.includes(active.id)} onClick={() => toggle(active.id)}><span>{selected.includes(active.id) ? "✓ Marked as visited" : "Mark as visited"}</span><span aria-hidden="true">{selected.includes(active.id) ? "−" : "+"}</span></button>}
-          {active && outline && <GeoSilhouette name={active.displayName ?? active.name} path={outline} source="Natural Earth" />}
+          {active && outline && <GeoSilhouette name={active.displayName ?? active.name} path={outline} />}
           {note && <section className="region-note" aria-label="Sourced region note"><h3>{note.title}</h3><p>{note.summary}</p><a href={note.sourceUrl} target="_blank" rel="noreferrer">Read at {note.sourceLabel} <span aria-hidden="true">↗</span></a></section>}
           <button type="button" className="browse-button" onClick={() => setSheetMode("expanded")}>Browse regions <span aria-hidden="true">→</span></button>
           <div className="detail-rule" />
           <div className="detail-progress" aria-live="polite"><span>Region progress</span><strong>{selected.length} <small>of {regions.length} regions</small></strong></div>
           <div className="progress-track"><span style={{ width: `${regions.length ? selected.length / regions.length * 100 : 0}%` }} /></div>
           <p className="privacy-copy">Saved only in this browser. No account or location tracking.</p>
+          <Link className="map-credits-link" href="/credits">Map credits</Link>
           <Link className="featured-link" href={backUrl}>← Back to {country.name}</Link>
         </div>
         <div className="mobile-browse"><div className="list-heading"><h3>Regions</h3><span>{filtered.length}</span></div>{compact && <RegionList {...listProps} />}</div>

@@ -25,6 +25,13 @@
 .photo-credit{padding-top:11px;border-top:1px solid #d9dace;color:#6f7569;font-size:10px;line-height:1.5}
 .photo-credit a,.place-photo small a{color:#1b5641;text-decoration:underline;text-underline-offset:2px}
 .content-footnote{max-width:1160px;margin:0 auto;padding:0 24px 48px;color:#69776a;font-size:12px}
+.credits-content{max-width:780px;margin:0 auto;padding:70px 24px 100px}
+.credits-content h1{margin:0 0 22px;color:#193c30;font:normal clamp(48px,7vw,76px)/1 Georgia,serif;letter-spacing:-.035em}
+.credits-content h2{margin:0 0 9px;color:#1d4938;font:normal 25px/1.2 Georgia,serif}
+.credits-content p{color:#425f52;font-size:14px;line-height:1.7}
+.credits-content section{margin-top:33px;padding-top:25px;border-top:1px solid #c7c9b9}
+.credits-content a{color:#1d5b45;text-decoration:underline;text-underline-offset:3px}
+.credits-end{margin-top:42px}
 .journey-links{display:flex;flex-wrap:wrap;gap:15px;margin:13px 0 0}
 .journey-links a{color:#1d5b45;font-size:12px;font-weight:700;text-decoration:underline;text-underline-offset:4px}
 .place-photo{margin:0 0 14px}

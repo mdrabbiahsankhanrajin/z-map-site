@@ -12,4 +12,4 @@ The rights notice for original Atlas material does not cover these sources:
 | Ratargul Swamp Forest photograph | [Ifsanjry](https://commons.wikimedia.org/wiki/File:Ratargul_Swamp_Forest,_Sylhet_03.jpg), [CC BY-SA 4.0](https://creativecommons.org/licenses/by-sa/4.0/). Local thumbnail; no image content changes. |
 | Bundled JavaScript | React and React DOM (MIT), Next.js (MIT), and MapLibre GL JS (BSD-3-Clause). License texts are in [licenses/](licenses/). |
 
-Map credits are also shown in the interface. The geographic boundaries are for exploration, not navigation or an assertion of sovereignty. Source licenses govern third-party material regardless of this repository's rights notice.
+Map credits are linked from the map and listed at `/credits/`. The geographic boundaries are for exploration, not navigation or an assertion of sovereignty. Source licenses govern third-party material regardless of this repository's rights notice.

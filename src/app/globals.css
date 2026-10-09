@@ -100,8 +100,7 @@ a{color:inherit;text-decoration:none}
 .map-zoom button{width:41px;height:39px;border:0;background:transparent;font-size:23px;color:#20372d}
 .map-zoom button+button{border-top:1px solid var(--line)}
 .map-zoom button:hover{background:#edf2ed}
-.map-attribution{position:absolute;left:15px;bottom:12px;z-index:2;max-width:calc(100% - 75px);padding:5px 8px;background:rgba(252,251,247,.82);border-radius:3px;color:#59685f;font-size:10px;line-height:1.3}
-.map-attribution a{text-decoration:underline;text-underline-offset:2px}
+.map-credits-link{display:inline-block;margin-top:10px;color:#52685a;font-size:11px;text-decoration:underline;text-underline-offset:3px}
 .detail-panel{width:324px;flex:none;min-height:0;overflow-y:auto;background:var(--surface);border:1px solid var(--line);border-radius:12px;box-shadow:0 8px 24px rgba(28,48,37,.07);z-index:2}
 .detail-inner{padding:30px 24px 28px}
 .detail-inner h2{font-family:Georgia,"Times New Roman",serif;font-size:40px;line-height:1.06;letter-spacing:-.03em;font-weight:400;margin:0 0 11px;color:var(--accent-deep)}
@@ -153,7 +152,7 @@ a{color:inherit;text-decoration:none}
   .map-top-caption{top:75px;left:12px;font-size:10px;white-space:normal;padding:7px 9px}
   .map-zoom{right:12px;top:121px;bottom:auto}
   .map-zoom button{width:36px;height:36px}
-  .map-attribution{bottom:calc(35dvh + 10px);max-width:calc(100% - 22px);font-size:9px}
+  .sheet-peek .map-credits-link,.detail-panel.is-overview.sheet-half .map-credits-link{display:none}
   .detail-panel{position:absolute;bottom:0;left:0;width:100%;border-left:0;border-top:1px solid #d9dcd4;border-radius:23px 23px 0 0;box-shadow:0 -10px 32px rgba(27,43,35,.13);overflow-y:auto}
   .detail-panel.sheet-peek{height:150px}
   .detail-panel.sheet-half{height:35dvh;min-height:270px}
@@ -259,9 +258,8 @@ a{color:inherit;text-decoration:none}
 .region-note p{margin:0 0 10px;font-size:13px;line-height:1.5;color:#475e53}
 .region-note a{font-size:12px;font-weight:700;color:#176d63;text-decoration:underline;text-underline-offset:3px}
 .geo-silhouette{height:178px;position:relative;overflow:hidden;margin:19px 0 0;border:1px solid #d2d0ba;border-radius:5px;background-color:#ebe9d8;background-image:linear-gradient(#78948424 1px,transparent 1px),linear-gradient(90deg,#78948424 1px,transparent 1px);background-size:38px 38px}
-.geo-silhouette svg,.geo-silhouette img{display:block;width:100%;height:100%;padding:5px 10px 21px;object-fit:contain;filter:drop-shadow(0 5px 5px #5f4b3733)}
+.geo-silhouette svg,.geo-silhouette img{display:block;width:100%;height:100%;padding:5px 10px;object-fit:contain;filter:drop-shadow(0 5px 5px #5f4b3733)}
 .geo-silhouette path{fill:#c48650;stroke:#815437;stroke-width:1.25;vector-effect:non-scaling-stroke}
-.geo-silhouette figcaption{position:absolute;left:10px;bottom:6px;color:#4b6355;font-size:10px;font-weight:700;letter-spacing:.02em}
 .map-depth-control{gap:7px}
 .map-view-switch{display:grid;grid-template-columns:1fr 1fr;min-width:166px;padding:3px;gap:2px;border:1px solid #a9bdad;border-radius:7px;background:#fffdf2ed;box-shadow:0 3px 12px #163b3422}
 .map-depth-control .map-view-switch button{min-height:31px;justify-content:center;padding:0 10px;border:0;border-radius:4px;background:transparent;color:#28584c;font-size:11px;font-weight:700;box-shadow:none;transform:none;transition:background .15s,color .15s}
@@ -312,10 +310,8 @@ a{color:inherit;text-decoration:none}
   .visit-action:hover,.visit-action.is-marked{background:transparent;color:#8a4c2b}
   .visit-action span:last-child{margin-left:14px}
   .browse-button{border-radius:3px;background:#e8ecde}
-  .map-attribution{bottom:calc(max(32dvh, 246px) + 10px)}
   .atlas-app[data-scope="world"] .geo-silhouette{display:block;position:absolute;top:14px;right:12px;width:114px;height:107px;margin:0;pointer-events:none;border:0;border-radius:0;background:none;opacity:.25}
   .atlas-app[data-scope="world"] .geo-silhouette img{padding:0;filter:none}
-  .atlas-app[data-scope="world"] .geo-silhouette figcaption{display:none}
 }
 @media(max-width:380px){.topbar{gap:7px}.brand{font-size:14px}.global-search input{font-size:11px}.top-nav{gap:6px;font-size:12px}.detail-inner h2{font-size:32px}}
 
@@ -377,7 +373,6 @@ a{color:inherit;text-decoration:none}
   .map-depth-control{top:20px;right:20px}
   .map-zoom{top:112px;right:20px;bottom:auto}
   .map-top-caption{top:20px;left:22px}
-  .map-attribution{font-size:10px}
 }
 .map-view-trigger{display:flex!important;min-width:104px;justify-content:space-between;font-family:Georgia,serif;font-size:13px!important}
 .map-view-options{display:none}
@@ -389,7 +384,6 @@ a{color:inherit;text-decoration:none}
   .global-search input{font-size:13px}
   .map-zoom{top:104px}
   .map-depth-control{top:186px}
-  .map-attribution{left:12px;max-width:calc(100% - 24px);font-size:9px;line-height:1.2}
   .detail-panel{scrollbar-width:none}
   .detail-panel::-webkit-scrollbar{display:none}
   .detail-panel.sheet-half{height:34dvh;min-height:280px}
@@ -404,5 +398,4 @@ a{color:inherit;text-decoration:none}
   .detail-panel.is-overview.sheet-half .detail-progress small{font-size:11px}
   .detail-inner.is-country-overview h2{font-size:39px!important}
   .atlas-app[data-scope="districts"] .detail-inner.is-country-overview::before{opacity:.12}
-  .map-attribution{bottom:calc(max(34dvh, 280px) + 9px)}
 }

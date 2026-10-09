@@ -363,9 +363,6 @@ export function MapAdapter({ scope, places, sourceUrl, overview, selectedIds, ac
         </div>
         {perspective && <small>Illustrative depth</small>}
       </div>}
-      <div className="map-attribution">
-        {scope !== "districts" ? <>Terrain: <a href="https://www.naturalearthdata.com/" target="_blank" rel="noreferrer">Natural Earth</a> / <a href="https://maps.black/" target="_blank" rel="noreferrer">maps.black</a> (CC0)</> : <>Districts: <a href="https://www.geoboundaries.org/" target="_blank" rel="noreferrer">geoBoundaries</a> / BBS &amp; OCHA · <a href="https://creativecommons.org/licenses/by/3.0/igo/" target="_blank" rel="noreferrer">CC BY 3.0 IGO</a> · Terrain: <a href="https://www.naturalearthdata.com/" target="_blank" rel="noreferrer">Natural Earth</a> / <a href="https://maps.black/" target="_blank" rel="noreferrer">maps.black</a> (CC0)</>}
-      </div>
     </div>
   );
 }
