@@ -57,7 +57,7 @@ function fitOverview(map: MapLibreMap, scope: Props["scope"], places: Place[], o
     return [Math.min(box[0], place.bounds[0]), Math.min(box[1], place.bounds[1]), Math.max(box[2], place.bounds[2]), Math.max(box[3], place.bounds[3])];
   }, [Infinity, Infinity, -Infinity, -Infinity]);
   if (bounds.every(Number.isFinite) && bounds[2] - bounds[0] < 180) map.fitBounds([[bounds[0], bounds[1]], [bounds[2], bounds[3]]], {
-    padding: mapPadding(mobile), maxZoom: scope === "regions" ? 7.5 : mobile ? 6.5 : 7, ...camera, duration: 0,
+    padding: mapPadding(mobile), maxZoom: scope === "regions" ? 7.5 : mobile ? 5.4 : 7, ...camera, duration: 0,
   });
   else if (scope === "regions" && overview && mobile) map.jumpTo({
     center: [overview.center[0], overview.center[1]], padding: mapPadding(mobile), ...camera,
@@ -70,10 +70,9 @@ function mapStyle(scope: Props["scope"], theme: ThemeId, sourceUrl?: string): St
     version: 8,
     sources: {
       graticule: { type: "geojson", data: grid },
-      satellite: { type: "raster", tiles: ["https://tiles.maps.eox.at/wmts/1.0.0/s2cloudless_3857/default/g/{z}/{y}/{x}.jpg"], tileSize: 256, minzoom: 0, maxzoom: 13, attribution: "EOxCloudless by EOX IT Services GmbH (Contains modified Copernicus Sentinel data 2016 & 2017)" },
       ...(scope === "districts"
         ? { "bd-terrain": { type: "raster" as const, tiles: [publicPath("/data/bd-terrain-hi/{z}/{x}/{y}.webp")], tileSize: 512, minzoom: 3, maxzoom: 6, attribution: "Natural Earth I; tiles by maps.black (CC0)" } }
-        : { relief: { type: "raster" as const, tiles: [publicPath("/data/relief/{z}/{x}/{y}.webp")], tileSize: 512, minzoom: 0, maxzoom: 4, attribution: "Natural Earth shaded relief" } }),
+        : { "world-terrain": { type: "raster" as const, tiles: [publicPath("/data/world-terrain/{z}/{x}/{y}.webp")], tileSize: 512, minzoom: 0, maxzoom: 4, attribution: "Natural Earth I; tiles by maps.black (CC0)" } }),
       ...(scope === "districts" ? {
         context: { type: "geojson" as const, data: publicPath("/data/bd-context.geojson") },
         rivers: { type: "geojson" as const, data: publicPath("/data/bd-rivers.geojson") },
@@ -87,20 +86,20 @@ function mapStyle(scope: Props["scope"], theme: ThemeId, sourceUrl?: string): St
     },
     layers: [
       { id: "ocean", type: "background", paint: { "background-color": palette.ocean } },
-      { id: "satellite", type: "raster", source: "satellite", layout: { visibility: "none" }, paint: { "raster-opacity": 1, "raster-fade-duration": 0 } },
-      { id: "graticule", type: "line", source: "graticule", paint: { "line-color": "#f7f1dc", "line-opacity": 0.42, "line-width": 0.7 } },
+      ...(scope !== "districts" ? [{ id: "world-terrain" as const, type: "raster" as const, source: "world-terrain", paint: { "raster-opacity": 1, "raster-fade-duration": 0, "raster-contrast": 0.24, "raster-saturation": 0.34, "raster-brightness-max": 0.82 } }] : []),
+      { id: "graticule", type: "line", source: "graticule", paint: { "line-color": "#f7f1dc", "line-opacity": 0.19, "line-width": 0.55 } },
       ...(scope === "districts" ? [
         { id: "context-land" as const, type: "fill" as const, source: "context", paint: { "fill-color": palette.land, "fill-opacity": 0.93 } },
-        { id: "bd-terrain" as const, type: "raster" as const, source: "bd-terrain", paint: { "raster-opacity": 1, "raster-fade-duration": 0, "raster-contrast": 0.2, "raster-saturation": 0.35, "raster-brightness-max": 0.78 } },
-        { id: "bd-tint" as const, type: "fill" as const, source: "context", filter: ["==", ["get", "id"], "BGD"] as FilterSpecification, maxzoom: 7, paint: { "fill-color": "#0e6237", "fill-opacity": 0.68 } },
-        { id: "context-line" as const, type: "line" as const, source: "context", paint: { "line-color": palette.line, "line-width": 0.9, "line-opacity": 0.6 } },
+        { id: "bd-terrain" as const, type: "raster" as const, source: "bd-terrain", paint: { "raster-opacity": 1, "raster-fade-duration": 0, "raster-contrast": 0.22, "raster-saturation": 0.22, "raster-brightness-max": 0.82 } },
+        { id: "context-tone" as const, type: "fill" as const, source: "context", maxzoom: 7, paint: { "fill-color": ["match", ["get", "id"], "BGD", "#0a5738", "IND", "#9b6e38", "MMR", "#37634a", "NPL", "#64714f", "BTN", "#4e6f52", "#4d6951"] as ExpressionSpecification, "fill-opacity": 0.28 } },
+        { id: "bd-tint" as const, type: "fill" as const, source: "context", filter: ["==", ["get", "id"], "BGD"] as FilterSpecification, maxzoom: 7, paint: { "fill-color": "#07452e", "fill-opacity": 0.35 } },
+        { id: "context-line" as const, type: "line" as const, source: "context", paint: { "line-color": "#163f34", "line-width": 1.15, "line-opacity": 0.72 } },
       ] : []),
-      { id: "places-fill", type: "fill", source: "places", paint: { "fill-color": palette.land, "fill-opacity": scope === "districts" ? 0.04 : 0.97, "fill-antialias": false } },
+      { id: "places-fill", type: "fill", source: "places", paint: { "fill-color": palette.land, "fill-opacity": 0.08, "fill-antialias": false } },
       ...(scope === "districts" ? [
-        { id: "bd-rivers" as const, type: "line" as const, source: "rivers", paint: { "line-color": "#3285a8", "line-opacity": 0.48, "line-width": ["interpolate", ["linear"], ["zoom"], 4, 0.5, 7, 1.2, 10, 1.8] as ExpressionSpecification } },
-        { id: "district-line-casing" as const, type: "line" as const, source: "places", paint: { "line-color": "#214934", "line-opacity": 0.28, "line-width": 1.3 } },
+        { id: "bd-rivers" as const, type: "line" as const, source: "rivers", paint: { "line-color": "#247ea6", "line-opacity": 0.75, "line-width": ["interpolate", ["linear"], ["zoom"], 4, 0.65, 7, 1.45, 10, 2] as ExpressionSpecification } },
+        { id: "district-line-casing" as const, type: "line" as const, source: "places", paint: { "line-color": "#214934", "line-opacity": 0.5, "line-width": 1.2 } },
       ] : []),
-      ...(scope !== "districts" ? [{ id: "relief" as const, type: "raster" as const, source: "relief", maxzoom: scope === "regions" ? 5 : undefined, paint: { "raster-opacity": scope === "world" ? 0.78 : 0.38, "raster-fade-duration": 0 } }] : []),
       {
         id: "selected-depth", type: "fill-extrusion", source: "places",
         filter: ["==", ["get", "id"], ""],
@@ -112,7 +111,8 @@ function mapStyle(scope: Props["scope"], theme: ThemeId, sourceUrl?: string): St
           "fill-extrusion-opacity": 0.44,
         },
       },
-      { id: "places-line", type: "line", source: "places", paint: { "line-color": palette.line, "line-width": scope === "world" ? 1.25 : 1.5, "line-opacity": scope === "world" ? ["case", ["in", ["get", "id"], ["literal", ["ISR", "PSX"]]], 0, 1] : 1 } },
+      ...(scope === "world" ? [{ id: "country-line-shadow" as const, type: "line" as const, source: "places", paint: { "line-color": "#153b2f", "line-width": 1.9, "line-opacity": ["case", ["in", ["get", "id"], ["literal", ["ISR", "PSX"]]], 0, 0.38] as ExpressionSpecification } }] : []),
+      { id: "places-line", type: "line", source: "places", paint: { "line-color": palette.line, "line-width": scope === "world" ? 1.4 : 1.15, "line-opacity": scope === "world" ? ["case", ["in", ["get", "id"], ["literal", ["ISR", "PSX"]]], 0, 1] : 0.83 } },
       { id: "selected-outline-casing", type: "line", source: "places", filter: ["==", ["get", "id"], ""], paint: { "line-color": "#fff9df", "line-width": 4, "line-opacity": 0.96 } },
       { id: "selected-outline", type: "line", source: "places", filter: ["==", ["get", "id"], ""], paint: { "line-color": "#135641", "line-width": 2.2, "line-opacity": 1 } },
       ...(scope === "districts" ? [
@@ -135,29 +135,12 @@ export function MapAdapter({ scope, places, sourceUrl, overview, selectedIds, ac
   const lastViewportMobile = useRef<boolean | null>(null);
   const [viewportMobile, setViewportMobile] = useState(() => typeof window !== "undefined" && window.innerWidth <= 1060);
   const [perspective, setPerspective] = useState(false);
-  const [satellite, setSatellite] = useState(false);
-  const [satelliteError, setSatelliteError] = useState(false);
-  const [online, setOnline] = useState(true);
   const [viewControlsOpen, setViewControlsOpen] = useState(false);
   const [ready, setReady] = useState(false);
   const [error, setError] = useState(false);
 
   useEffect(() => { selectRef.current = onSelect; }, [onSelect]);
   useEffect(() => { perspectiveRef.current = perspective; }, [perspective]);
-  useEffect(() => {
-    const update = () => {
-      const connected = navigator.onLine;
-      setOnline(connected);
-      if (!connected) setSatellite(false);
-    };
-    update();
-    window.addEventListener("online", update);
-    window.addEventListener("offline", update);
-    return () => {
-      window.removeEventListener("online", update);
-      window.removeEventListener("offline", update);
-    };
-  }, []);
 
   useEffect(() => {
     if (!container.current) return;
@@ -189,12 +172,32 @@ export function MapAdapter({ scope, places, sourceUrl, overview, selectedIds, ac
         map.on("load", () => {
           fitOverview(map, scope, places, overview, mobile, perspectiveRef.current);
           if (scope === "districts") {
-            for (const country of countries.filter((item) => ["BGD", "NPL", "BTN", "MMR"].includes(item.id))) {
+            const nearby = [
+              ...countries.filter((item) => ["BGD", "NPL", "BTN", "MMR"].includes(item.id)).map((item) => ({ name: item.name, id: item.id, center: item.center })),
+              { name: "India", id: "IND", center: [87.6, 26] },
+              { name: "Bay of Bengal", id: "SEA", center: [89.9, 21] },
+            ];
+            for (const country of nearby) {
               const element = document.createElement("span");
-              element.className = `map-country-label${country.id === "BGD" ? " is-home" : ""}`;
+              element.className = `map-country-label${country.id === "BGD" ? " is-home" : ""}${country.id === "SEA" ? " is-water" : ""}`;
               element.textContent = country.name;
               element.setAttribute("aria-hidden", "true");
-              map.on("zoom", () => { element.style.display = map.getZoom() > 6.3 ? "none" : ""; });
+              map.on("zoom", () => { element.style.display = map.getZoom() > 6.3 || mobile && ["NPL", "BTN"].includes(country.id) ? "none" : ""; });
+              if (mobile && ["NPL", "BTN"].includes(country.id)) element.style.display = "none";
+              labelsRef.current.push(new Marker({ element, anchor: "center" }).setLngLat(country.center as [number, number]).addTo(map));
+            }
+          } else if (scope === "world") {
+            const names: Record<string, string> = { USA: "United States", BRA: "Brazil", ZAF: "South Africa", IND: "India", CHN: "China", RUS: "Russia", AUS: "Australia", BGD: "Bangladesh" };
+            for (const country of countries.filter((item) => item.id in names)) {
+              const element = document.createElement("span");
+              element.className = `map-country-label is-world${country.id === "BGD" ? " is-home" : ""}`;
+              element.textContent = names[country.id];
+              element.setAttribute("aria-hidden", "true");
+              if (country.id === "BGD") {
+                const update = () => { element.style.display = map.getZoom() < 3 ? "none" : ""; };
+                map.on("zoom", update);
+                update();
+              }
               labelsRef.current.push(new Marker({ element, anchor: "center" }).setLngLat(country.center as [number, number]).addTo(map));
             }
           }
@@ -216,10 +219,7 @@ export function MapAdapter({ scope, places, sourceUrl, overview, selectedIds, ac
             map.on("mouseleave", layer, () => { map.getCanvas().style.cursor = ""; hoverLabel.remove(); });
           }
         });
-        map.on("error", (event) => {
-          if ("sourceId" in event && event.sourceId === "satellite") setSatelliteError(true);
-          else setError(true);
-        });
+        map.on("error", () => setError(true));
         resizeObserver = new ResizeObserver(() => {
           map.resize();
           const nextMobile = window.innerWidth <= 1060;
@@ -264,45 +264,40 @@ export function MapAdapter({ scope, places, sourceUrl, overview, selectedIds, ac
   useEffect(() => {
     const map = mapRef.current;
     if (!map || !ready) return;
-    map.setLayoutProperty("satellite", "visibility", satellite ? "visible" : "none");
-  }, [satellite, ready]);
-
-  useEffect(() => {
-    const map = mapRef.current;
-    if (!map || !ready) return;
     const palette = themes[theme];
     const featureId: ExpressionSpecification = scope === "world"
       ? ["case", ["==", ["get", "id"], "ISR"], "PSX", ["get", "id"]]
       : ["get", "id"];
-    map.setPaintProperty("ocean", "background-color", satellite ? "#183043" : palette.ocean);
-    map.setPaintProperty("selected-depth", "fill-extrusion-color", satellite ? "#52dfb6" : palette.selected);
-    map.setPaintProperty("selected-depth", "fill-extrusion-opacity", satellite ? 0.24 : 0.44);
+    map.setPaintProperty("ocean", "background-color", palette.ocean);
+    map.setPaintProperty("selected-depth", "fill-extrusion-color", palette.selected);
+    map.setPaintProperty("selected-depth", "fill-extrusion-opacity", 0.44);
     map.setFilter("selected-depth", activeId === "PSX" && scope === "world"
       ? ["in", ["get", "id"], ["literal", ["ISR", "PSX"]]]
       : ["==", ["get", "id"], activeId ?? ""]);
     for (const layer of ["selected-outline-casing", "selected-outline"]) map.setFilter(layer, activeId === "PSX" && scope === "world"
       ? ["in", ["get", "id"], ["literal", ["ISR", "PSX"]]]
       : ["==", ["get", "id"], activeId ?? ""]);
-    if (scope === "districts") map.setPaintProperty("bd-terrain", "raster-opacity", satellite ? 0 : theme === "ink" ? 0.18 : theme === "dusk" ? 0.42 : theme === "coastal" ? 0.75 : 1);
-    else map.setPaintProperty("relief", "raster-opacity", satellite ? 0 : scope === "regions" ? 0.38 : theme === "ink" ? 0.22 : theme === "dusk" ? 0.42 : 0.78);
+    if (scope === "districts") map.setPaintProperty("bd-terrain", "raster-opacity", theme === "ink" ? 0.18 : theme === "dusk" ? 0.42 : 1);
+    else map.setPaintProperty("world-terrain", "raster-opacity", theme === "ink" ? 0.22 : theme === "dusk" ? 0.42 : 1);
     if (scope === "districts") {
       map.setPaintProperty("context-land", "fill-color", palette.land);
-      map.setPaintProperty("context-land", "fill-opacity", satellite ? 0 : 0.93);
-      map.setPaintProperty("context-line", "line-color", satellite ? "#fff6d8" : palette.line);
-      map.setPaintProperty("bd-tint", "fill-opacity", satellite ? 0 : theme === "ink" || theme === "dusk" ? 0.04 : 0.68);
-      map.setPaintProperty("bd-rivers", "line-opacity", satellite ? 0 : 0.48);
-      map.setPaintProperty("district-line-casing", "line-opacity", satellite ? 0.55 : 0.28);
+      map.setPaintProperty("context-land", "fill-opacity", 0.93);
+      map.setPaintProperty("context-line", "line-color", palette.line);
+      map.setPaintProperty("context-tone", "fill-opacity", theme === "ink" || theme === "dusk" ? 0.04 : 0.28);
+      map.setPaintProperty("bd-tint", "fill-opacity", theme === "ink" || theme === "dusk" ? 0.04 : 0.35);
+      map.setPaintProperty("bd-rivers", "line-opacity", 0.75);
+      map.setPaintProperty("district-line-casing", "line-opacity", 0.5);
     }
-    map.setPaintProperty("graticule", "line-opacity", satellite ? 0.12 : 0.42);
+    map.setPaintProperty("graticule", "line-opacity", 0.19);
     map.setPaintProperty("places-line", "line-color", [
-      "case", ["==", featureId, activeId ?? ""], satellite ? "#62ffd1" : palette.selected, satellite ? "#fff6d8" : scope === "districts" ? "#fff8df" : palette.line,
+      "case", ["==", featureId, activeId ?? ""], palette.selected, scope === "districts" ? "#fff8df" : palette.line,
     ]);
     if (scope === "world") {
-      map.setPaintProperty("palestine-outline", "line-color", activeId === "PSX" ? satellite ? "#62ffd1" : palette.selected : satellite ? "#fff6d8" : palette.line);
+      map.setPaintProperty("palestine-outline", "line-color", activeId === "PSX" ? palette.selected : palette.line);
       map.setPaintProperty("palestine-outline", "line-width", activeId === "PSX" ? 2.6 : 1.2);
     }
     map.setPaintProperty("places-line", "line-width", [
-      "case", ["==", featureId, activeId ?? ""], scope === "world" ? 2.8 : 2.2, satellite ? scope === "world" ? 1.35 : 1.65 : scope === "world" ? 1.2 : 0.9,
+      "case", ["==", featureId, activeId ?? ""], scope === "world" ? 2.8 : 2.2, scope === "world" ? 1.2 : 0.9,
     ]);
     const regionalColors = scope === "districts"
       ? ["#dce5bf", "#cbdcb9", "#e7dfb6", "#c5d9c5", "#dfd4b0"]
@@ -318,16 +313,16 @@ export function MapAdapter({ scope, places, sourceUrl, overview, selectedIds, ac
     ];
     map.setPaintProperty("places-fill", "fill-color", [
       "case",
-      ["==", featureId, activeId ?? ""], satellite ? "#37d9a9" : palette.selected,
-      ["in", featureId, ["literal", selectedIds]], satellite ? "#ffcf78" : palette.visited,
-      satellite ? "#ffffff" : theme === "ink" || theme === "dusk" ? palette.land : scope === "world" ? worldColor : regionalColor,
+      ["==", featureId, activeId ?? ""], palette.selected,
+      ["in", featureId, ["literal", selectedIds]], palette.visited,
+      theme === "ink" || theme === "dusk" ? palette.land : scope === "world" ? worldColor : regionalColor,
     ]);
     map.setPaintProperty("places-fill", "fill-opacity", [
-      "case", ["==", featureId, activeId ?? ""], satellite ? 0.26 : scope === "world" ? 0.52 : scope === "districts" ? 0.26 : 0.42,
-      ["in", featureId, ["literal", selectedIds]], satellite ? 0.2 : 0.98,
-      satellite ? 0.025 : scope === "districts" ? 0.07 : 0.98,
+      "case", ["==", featureId, activeId ?? ""], scope === "world" ? 0.32 : scope === "districts" ? 0.2 : 0.32,
+      ["in", featureId, ["literal", selectedIds]], 0.62,
+      theme === "ink" || theme === "dusk" ? 0.48 : scope === "districts" ? 0.025 : 0.06,
     ]);
-  }, [theme, selectedIds, activeId, ready, scope, places, satellite]);
+  }, [theme, selectedIds, activeId, ready, scope, places]);
 
   useEffect(() => {
     if (!ready || !mapRef.current) return;
@@ -350,7 +345,7 @@ export function MapAdapter({ scope, places, sourceUrl, overview, selectedIds, ac
   }, [activeId, places, ready, scope, viewportMobile]);
 
   return (
-    <div className={satellite ? "map-frame is-satellite" : "map-frame"}>
+    <div className="map-frame">
       <div className="map-canvas" ref={container} role="img" aria-label={scope === "world" ? "Interactive world map; use the adjacent searchable list for keyboard access" : scope === "regions" ? "Interactive map of country regions; use the adjacent searchable list for keyboard access" : "Interactive map of Bangladesh districts; use the adjacent searchable list for keyboard access"} />
       {!ready && !error && <div className="map-state" role="status"><span>Loading map boundaries</span><small>Local atlas data</small></div>}
       {error && <div className="map-state map-error">Map unavailable. Search and select places in the list.</div>}
@@ -358,26 +353,18 @@ export function MapAdapter({ scope, places, sourceUrl, overview, selectedIds, ac
         <button type="button" onClick={() => mapRef.current?.zoomIn()} aria-label="Zoom in">+</button>
         <button type="button" onClick={() => mapRef.current?.zoomOut()} aria-label="Zoom out">−</button>
       </div>
-      <div className="map-depth-control">
-        <button className="map-view-trigger" type="button" aria-expanded={viewControlsOpen} aria-controls="map-view-options" onClick={() => setViewControlsOpen((current) => !current)}>Layers <span aria-hidden="true">{viewControlsOpen ? "−" : "+"}</span></button>
+      {scope !== "world" && <div className="map-depth-control">
+        <button className="map-view-trigger" type="button" aria-expanded={viewControlsOpen} aria-controls="map-view-options" onClick={() => setViewControlsOpen((current) => !current)}>View <span aria-hidden="true">{viewControlsOpen ? "−" : "+"}</span></button>
         <div id="map-view-options" className={`map-view-options ${viewControlsOpen ? "is-open" : ""}`}>
-          <div className="map-view-switch" role="group" aria-label="Map imagery">
-            <button type="button" className={!satellite ? "is-on" : ""} aria-pressed={!satellite} onClick={() => { setSatelliteError(false); setSatellite(false); }}>Atlas</button>
-            <button type="button" className={satellite ? "is-on" : ""} aria-label="Satellite (requires internet)" aria-pressed={satellite} disabled={!online} onClick={() => { setSatelliteError(false); setSatellite(true); }}>Satellite</button>
-          </div>
-          <small className="map-online-note">Satellite needs internet · 2016</small>
-          {scope !== "world" && <div className="map-view-switch" role="group" aria-label="Map perspective">
+          <div className="map-view-switch" role="group" aria-label="Map perspective">
             <button type="button" className={!perspective ? "is-on" : ""} aria-pressed={!perspective} onClick={() => setPerspective(false)}>Flat</button>
             <button type="button" className={perspective ? "is-on" : ""} aria-pressed={perspective} onClick={() => setPerspective(true)}>Tilt</button>
-          </div>}
+          </div>
         </div>
-        {satelliteError && satellite && <small role="status">Imagery unavailable. Switch to atlas view.</small>}
-        {!online && <small role="status">Offline · Atlas map available</small>}
         {perspective && <small>Illustrative depth</small>}
-      </div>
-      <div className={satellite ? "map-attribution is-satellite" : "map-attribution"}>
-        {satellite && <>Imagery: <a href="https://cloudless.eox.at" target="_blank" rel="noreferrer">EOxCloudless</a> by EOX IT Services GmbH (Contains modified Copernicus Sentinel data 2016 &amp; 2017) · </>}
-        {scope !== "districts" ? <>Map: <a href="https://www.naturalearthdata.com/" target="_blank" rel="noreferrer">Natural Earth</a></> : <>Districts: <a href="https://www.geoboundaries.org/" target="_blank" rel="noreferrer">geoBoundaries</a> / BBS &amp; OCHA · <a href="https://creativecommons.org/licenses/by/3.0/igo/" target="_blank" rel="noreferrer">CC BY 3.0 IGO</a> · Terrain: <a href="https://www.naturalearthdata.com/" target="_blank" rel="noreferrer">Natural Earth</a> / <a href="https://maps.black/" target="_blank" rel="noreferrer">maps.black</a> (CC0)</>}
+      </div>}
+      <div className="map-attribution">
+        {scope !== "districts" ? <>Terrain: <a href="https://www.naturalearthdata.com/" target="_blank" rel="noreferrer">Natural Earth</a> / <a href="https://maps.black/" target="_blank" rel="noreferrer">maps.black</a> (CC0)</> : <>Districts: <a href="https://www.geoboundaries.org/" target="_blank" rel="noreferrer">geoBoundaries</a> / BBS &amp; OCHA · <a href="https://creativecommons.org/licenses/by/3.0/igo/" target="_blank" rel="noreferrer">CC BY 3.0 IGO</a> · Terrain: <a href="https://www.naturalearthdata.com/" target="_blank" rel="noreferrer">Natural Earth</a> / <a href="https://maps.black/" target="_blank" rel="noreferrer">maps.black</a> (CC0)</>}
       </div>
     </div>
   );

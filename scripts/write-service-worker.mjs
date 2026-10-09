@@ -22,7 +22,7 @@ if (process.env.GITHUB_PAGES === "true") {
     "maplibre/maplibre-gl-worker.mjs", "maplibre/maplibre-gl-shared.mjs",
     "textures/atlas-paper.webp", "illustrations/bd-water-lily.webp",
     ...await filesUnder("_next/static"),
-    ...await filesUnder("data/relief"),
+    ...await filesUnder("data/world-terrain"),
     ...await filesUnder("data/bd-terrain-hi"),
   ];
   for (const file of core) {

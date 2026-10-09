@@ -102,7 +102,6 @@ a{color:inherit;text-decoration:none}
 .map-zoom button:hover{background:#edf2ed}
 .map-attribution{position:absolute;left:15px;bottom:12px;z-index:2;max-width:calc(100% - 75px);padding:5px 8px;background:rgba(252,251,247,.82);border-radius:3px;color:#59685f;font-size:10px;line-height:1.3}
 .map-attribution a{text-decoration:underline;text-underline-offset:2px}
-.map-attribution.is-satellite{max-width:min(550px,calc(100% - 75px));background:rgba(255,253,241,.94);color:#243e39;font-size:10px}
 .detail-panel{width:324px;flex:none;min-height:0;overflow-y:auto;background:var(--surface);border:1px solid var(--line);border-radius:12px;box-shadow:0 8px 24px rgba(28,48,37,.07);z-index:2}
 .detail-inner{padding:30px 24px 28px}
 .detail-inner h2{font-family:Georgia,"Times New Roman",serif;font-size:40px;line-height:1.06;letter-spacing:-.03em;font-weight:400;margin:0 0 11px;color:var(--accent-deep)}
@@ -155,7 +154,7 @@ a{color:inherit;text-decoration:none}
   .map-zoom{right:12px;top:121px;bottom:auto}
   .map-zoom button{width:36px;height:36px}
   .map-attribution{bottom:calc(35dvh + 10px);max-width:calc(100% - 22px);font-size:9px}
-  .detail-panel{position:absolute;bottom:0;left:0;width:100%;border-left:0;border-top:1px solid #d9dcd4;border-radius:23px 23px 0 0;box-shadow:0 -10px 32px rgba(27,43,35,.13);transition:height .25s ease;overflow-y:auto}
+  .detail-panel{position:absolute;bottom:0;left:0;width:100%;border-left:0;border-top:1px solid #d9dcd4;border-radius:23px 23px 0 0;box-shadow:0 -10px 32px rgba(27,43,35,.13);overflow-y:auto}
   .detail-panel.sheet-peek{height:150px}
   .detail-panel.sheet-half{height:35dvh;min-height:270px}
   .detail-panel.sheet-expanded{height:83dvh;overflow:hidden}
@@ -200,9 +199,6 @@ a{color:inherit;text-decoration:none}
 .legend-swatch{background:linear-gradient(135deg,#b9d5ac 50%,#e9c89b 50%)}
 .legend-swatch.visited{background:#f5b86c;border-color:#9b7048}
 .legend-swatch.active{background:#137568;border-color:#0c4d44}
-.map-area:has(.map-frame.is-satellite) .legend-swatch{background:transparent;border-color:#47685c}
-.map-area:has(.map-frame.is-satellite) .legend-swatch.visited{background:#ffcf78;border-color:#9b7048}
-.map-area:has(.map-frame.is-satellite) .legend-swatch.active{background:#52dfb6;border-color:#14715b}
 .detail-panel{border-color:#bdcbb9}
 .detail-panel::before{content:"";display:block;height:3px;background:#197f78;border-radius:11px 11px 0 0}
 .detail-inner h2{color:#155246}
@@ -227,7 +223,6 @@ a{color:inherit;text-decoration:none}
 .map-depth-control small{padding:3px 5px;border-radius:3px;background:#fffdf1e8;color:#315e52;font-size:11px;letter-spacing:.01em}
 .map-depth-control .map-online-note{font-size:10px;line-height:1.25;text-align:right}
 .map-depth-control small[role="status"]{max-width:125px;text-align:right;color:#8b3a2d}
-@media(max-width:1060px){.map-attribution.is-satellite{bottom:calc(35dvh + 48px);max-width:calc(100% - 24px);font-size:9px}}
 @media(max-width:1060px){.map-depth-control{top:207px;right:12px}.map-depth-control button{min-height:35px;padding:0 9px;font-size:11px}.map-depth-control small{font-size:10px}}
 @media(max-width:1060px){.detail-panel::before{height:3px;border-radius:23px 23px 0 0}.topbar{background:#fffdf5f5}}
 
@@ -318,7 +313,6 @@ a{color:inherit;text-decoration:none}
   .visit-action span:last-child{margin-left:14px}
   .browse-button{border-radius:3px;background:#e8ecde}
   .map-attribution{bottom:calc(max(32dvh, 246px) + 10px)}
-  .map-attribution.is-satellite{bottom:calc(max(32dvh, 246px) + 48px)}
   .atlas-app[data-scope="world"] .geo-silhouette{display:block;position:absolute;top:14px;right:12px;width:114px;height:107px;margin:0;pointer-events:none;border:0;border-radius:0;background:none;opacity:.25}
   .atlas-app[data-scope="world"] .geo-silhouette img{padding:0;filter:none}
   .atlas-app[data-scope="world"] .geo-silhouette figcaption{display:none}
@@ -336,7 +330,9 @@ a{color:inherit;text-decoration:none}
 /* Bangladesh: the geography is the main illustration; controls live on paper. */
 .map-country-label{pointer-events:none;white-space:nowrap;color:#173329;font:600 13px/1 Georgia,serif;letter-spacing:.22em;text-transform:uppercase;text-shadow:0 1px 4px #fff9de,0 0 12px #fff9de}
 .map-country-label.is-home{color:#fff9e3;font-size:17px;letter-spacing:.19em;text-shadow:0 2px 5px #173b2a,0 0 15px #173b2a}
-.is-satellite .map-country-label{color:#fffdf2;text-shadow:0 1px 4px #102b26,0 0 12px #102b26}
+.map-country-label.is-water{color:#f8f0d9;font-size:12px;font-style:italic;font-weight:400;letter-spacing:.25em;text-shadow:0 1px 6px #124462,0 0 12px #124462}
+.map-country-label.is-world{font-size:11px;font-weight:600;letter-spacing:.16em;text-shadow:0 1px 3px #fff5dc,0 0 10px #fff5dc}
+.map-country-label.is-world.is-home{color:#174e38;font-size:11px;text-shadow:0 1px 3px #fff5dc,0 0 10px #fff5dc}
 .atlas-app[data-scope="districts"] .detail-inner.is-country-overview{position:relative;isolation:isolate}
 .atlas-app[data-scope="districts"] .detail-inner.is-country-overview::before{content:"";position:absolute;z-index:-1;right:2px;top:8px;width:135px;height:205px;background-image:var(--water-lily-image);background-position:center;background-size:contain;background-repeat:no-repeat;opacity:.24;pointer-events:none}
 @media(min-width:1061px){
@@ -409,5 +405,4 @@ a{color:inherit;text-decoration:none}
   .detail-inner.is-country-overview h2{font-size:39px!important}
   .atlas-app[data-scope="districts"] .detail-inner.is-country-overview::before{opacity:.12}
   .map-attribution{bottom:calc(max(34dvh, 280px) + 9px)}
-  .map-attribution.is-satellite{bottom:calc(max(34dvh, 280px) + 42px)}
 }

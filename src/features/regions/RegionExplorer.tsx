@@ -108,7 +108,7 @@ export function RegionExplorer({ country }: { country: Place }) {
         <div className="map-top-caption">{active ? `${active.displayName ?? active.name} · ${country.name}` : `${country.name} · ${regions.length} regions`}</div>
         <div className="map-legend" aria-label="Map color key"><span><span className="legend-swatch active" aria-hidden="true" />Selected</span><span><span className="legend-swatch visited" aria-hidden="true" />Visited</span><span><span className="legend-swatch" aria-hidden="true" />Not visited</span></div>
       </section>
-      <aside className={`detail-panel sheet-${sheetMode}`} aria-label="Selected region details">
+      <aside className={`detail-panel sheet-${sheetMode}${active ? "" : " is-overview"}`} aria-label="Selected region details">
         <button className="sheet-handle" type="button" onClick={cycleSheet} aria-label={`Expand region panel; current position ${sheetMode}`}><span /></button>
         <div className="detail-inner">
           <h2>{active?.displayName ?? active?.name ?? "Choose a region"}</h2>
