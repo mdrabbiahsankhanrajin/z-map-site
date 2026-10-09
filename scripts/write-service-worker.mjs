@@ -22,8 +22,10 @@ if (process.env.GITHUB_PAGES === "true") {
     "maplibre/maplibre-gl-worker.mjs", "maplibre/maplibre-gl-shared.mjs",
     "textures/atlas-paper.webp", "illustrations/bd-water-lily.webp",
     ...await filesUnder("_next/static"),
-    ...await filesUnder("data/world-terrain"),
-    ...await filesUnder("data/bd-terrain-hi"),
+    // Keep the overview maps available offline without downloading every deep-zoom tile
+    // during installation. Tiles outside these zooms are cached when explored.
+    ...await Promise.all([0, 1, 2, 3].map((zoom) => filesUnder(`data/world-terrain/${zoom}`))).then((groups) => groups.flat()),
+    ...await Promise.all([3, 4, 5].map((zoom) => filesUnder(`data/bd-terrain-hi/${zoom}`))).then((groups) => groups.flat()),
   ];
   for (const file of core) {
     if (!(await stat(path.join(root, file))).isFile()) throw new Error(`Missing offline asset: ${file}`);
