@@ -98,8 +98,8 @@ function mapStyle(scope: Props["scope"], theme: ThemeId, sourceUrl?: string): St
       ] : []),
       { id: "places-fill", type: "fill", source: "places", paint: { "fill-color": palette.land, "fill-opacity": 0.08, "fill-antialias": false } },
       ...(scope === "districts" ? [
-        { id: "bd-rivers" as const, type: "line" as const, source: "rivers", paint: { "line-color": "#247ea6", "line-opacity": 0.75, "line-width": ["interpolate", ["linear"], ["zoom"], 4, 0.65, 7, 1.45, 10, 2] as ExpressionSpecification } },
-        { id: "district-line-casing" as const, type: "line" as const, source: "places", paint: { "line-color": "#214934", "line-opacity": 0.5, "line-width": 1.2 } },
+        { id: "bd-rivers" as const, type: "line" as const, source: "rivers", maxzoom: 6.15, paint: { "line-color": "#247ea6", "line-opacity": 0.4, "line-width": 0.7 } },
+        { id: "district-line-casing" as const, type: "line" as const, source: "places", paint: { "line-color": "#214934", "line-opacity": 0.36, "line-width": 1.1 } },
       ] : []),
       {
         id: "selected-depth", type: "fill-extrusion", source: "places",
@@ -117,8 +117,8 @@ function mapStyle(scope: Props["scope"], theme: ThemeId, sourceUrl?: string): St
       { id: "selected-outline-casing", type: "line", source: "places", filter: ["==", ["get", "id"], ""], paint: { "line-color": "#fff9df", "line-width": 4, "line-opacity": 0.96 } },
       { id: "selected-outline", type: "line", source: "places", filter: ["==", ["get", "id"], ""], paint: { "line-color": "#135641", "line-width": 2.2, "line-opacity": 1 } },
       ...(scope === "districts" ? [
-        { id: "bd-border-casing" as const, type: "line" as const, source: "context", filter: ["==", ["get", "id"], "BGD"] as FilterSpecification, maxzoom: 7, paint: { "line-color": "#17432d", "line-width": 3.8, "line-opacity": 0.9 } },
-        { id: "bd-border" as const, type: "line" as const, source: "context", filter: ["==", ["get", "id"], "BGD"] as FilterSpecification, maxzoom: 7, paint: { "line-color": "#fff8dc", "line-width": 1.45, "line-opacity": 0.95 } },
+        { id: "bd-border-casing" as const, type: "line" as const, source: "context", filter: ["==", ["get", "id"], "BGD"] as FilterSpecification, maxzoom: 6.05, paint: { "line-color": "#17432d", "line-width": 3.2, "line-opacity": 0.75 } },
+        { id: "bd-border" as const, type: "line" as const, source: "context", filter: ["==", ["get", "id"], "BGD"] as FilterSpecification, maxzoom: 6.05, paint: { "line-color": "#fff8dc", "line-width": 1.1, "line-opacity": 0.7 } },
       ] : []),
       ...(scope === "world" ? [{ id: "palestine-outline" as const, type: "line" as const, source: "palestine-outline", paint: { "line-color": palette.line, "line-width": 1.2 } }] : []),
     ],
@@ -161,7 +161,7 @@ export function MapAdapter({ scope, places, sourceUrl, overview, selectedIds, ac
           center: scope === "world" ? (mobile ? [82, 22] : [12, 20]) : scope === "regions" && overview ? [overview.center[0], overview.center[1]] : [90.3, 23.8],
           zoom: scope === "world" ? (mobile ? 2.6 : 1.2) : scope === "regions" ? overview?.bounds && overview.bounds[2] - overview.bounds[0] >= 180 ? (mobile ? 2.1 : 2.5) : 3 : (mobile ? 4.8 : 6.2),
           minZoom: scope === "world" ? 0.8 : scope === "regions" ? 1.5 : 4.5,
-          maxZoom: scope === "world" ? 5.5 : scope === "districts" ? 7.25 : 11,
+          maxZoom: scope === "world" ? 5.5 : scope === "districts" ? 6.3 : 11,
           maxBounds: scope === "districts" ? [[65, 3], [107, 39]] : undefined,
           ...camera,
           maxPitch: 60,
@@ -286,20 +286,21 @@ export function MapAdapter({ scope, places, sourceUrl, overview, selectedIds, ac
       map.setPaintProperty("context-line", "line-color", palette.line);
       map.setPaintProperty("context-tone", "fill-opacity", theme === "ink" || theme === "dusk" ? 0.04 : 0.28);
       map.setPaintProperty("bd-tint", "fill-opacity", theme === "ink" || theme === "dusk" ? 0.04 : 0.35);
-      map.setPaintProperty("bd-rivers", "line-opacity", 0.75);
-      map.setPaintProperty("district-line-casing", "line-opacity", 0.5);
+      map.setPaintProperty("bd-rivers", "line-opacity", 0.4);
+      map.setPaintProperty("district-line-casing", "line-opacity", 0.36);
     }
     map.setPaintProperty("graticule", "line-opacity", 0.19);
-    map.setPaintProperty("places-line", "line-color", [
-      "case", ["==", featureId, activeId ?? ""], palette.selected, scope === "districts" ? "#fff8df" : palette.line,
-    ]);
+    const selectedLine: ExpressionSpecification = ["==", featureId, activeId ?? ""];
+    map.setPaintProperty("places-line", "line-color", scope === "districts"
+      ? ["interpolate", ["linear"], ["zoom"], 5, ["case", selectedLine, palette.selected, "#f5f0d8"], 6.3, ["case", selectedLine, palette.selected, "#a8baa7"]] as unknown as ExpressionSpecification
+      : ["case", selectedLine, palette.selected, palette.line] as ExpressionSpecification);
     if (scope === "world") {
       map.setPaintProperty("palestine-outline", "line-color", activeId === "PSX" ? palette.selected : palette.line);
       map.setPaintProperty("palestine-outline", "line-width", activeId === "PSX" ? 2.6 : 1.2);
     }
-    map.setPaintProperty("places-line", "line-width", [
-      "case", ["==", featureId, activeId ?? ""], scope === "world" ? 2.8 : 2.2, scope === "world" ? 1.2 : 0.9,
-    ]);
+    map.setPaintProperty("places-line", "line-width", scope === "districts"
+      ? ["interpolate", ["linear"], ["zoom"], 5, ["case", selectedLine, 2.2, 0.9], 6.3, ["case", selectedLine, 2.2, 0.7]] as unknown as ExpressionSpecification
+      : ["case", selectedLine, scope === "world" ? 2.8 : 2.2, scope === "world" ? 1.2 : 0.9] as ExpressionSpecification);
     const regionalColors = scope === "districts"
       ? ["#dce5bf", "#cbdcb9", "#e7dfb6", "#c5d9c5", "#dfd4b0"]
       : ["#d9e5b2", "#afcfa8", "#e9d7a2", "#b9d9cf", "#e8bd9a"];
