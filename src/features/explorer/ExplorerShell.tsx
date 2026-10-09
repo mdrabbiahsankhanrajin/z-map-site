@@ -66,6 +66,7 @@ function ThemePicker({ theme, onChange }: { theme: ThemeId; onChange: (value: Th
         aria-pressed={theme === id} onClick={() => onChange(id)}
       ><span className="theme-swatch" style={{ background: `linear-gradient(135deg, ${themes[id].ocean} 48%, ${themes[id].land} 48%)` }} /><span>{themes[id].label}</span></button>)}
     </div>
+    <Link className="map-credits-link" href="/credits">Map data & credits</Link>
   </details>;
 }
 
@@ -127,7 +128,6 @@ function Detail({ scope, place, marked, onToggle, selectedCount, totalPlaces, on
       <div className="detail-progress" aria-live="polite"><span>{scope === "world" ? "Your world atlas" : "District progress"}</span><strong>{selectedCount} <small>of {totalPlaces} {scope === "world" ? "mapped places" : "districts"}</small></strong></div>
       <div className="progress-track"><span style={{ width: `${Math.min(100, selectedCount / totalPlaces * 100)}%` }} /></div>
       <p className="privacy-copy">Saved only in this browser. No account or location tracking.</p>
-      <Link className="map-credits-link" href="/credits">Map credits</Link>
       <button type="button" className="profile-open" onClick={onOpenProfile}>Share or export atlas <span aria-hidden="true">↗</span></button>
       {highlight && <section className="place-note" aria-label="Sourced place note">
         {attraction && <div className="place-photo"><Link href="/discover" aria-label={`See more places including ${attraction.title}`}><Image src={publicPath(attraction.image.src)} alt={attraction.image.alt} width={800} height={600} unoptimized loading="lazy" /></Link><small>Photo: <a href={attraction.image.sourceUrl} target="_blank" rel="noreferrer">{attraction.image.author}</a> · <a href={attraction.image.licenseUrl} target="_blank" rel="noreferrer">{attraction.image.license}</a></small></div>}
@@ -222,7 +222,6 @@ export function ExplorerShell({ scope, places }: { scope: Scope; places: Place[]
         <div className="bulk-actions"><button type="button" onClick={selectShown} disabled={shownIds.length === 0}>Mark shown visited</button><button type="button" onClick={clearShown} disabled={!hasMarkedShown}>Clear shown</button></div>
         {!compact && <PlaceList places={filtered} selected={selected} activeId={activeId} onPick={pick} onToggle={toggleVisited} scope={scope} />}
         <ThemePicker theme={theme} onChange={setTheme} />
-        <Link className="map-credits-link" href="/credits">Map credits</Link>
       </aside>
 
       <section className="map-area" aria-label={scope === "world" ? "World explorer" : "Bangladesh explorer"}>

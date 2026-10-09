@@ -32,6 +32,14 @@ function RegionList({ regions, selected, activeId, onPick, onToggle }: {
   </div>;
 }
 
+function RegionThemePicker({ theme, onChange }: { theme: ThemeId; onChange: (value: ThemeId) => void }) {
+  return <details className="theme-section">
+    <summary>Map style</summary>
+    <div className="theme-options">{(Object.keys(themes) as ThemeId[]).map((id) => <button key={id} type="button" className={`theme-option ${theme === id ? "is-selected" : ""}`} aria-pressed={theme === id} onClick={() => onChange(id)}><span className="theme-swatch" style={{ background: `linear-gradient(135deg, ${themes[id].ocean} 48%, ${themes[id].land} 48%)` }} /><span>{themes[id].label}</span></button>)}</div>
+    <Link className="map-credits-link" href="/credits">Map data & credits</Link>
+  </details>;
+}
+
 export function RegionExplorer({ country }: { country: Place }) {
   const compact = useCompactLayout();
   const [regions, setRegions] = useState<Region[]>([]);
@@ -101,8 +109,7 @@ export function RegionExplorer({ country }: { country: Place }) {
         <div className="list-heading"><h3>Regions</h3><span>{filtered.length}</span></div>
         <div className="bulk-actions"><button type="button" disabled={shownIds.length === 0} onClick={() => setSelected((current) => [...new Set([...current, ...shownIds])])}>Mark shown visited</button><button type="button" disabled={!shownIds.some((id) => selected.includes(id))} onClick={() => setSelected((current) => current.filter((id) => !shownIds.includes(id)))}>Clear shown</button></div>
         {!compact && <RegionList {...listProps} />}
-        <details className="theme-section"><summary>Map style</summary><div className="theme-options">{(Object.keys(themes) as ThemeId[]).map((id) => <button key={id} type="button" className={`theme-option ${theme === id ? "is-selected" : ""}`} aria-pressed={theme === id} onClick={() => setTheme(id)}><span className="theme-swatch" style={{ background: `linear-gradient(135deg, ${themes[id].ocean} 48%, ${themes[id].land} 48%)` }} /><span>{themes[id].label}</span></button>)}</div></details>
-        <Link className="map-credits-link" href="/credits">Map credits</Link>
+        <RegionThemePicker theme={theme} onChange={setTheme} />
       </aside>
       <section className="map-area" aria-label={`${country.name} regions map`}>
         {loaded ? <MapAdapter scope="regions" places={regions} sourceUrl={sourceUrl} overview={country} selectedIds={selected} activeId={activeId} theme={theme} onSelect={pick} /> : <div className="map-state" role="status">{error ? "Regions unavailable. Return to the World map." : <><span>Loading region boundaries</span><small>Local atlas data</small></>}</div>}
@@ -124,10 +131,9 @@ export function RegionExplorer({ country }: { country: Place }) {
           <div className="detail-progress" aria-live="polite"><span>Region progress</span><strong>{selected.length} <small>of {regions.length} regions</small></strong></div>
           <div className="progress-track"><span style={{ width: `${regions.length ? selected.length / regions.length * 100 : 0}%` }} /></div>
           <p className="privacy-copy">Saved only in this browser. No account or location tracking.</p>
-          <Link className="map-credits-link" href="/credits">Map credits</Link>
           <Link className="featured-link" href={backUrl}>← Back to {country.name}</Link>
         </div>
-        <div className="mobile-browse"><div className="list-heading"><h3>Regions</h3><span>{filtered.length}</span></div>{compact && <RegionList {...listProps} />}</div>
+        <div className="mobile-browse"><div className="list-heading"><h3>Regions</h3><span>{filtered.length}</span></div>{compact && <RegionList {...listProps} />}<RegionThemePicker theme={theme} onChange={setTheme} /></div>
       </aside>
     </main>
   </div>;

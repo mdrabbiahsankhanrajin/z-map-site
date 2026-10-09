@@ -9,6 +9,7 @@ import { resolveWorldPlaceId } from "@/data/worldPlaces";
 import { themes, type ThemeId } from "@/features/explorer/themes";
 import countries from "@/data/countries.json";
 import { publicPath } from "@/lib/publicPath";
+import { zoomFocus } from "./zoomFocus";
 
 
 type Props = {
@@ -160,7 +161,7 @@ export function MapAdapter({ scope, places, sourceUrl, overview, selectedIds, ac
           center: scope === "world" ? (mobile ? [82, 22] : [12, 20]) : scope === "regions" && overview ? [overview.center[0], overview.center[1]] : [90.3, 23.8],
           zoom: scope === "world" ? (mobile ? 2.6 : 1.2) : scope === "regions" ? overview?.bounds && overview.bounds[2] - overview.bounds[0] >= 180 ? (mobile ? 2.1 : 2.5) : 3 : (mobile ? 4.8 : 6.2),
           minZoom: scope === "world" ? 0.8 : scope === "regions" ? 1.5 : 4.5,
-          maxZoom: scope === "world" ? 5.5 : 11,
+          maxZoom: scope === "world" ? 5.5 : scope === "districts" ? 8.5 : 11,
           maxBounds: scope === "districts" ? [[65, 3], [107, 39]] : undefined,
           ...camera,
           maxPitch: 60,
@@ -344,14 +345,26 @@ export function MapAdapter({ scope, places, sourceUrl, overview, selectedIds, ac
     }
   }, [activeId, places, ready, scope, viewportMobile]);
 
+  function zoomBy(step: number) {
+    const map = mapRef.current;
+    const canvas = container.current;
+    if (!map || !canvas) return;
+    const bounds = canvas.getBoundingClientRect();
+    const sheetTop = viewportMobile
+      ? canvas.closest(".explorer-layout")?.querySelector(".detail-panel")?.getBoundingClientRect().top
+      : undefined;
+    const point = zoomFocus(bounds.width, bounds.height, sheetTop === undefined ? undefined : sheetTop - bounds.top);
+    map.easeTo({ zoom: Math.max(map.getMinZoom(), Math.min(map.getMaxZoom(), map.getZoom() + step)), around: map.unproject(point), duration: 250 });
+  }
+
   return (
     <div className="map-frame">
       <div className="map-canvas" ref={container} role="img" aria-label={scope === "world" ? "Interactive world map; use the adjacent searchable list for keyboard access" : scope === "regions" ? "Interactive map of country regions; use the adjacent searchable list for keyboard access" : "Interactive map of Bangladesh districts; use the adjacent searchable list for keyboard access"} />
       {!ready && !error && <div className="map-state" role="status"><span>Loading map boundaries</span><small>Local atlas data</small></div>}
       {error && <div className="map-state map-error">Map unavailable. Search and select places in the list.</div>}
       <div className="map-zoom" aria-label="Map zoom controls">
-        <button type="button" onClick={() => mapRef.current?.zoomIn()} aria-label="Zoom in">+</button>
-        <button type="button" onClick={() => mapRef.current?.zoomOut()} aria-label="Zoom out">−</button>
+        <button type="button" onClick={() => zoomBy(1)} aria-label="Zoom in">+</button>
+        <button type="button" onClick={() => zoomBy(-1)} aria-label="Zoom out">−</button>
       </div>
       {scope !== "world" && <div className="map-depth-control">
         <button className="map-view-trigger" type="button" aria-expanded={viewControlsOpen} aria-controls="map-view-options" onClick={() => setViewControlsOpen((current) => !current)}>View <span aria-hidden="true">{viewControlsOpen ? "−" : "+"}</span></button>
