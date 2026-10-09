@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import dynamic from "next/dynamic";
 import { useEffect, useMemo, useState } from "react";
 import { MapAdapter } from "@/components/map/MapAdapter";
@@ -13,6 +14,7 @@ import admin1Counts from "@/data/admin1-counts.json";
 import { useCompactLayout } from "./useCompactLayout";
 import { GeoSilhouette } from "@/components/map/GeoSilhouette";
 import { publicPath } from "@/lib/publicPath";
+import { attractions } from "@/data/attractions";
 
 const regionCounts: Record<string, number> = admin1Counts;
 
@@ -99,6 +101,7 @@ function Detail({ scope, place, marked, onToggle, selectedCount, totalPlaces, on
   onSheetMode: () => void;
 }) {
   const highlight = scope === "districts" && place ? highlightForDistrict(place.name) : undefined;
+  const attraction = scope === "districts" && place ? attractions.find((item) => item.district === place.name) : undefined;
   const regionCount = scope === "world" && place ? regionCounts[place.id] ?? 0 : 0;
   return <>
     <button className="sheet-handle" type="button" onClick={onSheetMode} aria-label={`Expand district or country panel; current position ${sheetMode}`}><span /></button>
@@ -118,6 +121,7 @@ function Detail({ scope, place, marked, onToggle, selectedCount, totalPlaces, on
       </button>}
       {place && <GeoSilhouette name={place.displayName ?? place.name} src={publicPath(`/data/silhouettes/${scope}/${place.id}.svg`)} source={scope === "world" ? "Natural Earth" : "geoBoundaries"} />}
       <button type="button" className="browse-button" onClick={onBrowse}>Browse {scope === "world" ? "places" : "districts"} <span aria-hidden="true">→</span></button>
+      <nav className="journey-links" aria-label="More ways to explore">{scope === "districts" && <><Link href="/discover">Places & photos</Link><Link href="/planner">Plan a trip</Link></>}<Link href="/insights">Your atlas in numbers</Link></nav>
 
       <div className="detail-rule" />
       <div className="detail-progress" aria-live="polite"><span>{scope === "world" ? "Your world atlas" : "District progress"}</span><strong>{selectedCount} <small>of {totalPlaces} {scope === "world" ? "mapped places" : "districts"}</small></strong></div>
@@ -125,6 +129,7 @@ function Detail({ scope, place, marked, onToggle, selectedCount, totalPlaces, on
       <p className="privacy-copy">Saved only in this browser. No account or location tracking.</p>
       <button type="button" className="profile-open" onClick={onOpenProfile}>Share or export atlas <span aria-hidden="true">↗</span></button>
       {highlight && <section className="place-note" aria-label="Sourced place note">
+        {attraction && <div className="place-photo"><Link href="/discover" aria-label={`See more places including ${attraction.title}`}><Image src={publicPath(attraction.image.src)} alt={attraction.image.alt} width={800} height={600} unoptimized loading="lazy" /></Link><small>Photo: <a href={attraction.image.sourceUrl} target="_blank" rel="noreferrer">{attraction.image.author}</a> · <a href={attraction.image.licenseUrl} target="_blank" rel="noreferrer">{attraction.image.license}</a></small></div>}
         <p className="eyebrow">Field note · {highlight.category}</p>
         <h3>{highlight.title}</h3>
         <p>{highlight.summary}</p>
@@ -209,6 +214,8 @@ export function ExplorerShell({ scope, places }: { scope: Scope; places: Place[]
         </div>
         <div className="rail-progress"><strong>{selected.length} / {places.length} visited</strong><span>Saved in this browser</span></div>
         {scope === "world" && <Link href="/bd" className="featured-link">Bangladesh district map <span aria-hidden="true">→</span></Link>}
+        {scope === "districts" && <><Link href="/discover" className="featured-link">Places & photos <span aria-hidden="true">→</span></Link><Link href="/planner" className="featured-link">Plan a trip <span aria-hidden="true">→</span></Link></>}
+        <Link href="/insights" className="featured-link">Atlas insights <span aria-hidden="true">→</span></Link>
         {scope === "districts" && <DivisionPicker id="division-filter-desktop" value={division} onChange={setDivision} selected={selected} places={places} />}
         <div className="list-heading"><h3>{scope === "world" ? "Places" : "Districts"}</h3><span>{filtered.length}</span></div>
         <div className="bulk-actions"><button type="button" onClick={selectShown} disabled={shownIds.length === 0}>Mark shown visited</button><button type="button" onClick={clearShown} disabled={!hasMarkedShown}>Clear shown</button></div>

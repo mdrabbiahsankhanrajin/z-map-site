@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import "maplibre-gl/dist/maplibre-gl.css";
 import "./globals.css";
 import "./profile.css";
+import "./discovery.css";
 import { publicPath } from "@/lib/publicPath";
 import { OfflineRegistration } from "@/components/OfflineRegistration";
 

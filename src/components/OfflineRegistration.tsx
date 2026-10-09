@@ -14,8 +14,11 @@ export function OfflineRegistration() {
       });
     };
     const schedule = () => {
-      if ("requestIdleCallback" in window) idleId = window.requestIdleCallback(register, { timeout: 5000 });
-      else timerId = setTimeout(register, 3000);
+      // Give the map's first render and visible tiles priority on slower phones.
+      timerId = setTimeout(() => {
+        if ("requestIdleCallback" in window) idleId = window.requestIdleCallback(register, { timeout: 5000 });
+        else register();
+      }, 3500);
     };
     if (document.readyState === "complete") schedule();
     else window.addEventListener("load", schedule, { once: true });
