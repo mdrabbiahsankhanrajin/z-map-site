@@ -76,7 +76,11 @@ function mapStyle(scope: Props["scope"], theme: ThemeId, sourceUrl?: string): St
         : { "world-terrain": { type: "raster" as const, tiles: [publicPath("/data/world-terrain/{z}/{x}/{y}.webp")], tileSize: 512, minzoom: 0, maxzoom: 4, attribution: "Natural Earth I; tiles by maps.black (CC0)" } }),
       ...(scope === "districts" ? {
         context: { type: "geojson" as const, data: publicPath("/data/bd-context.geojson") },
+        "bd-outline": { type: "geojson" as const, data: publicPath("/data/bd-outline.geojson") },
+        "bd-outline-display": { type: "geojson" as const, data: publicPath("/data/bd-outline-display.geojson") },
+        "bd-division-lines": { type: "geojson" as const, data: publicPath("/data/bd-division-lines.geojson") },
         rivers: { type: "geojson" as const, data: publicPath("/data/bd-rivers.geojson") },
+        "bd-imagery": { type: "raster" as const, tiles: [publicPath("/data/bd-blue-marble/{z}/{x}/{y}.jpeg")], tileSize: 256, minzoom: 5, maxzoom: 7, attribution: "NASA Blue Marble Next Generation (2004)" },
       } : {}),
       places: {
         type: "geojson",
@@ -92,14 +96,15 @@ function mapStyle(scope: Props["scope"], theme: ThemeId, sourceUrl?: string): St
       ...(scope === "districts" ? [
         { id: "context-land" as const, type: "fill" as const, source: "context", paint: { "fill-color": palette.land, "fill-opacity": 0.93 } },
         { id: "bd-terrain" as const, type: "raster" as const, source: "bd-terrain", paint: { "raster-opacity": 1, "raster-fade-duration": 0, "raster-contrast": 0.22, "raster-saturation": 0.22, "raster-brightness-max": 0.82 } },
-        { id: "context-tone" as const, type: "fill" as const, source: "context", paint: { "fill-color": ["match", ["get", "id"], "BGD", "#0a5738", "IND", "#9b6e38", "MMR", "#37634a", "NPL", "#64714f", "BTN", "#4e6f52", "#4d6951"] as ExpressionSpecification, "fill-opacity": 0.28 } },
-        { id: "bd-tint" as const, type: "fill" as const, source: "context", filter: ["==", ["get", "id"], "BGD"] as FilterSpecification, paint: { "fill-color": "#07452e", "fill-opacity": 0.35 } },
-        { id: "context-line" as const, type: "line" as const, source: "context", paint: { "line-color": "#163f34", "line-width": 1.15, "line-opacity": 0.72 } },
+        { id: "bd-imagery" as const, type: "raster" as const, source: "bd-imagery", paint: { "raster-opacity": ["interpolate", ["linear"], ["zoom"], 5, 0, 5.7, 0.28, 6.2, 0.78, 7.1, 0.88] as ExpressionSpecification, "raster-fade-duration": 0, "raster-contrast": 0.08, "raster-saturation": -0.1, "raster-brightness-min": 0.08, "raster-brightness-max": 0.95 } },
+        { id: "context-tone" as const, type: "fill" as const, source: "context", filter: ["!=", ["get", "id"], "BGD"] as FilterSpecification, paint: { "fill-color": ["match", ["get", "id"], "IND", "#9b6e38", "MMR", "#37634a", "NPL", "#64714f", "BTN", "#4e6f52", "#4d6951"] as ExpressionSpecification, "fill-opacity": 0.28 } },
+        { id: "bd-tint" as const, type: "fill" as const, source: "bd-outline", paint: { "fill-color": "#07452e", "fill-opacity": 0.18 } },
+        { id: "context-line" as const, type: "line" as const, source: "context", filter: ["!=", ["get", "id"], "BGD"] as FilterSpecification, paint: { "line-color": "#163f34", "line-width": 1.15, "line-opacity": 0.72 } },
       ] : []),
       { id: "places-fill", type: "fill", source: "places", paint: { "fill-color": palette.land, "fill-opacity": 0.08, "fill-antialias": false } },
       ...(scope === "districts" ? [
         { id: "bd-rivers" as const, type: "line" as const, source: "rivers", maxzoom: 6.15, paint: { "line-color": "#247ea6", "line-opacity": 0.4, "line-width": 0.7 } },
-        { id: "district-line-casing" as const, type: "line" as const, source: "places", paint: { "line-color": "#214934", "line-opacity": 0.36, "line-width": 1.1 } },
+        { id: "district-line-casing" as const, type: "line" as const, source: scope === "districts" ? "bd-division-lines" : "places", paint: { "line-color": "#214934", "line-opacity": 0.34, "line-width": 1.7 } },
       ] : []),
       {
         id: "selected-depth", type: "fill-extrusion", source: "places",
@@ -113,12 +118,12 @@ function mapStyle(scope: Props["scope"], theme: ThemeId, sourceUrl?: string): St
         },
       },
       ...(scope === "world" ? [{ id: "country-line-shadow" as const, type: "line" as const, source: "places", paint: { "line-color": "#153b2f", "line-width": 1.9, "line-opacity": ["case", ["in", ["get", "id"], ["literal", ["ISR", "PSX"]]], 0, 0.38] as ExpressionSpecification } }] : []),
-      { id: "places-line", type: "line", source: "places", paint: { "line-color": palette.line, "line-width": scope === "world" ? 1.4 : 1.15, "line-opacity": scope === "world" ? ["case", ["in", ["get", "id"], ["literal", ["ISR", "PSX"]]], 0, 1] : 0.83 } },
+      { id: "places-line", type: "line", source: scope === "districts" ? "bd-division-lines" : "places", paint: { "line-color": palette.line, "line-width": scope === "world" ? 1.4 : 1.15, "line-opacity": scope === "world" ? ["case", ["in", ["get", "id"], ["literal", ["ISR", "PSX"]]], 0, 1] : 0.83 } },
       { id: "selected-outline-casing", type: "line", source: "places", filter: ["==", ["get", "id"], ""], paint: { "line-color": "#fff9df", "line-width": 4, "line-opacity": 0.96 } },
       { id: "selected-outline", type: "line", source: "places", filter: ["==", ["get", "id"], ""], paint: { "line-color": "#135641", "line-width": 2.2, "line-opacity": 1 } },
       ...(scope === "districts" ? [
-        { id: "bd-border-casing" as const, type: "line" as const, source: "context", filter: ["==", ["get", "id"], "BGD"] as FilterSpecification, maxzoom: 6.05, paint: { "line-color": "#17432d", "line-width": 3.2, "line-opacity": 0.75 } },
-        { id: "bd-border" as const, type: "line" as const, source: "context", filter: ["==", ["get", "id"], "BGD"] as FilterSpecification, maxzoom: 6.05, paint: { "line-color": "#fff8dc", "line-width": 1.1, "line-opacity": 0.7 } },
+        { id: "bd-border-casing" as const, type: "line" as const, source: "bd-outline-display", layout: { "line-join": "round" as const }, paint: { "line-color": "#17432d", "line-width": ["interpolate", ["linear"], ["zoom"], 5, 3.2, 7.1, 1.8] as ExpressionSpecification, "line-opacity": 0.8 } },
+        { id: "bd-border" as const, type: "line" as const, source: "bd-outline-display", layout: { "line-join": "round" as const }, paint: { "line-color": "#fff8dc", "line-width": ["interpolate", ["linear"], ["zoom"], 5, 1.15, 7.1, 0.8] as ExpressionSpecification, "line-opacity": 0.8 } },
       ] : []),
       ...(scope === "world" ? [{ id: "palestine-outline" as const, type: "line" as const, source: "palestine-outline", paint: { "line-color": palette.line, "line-width": 1.2 } }] : []),
     ],
@@ -161,7 +166,7 @@ export function MapAdapter({ scope, places, sourceUrl, overview, selectedIds, ac
           center: scope === "world" ? (mobile ? [82, 22] : [12, 20]) : scope === "regions" && overview ? [overview.center[0], overview.center[1]] : [90.3, 23.8],
           zoom: scope === "world" ? (mobile ? 2.6 : 1.2) : scope === "regions" ? overview?.bounds && overview.bounds[2] - overview.bounds[0] >= 180 ? (mobile ? 2.1 : 2.5) : 3 : (mobile ? 4.8 : 6.2),
           minZoom: scope === "world" ? 0.8 : scope === "regions" ? 1.5 : 4.5,
-          maxZoom: scope === "world" ? 5.5 : scope === "districts" ? 6.3 : 11,
+          maxZoom: scope === "world" ? 5.5 : scope === "districts" ? 7.1 : 11,
           maxBounds: scope === "districts" ? [[65, 3], [107, 39]] : undefined,
           ...camera,
           maxPitch: 60,
@@ -285,22 +290,24 @@ export function MapAdapter({ scope, places, sourceUrl, overview, selectedIds, ac
       map.setPaintProperty("context-land", "fill-opacity", 0.93);
       map.setPaintProperty("context-line", "line-color", palette.line);
       map.setPaintProperty("context-tone", "fill-opacity", theme === "ink" || theme === "dusk" ? 0.04 : 0.28);
-      map.setPaintProperty("bd-tint", "fill-opacity", theme === "ink" || theme === "dusk" ? 0.04 : 0.35);
+      map.setPaintProperty("bd-imagery", "raster-opacity", theme === "atlas" ? ["interpolate", ["linear"], ["zoom"], 5, 0, 5.7, 0.28, 6.2, 0.78, 7.1, 0.88] : 0);
+      map.setPaintProperty("bd-tint", "fill-opacity", theme === "ink" || theme === "dusk" ? 0.04 : 0.18);
       map.setPaintProperty("bd-rivers", "line-opacity", 0.4);
-      map.setPaintProperty("district-line-casing", "line-opacity", 0.36);
+      map.setPaintProperty("district-line-casing", "line-opacity", 0.34);
     }
     map.setPaintProperty("graticule", "line-opacity", 0.19);
     const selectedLine: ExpressionSpecification = ["==", featureId, activeId ?? ""];
     map.setPaintProperty("places-line", "line-color", scope === "districts"
-      ? ["interpolate", ["linear"], ["zoom"], 5, ["case", selectedLine, palette.selected, "#f5f0d8"], 6.3, ["case", selectedLine, palette.selected, "#a8baa7"]] as unknown as ExpressionSpecification
+      ? ["interpolate", ["linear"], ["zoom"], 5, "#ebe8d1", 7.1, "#b8c6b1"] as ExpressionSpecification
       : ["case", selectedLine, palette.selected, palette.line] as ExpressionSpecification);
     if (scope === "world") {
       map.setPaintProperty("palestine-outline", "line-color", activeId === "PSX" ? palette.selected : palette.line);
       map.setPaintProperty("palestine-outline", "line-width", activeId === "PSX" ? 2.6 : 1.2);
     }
     map.setPaintProperty("places-line", "line-width", scope === "districts"
-      ? ["interpolate", ["linear"], ["zoom"], 5, ["case", selectedLine, 2.2, 0.9], 6.3, ["case", selectedLine, 2.2, 0.7]] as unknown as ExpressionSpecification
+      ? ["interpolate", ["linear"], ["zoom"], 5, 0.85, 7.1, 0.65] as ExpressionSpecification
       : ["case", selectedLine, scope === "world" ? 2.8 : 2.2, scope === "world" ? 1.2 : 0.9] as ExpressionSpecification);
+    if (scope === "districts") map.setPaintProperty("places-line", "line-opacity", ["interpolate", ["linear"], ["zoom"], 5, 0.72, 7.1, 0.72]);
     const regionalColors = scope === "districts"
       ? ["#dce5bf", "#cbdcb9", "#e7dfb6", "#c5d9c5", "#dfd4b0"]
       : ["#d9e5b2", "#afcfa8", "#e9d7a2", "#b9d9cf", "#e8bd9a"];

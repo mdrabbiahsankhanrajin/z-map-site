@@ -18,7 +18,7 @@ if (process.env.GITHUB_PAGES === "true") {
   const core = [
     "index.html", "index.txt", "bd/index.html", "bd/index.txt", "discover/index.html", "discover/index.txt", "planner/index.html", "planner/index.txt", "insights/index.html", "insights/index.txt", "share/index.html", "share/index.txt", "credits/index.html", "credits/index.txt",
     "data/world.geojson", "data/bd-districts.geojson", "data/bd-context.geojson",
-    "data/bd-rivers.geojson", "data/palestine-outline.geojson",
+    "data/bd-rivers.geojson", "data/bd-outline.geojson", "data/bd-outline-display.geojson", "data/bd-division-lines.geojson", "data/palestine-outline.geojson",
     "maplibre/maplibre-gl-worker.mjs", "maplibre/maplibre-gl-shared.mjs",
     "textures/atlas-paper.webp", "illustrations/bd-water-lily.webp",
     ...await filesUnder("images/attractions"),
@@ -27,6 +27,7 @@ if (process.env.GITHUB_PAGES === "true") {
     // during installation. Tiles outside these zooms are cached when explored.
     ...await Promise.all([0, 1, 2, 3].map((zoom) => filesUnder(`data/world-terrain/${zoom}`))).then((groups) => groups.flat()),
     ...await Promise.all([3, 4, 5].map((zoom) => filesUnder(`data/bd-terrain-hi/${zoom}`))).then((groups) => groups.flat()),
+    ...await filesUnder("data/bd-blue-marble/5"),
   ];
   for (const file of core) {
     if (!(await stat(path.join(root, file))).isFile()) throw new Error(`Missing offline asset: ${file}`);
