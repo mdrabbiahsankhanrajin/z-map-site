@@ -159,10 +159,9 @@ export function ExplorerShell({ scope, places }: { scope: Scope; places: Place[]
   useEffect(() => {
     const frame = requestAnimationFrame(() => {
       try { setSelected(parseSavedSelection(localStorage.getItem(storageKey), places, scope === "world" ? resolveWorldPlaceId : undefined)); } catch { setSelected([]); }
-      if (scope === "world") {
-        const requested = new URLSearchParams(window.location.search).get("place");
-        if (requested && places.some((place) => place.id === requested)) setActiveId(requested);
-      }
+      const requested = new URLSearchParams(window.location.search).get(scope === "world" ? "place" : "district");
+      const match = places.find((place) => scope === "world" ? place.id === requested : place.name.toLowerCase() === requested?.toLowerCase());
+      if (match) setActiveId(match.id);
       setHydrated(true);
     });
     return () => cancelAnimationFrame(frame);

@@ -1,6 +1,6 @@
 # Atlas
 
-An interactive atlas of countries, regions, and Bangladesh's 64 districts. Mark places visited, browse photographed places in every Bangladesh district, arrange a manual trip, and see personal progress by continent and division. Progress and trip notes stay in this browser. No account or server-side user database is required.
+An interactive atlas of countries, regions, and Bangladesh's 64 districts. Mark places visited, browse photographed places in every Bangladesh district, arrange a manual trip, and see personal progress by continent and division. Marked districts form a photo passport on the Insights page. Progress and trip notes stay in this browser. No account or server-side user database is required.
 
 **Live site:** https://mdrabbiahsankhanrajin.github.io/z-map-site/
 
