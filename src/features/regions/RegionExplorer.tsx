@@ -8,6 +8,7 @@ import { geoSilhouette, type OutlineGeometry } from "@/lib/geoSilhouette";
 import { filterPlaces, parseSavedSelection, serializeSelection, togglePlace, type Place } from "@/features/explorer/state";
 import { themes, type ThemeId } from "@/features/explorer/themes";
 import { regionNotes } from "@/data/regionNotes";
+import { WorldPlaceCard } from "./WorldPlaceCard";
 import { disambiguateRegions, type Region } from "./disambiguateRegions";
 import { useCompactLayout } from "@/features/explorer/useCompactLayout";
 import { publicPath } from "@/lib/publicPath";
@@ -70,6 +71,8 @@ export function RegionExplorer({ country }: { country: Place }) {
         if (!items.every((item) => typeof item.id === "string" && typeof item.name === "string" && Array.isArray(item.bounds))) throw new Error("Invalid region records");
         setGeometryById(new Map(data.features.map((feature) => [feature.properties.id, feature.geometry])));
         setRegions(disambiguateRegions(items));
+        const requested = new URLSearchParams(window.location.search).get("region");
+        if (requested && items.some((item) => item.id === requested)) setActiveId(requested);
         try { setSelected(parseSavedSelection(localStorage.getItem(storageKey), items)); } catch { setSelected([]); }
         setLoaded(true);
       })
@@ -125,7 +128,7 @@ export function RegionExplorer({ country }: { country: Place }) {
           <p className="detail-description">{active ? "Mark this region if you have visited it." : "Tap the map, search, or browse the region list."}</p>
           {active && <button className={`visit-action ${selected.includes(active.id) ? "is-marked" : ""}`} type="button" aria-pressed={selected.includes(active.id)} onClick={() => toggle(active.id)}><span>{selected.includes(active.id) ? "✓ Marked as visited" : "Mark as visited"}</span><span aria-hidden="true">{selected.includes(active.id) ? "−" : "+"}</span></button>}
           {active && outline && <GeoSilhouette name={active.displayName ?? active.name} path={outline} />}
-          {note && <section className="region-note" aria-label="Sourced region note"><h3>{note.title}</h3><p>{note.summary}</p><a href={note.sourceUrl} target="_blank" rel="noreferrer">Read at {note.sourceLabel} <span aria-hidden="true">↗</span></a></section>}
+          {note && active && <WorldPlaceCard regionId={active.id} />}
           <button type="button" className="browse-button" onClick={() => setSheetMode("expanded")}>Browse regions <span aria-hidden="true">→</span></button>
           <div className="detail-rule" />
           <div className="detail-progress" aria-live="polite"><span>Region progress</span><strong>{selected.length} <small>of {regions.length} regions</small></strong></div>

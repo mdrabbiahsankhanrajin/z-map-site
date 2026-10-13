@@ -1,0 +1,178 @@
+{
+  "USA-3520": {
+    "slug": "grand-canyon",
+    "file": "File:Grand Canyon (South Rim) Panorama -w.jpg",
+    "image": {
+      "src": "/images/world/grand-canyon.jpg",
+      "author": "Photo by Mike Huber (self-identification at en-wiki), edit by Cornischong",
+      "license": "CC BY-SA 3.0",
+      "licenseUrl": "https://creativecommons.org/licenses/by-sa/3.0/",
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File:Grand_Canyon_(South_Rim)_Panorama_-w.jpg"
+    }
+  },
+  "IND-3253": {
+    "slug": "taj-mahal",
+    "file": "File:Taj Mahal, Agra, India edit2.jpg",
+    "image": {
+      "src": "/images/world/taj-mahal.jpg",
+      "author": "Yann; edited by King of Hearts",
+      "license": "CC BY-SA 4.0",
+      "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File:Taj_Mahal,_Agra,_India_edit2.jpg"
+    }
+  },
+  "EGY-1544": {
+    "slug": "giza-pyramids",
+    "file": "File:All Gizah Pyramids.jpg",
+    "image": {
+      "src": "/images/world/giza-pyramids.jpg",
+      "author": "Ricardo Liberato",
+      "license": "CC BY-SA 2.0",
+      "licenseUrl": "https://creativecommons.org/licenses/by-sa/2.0",
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File:All_Gizah_Pyramids.jpg"
+    }
+  },
+  "PER-571": {
+    "slug": "machu-picchu",
+    "file": "File:80 - Machu Picchu - Juin 2009 - edit.jpg",
+    "image": {
+      "src": "/images/world/machu-picchu.jpg",
+      "author": "Martin St-Amant (S23678)",
+      "license": "CC BY-SA 3.0",
+      "licenseUrl": "https://creativecommons.org/licenses/by-sa/3.0",
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File:80_-_Machu_Picchu_-_Juin_2009_-_edit.jpg"
+    }
+  },
+  "JOR-853": {
+    "slug": "petra",
+    "file": "File:The Treasury, Petra, Jordan1.jpg",
+    "image": {
+      "src": "/images/world/petra.jpg",
+      "author": "Diego Delso",
+      "license": "CC BY-SA 3.0",
+      "licenseUrl": "https://creativecommons.org/licenses/by-sa/3.0",
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File:The_Treasury,_Petra,_Jordan1.jpg"
+    }
+  },
+  "AUS-2654": {
+    "slug": "sydney-opera-house",
+    "file": "File:Sydney Opera House - Dec 2008.jpg",
+    "image": {
+      "src": "/images/world/sydney-opera-house.jpg",
+      "author": "Diliff",
+      "license": "CC BY-SA 3.0",
+      "licenseUrl": "https://creativecommons.org/licenses/by-sa/3.0",
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File:Sydney_Opera_House_-_Dec_2008.jpg"
+    }
+  },
+  "BRA-627": {
+    "slug": "christ-the-redeemer",
+    "file": "File:Christ the Redeemer - Cristo Redentor.jpg",
+    "image": {
+      "src": "/images/world/christ-the-redeemer.jpg",
+      "author": "Arne Müseler / arne-mueseler.com",
+      "license": "CC BY-SA 3.0 de",
+      "licenseUrl": "https://creativecommons.org/licenses/by-sa/3.0/de/deed.en",
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File:Christ_the_Redeemer_-_Cristo_Redentor.jpg"
+    }
+  },
+  "JPN-1850": {
+    "slug": "kiyomizu-dera",
+    "file": "File:Kiyomizu-dera, Kyoto, November 2016 -07.jpg",
+    "image": {
+      "src": "/images/world/kiyomizu-dera.jpg",
+      "author": "Martin Falbisoner",
+      "license": "CC BY-SA 4.0",
+      "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File:Kiyomizu-dera,_Kyoto,_November_2016_-07.jpg"
+    }
+  },
+  "FRA-5333": {
+    "slug": "eiffel-tower",
+    "file": "File:Eiffel Tower in 2022 02.jpg",
+    "image": {
+      "src": "/images/world/eiffel-tower.jpg",
+      "author": "Maksim Sokolov (maxergon.com)",
+      "license": "CC BY-SA 4.0",
+      "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File:Eiffel_Tower_in_2022_02.jpg"
+    }
+  },
+  "ITA-5422": {
+    "slug": "colosseum",
+    "file": "File:Colosseum in Rome, Italy - April 2007.jpg",
+    "image": {
+      "src": "/images/world/colosseum.jpg",
+      "author": "Diliff",
+      "license": "CC BY-SA 2.5",
+      "licenseUrl": "https://creativecommons.org/licenses/by-sa/2.5",
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File:Colosseum_in_Rome,_Italy_-_April_2007.jpg"
+    }
+  },
+  "MEX-2737": {
+    "slug": "chichen-itza",
+    "file": "File:El Castillo Stitch 2008 Edit 2.jpg",
+    "image": {
+      "src": "/images/world/chichen-itza.jpg",
+      "author": "Fcb981",
+      "license": "CC BY-SA 3.0",
+      "licenseUrl": "https://creativecommons.org/licenses/by-sa/3.0/",
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File:El_Castillo_Stitch_2008_Edit_2.jpg"
+    }
+  },
+  "CAN-632": {
+    "slug": "lake-louise",
+    "file": "File:Banff National Park (AB, Canada), Lake Louise -- 2022 -- 2197.jpg",
+    "image": {
+      "src": "/images/world/lake-louise.jpg",
+      "author": "Dietmar Rabich",
+      "license": "CC BY-SA 4.0",
+      "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File:Banff_National_Park_(AB,_Canada),_Lake_Louise_--_2022_--_2197.jpg"
+    }
+  },
+  "MAR-1456": {
+    "slug": "jemaa-el-fnaa",
+    "file": "File:Jemaa el-Fnaa Marrakech at sunset.jpg",
+    "image": {
+      "src": "/images/world/jemaa-el-fnaa.jpg",
+      "author": "Herokk",
+      "license": "CC BY-SA 4.0",
+      "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File:Jemaa_el-Fnaa_Marrakech_at_sunset.jpg"
+    }
+  },
+  "IDN-1232": {
+    "slug": "jatiluwih",
+    "file": "File:Jatiluwih rice terraces SF0002.jpg",
+    "image": {
+      "src": "/images/world/jatiluwih.jpg",
+      "author": "Stefan Fussan",
+      "license": "CC BY-SA 3.0",
+      "licenseUrl": "https://creativecommons.org/licenses/by-sa/3.0",
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File:Jatiluwih_rice_terraces_SF0002.jpg"
+    }
+  },
+  "DEU-1591": {
+    "slug": "neuschwanstein",
+    "file": "File:Neuschwanstein Castle Bavaria Germany.JPG",
+    "image": {
+      "src": "/images/world/neuschwanstein.jpg",
+      "author": "Nilsane",
+      "license": "CC BY-SA 4.0",
+      "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File:Neuschwanstein_Castle_Bavaria_Germany.JPG"
+    }
+  },
+  "CHN-1155": {
+    "slug": "great-wall",
+    "file": "File:The Great Wall of China, Muntianyu, near Beijing (17049109746).jpg",
+    "image": {
+      "src": "/images/world/great-wall.jpg",
+      "author": "Ray in Manila",
+      "license": "CC BY 2.0",
+      "licenseUrl": "https://creativecommons.org/licenses/by/2.0",
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File:The_Great_Wall_of_China,_Muntianyu,_near_Beijing_(17049109746).jpg"
+    }
+  }
+}

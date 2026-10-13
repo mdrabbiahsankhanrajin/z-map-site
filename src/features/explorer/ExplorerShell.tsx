@@ -21,6 +21,7 @@ const regionCounts: Record<string, number> = admin1Counts;
 type Scope = "world" | "districts";
 type SheetMode = "peek" | "half" | "expanded";
 const ProfileComposer = dynamic(() => import("@/features/profile/ProfileComposer").then((module) => module.ProfileComposer), { ssr: false });
+const WorldPlaceCard = dynamic(() => import("@/features/regions/WorldPlaceCard").then((module) => module.WorldPlaceCard), { ssr: false });
 
 function AtlasMark() {
   return <svg className="atlas-mark" viewBox="0 0 40 40" fill="none" aria-hidden="true"><path d="M20 2 23 17 38 20 23 23 20 38 17 23 2 20 17 17 20 2Z" stroke="currentColor" strokeWidth="1.6"/><circle cx="20" cy="20" r="4" fill="currentColor"/></svg>;
@@ -121,6 +122,7 @@ function Detail({ scope, place, marked, onToggle, selectedCount, totalPlaces, on
         <span>{marked ? "✓ Marked as visited" : "Mark as visited"}</span><span aria-hidden="true">{marked ? "−" : "+"}</span>
       </button>}
       {attraction && place && <div className="place-photo"><Link href={`/discover?district=${encodeURIComponent(place.name)}`} aria-label={`Explore photographed places in ${place.displayName ?? place.name}`}><Image src={publicPath(attraction.image.src)} alt={attraction.image.alt} width={800} height={600} unoptimized loading="lazy" /></Link><small>{attraction.title} · Photo: <a href={attraction.image.sourceUrl} target="_blank" rel="noreferrer">{attraction.image.author}</a> · <a href={attraction.image.licenseUrl} target="_blank" rel="noreferrer">{attraction.image.license}</a>{attraction.image.note && <> · {attraction.image.note}</>}</small></div>}
+      {scope === "world" && place && <WorldPlaceCard countryId={place.id} />}
       {place && <GeoSilhouette name={place.displayName ?? place.name} src={publicPath(`/data/silhouettes/${scope}/${place.id}.svg`)} />}
       <button type="button" className="browse-button" onClick={onBrowse}>Browse {scope === "world" ? "places" : "districts"} <span aria-hidden="true">→</span></button>
       <nav className="journey-links" aria-label="More ways to explore">{scope === "districts" && <><Link href={place ? `/discover?district=${encodeURIComponent(place.name)}` : "/discover"}>Places & photos</Link><Link href="/planner">Plan a trip</Link></>}<Link href="/insights">Your atlas in numbers</Link></nav>
