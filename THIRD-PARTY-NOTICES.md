@@ -11,6 +11,7 @@ The rights notice for original Atlas material does not cover these sources:
 | Lalbagh Fort photograph | [Jonaid Siam](https://commons.wikimedia.org/wiki/File:Lalbag_fort.jpg), [CC BY-SA 3.0](https://creativecommons.org/licenses/by-sa/3.0/). Local thumbnail; no image content changes. |
 | Cox's Bazar beach photograph | [Md Faysal Ahmed](https://commons.wikimedia.org/wiki/File:Cox%27s_Bazar_beach_(3991311).jpg), [CC0 1.0](https://creativecommons.org/publicdomain/zero/1.0/). Local thumbnail; no image content changes. |
 | Ratargul Swamp Forest photograph | [Ifsanjry](https://commons.wikimedia.org/wiki/File:Ratargul_Swamp_Forest,_Sylhet_03.jpg), [CC BY-SA 4.0](https://creativecommons.org/licenses/by-sa/4.0/). Local thumbnail; no image content changes. |
+| Bangladesh district photo catalog | 111 locally stored Wikimedia Commons photographs covering all 64 districts. Each place card provides its creator, original file link, and license link; the machine-readable record is [src/data/districtAttractions.json](src/data/districtAttractions.json). These thumbnails were resized and recompressed for web use. The source licenses govern each image independently. |
 | Bundled JavaScript | React and React DOM (MIT), Next.js (MIT), and MapLibre GL JS (BSD-3-Clause). License texts are in [licenses/](licenses/). |
 
 Map credits are linked from the map and listed at `/credits/`. The geographic boundaries are for exploration, not navigation or an assertion of sovereignty. Source licenses govern third-party material regardless of this repository's rights notice.

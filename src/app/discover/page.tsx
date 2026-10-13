@@ -1,12 +1,11 @@
-import { attractions } from "@/data/attractions";
-import { AttractionCard } from "@/features/discovery/AttractionCard";
 import { TravelHeader } from "@/components/TravelHeader";
+import { DiscoverExplorer } from "@/features/discovery/DiscoverExplorer";
 
 export default function DiscoverPage() {
-  return <main className="atlas-content-page">
+  return <main className="atlas-content-page discovery-page">
     <TravelHeader active="places" />
-    <section className="content-intro"><p className="content-locale">Bangladesh · curated places</p><h1>Places worth a closer look</h1><p>Real photographs and short notes from named sources. This is a small growing collection, not a complete guide to all 64 districts.</p></section>
-    <div className="attraction-grid">{attractions.map((attraction) => <AttractionCard key={attraction.id} attraction={attraction} />)}</div>
-    <p className="content-footnote">Travel conditions, opening hours and prices change. Check the linked source before going.</p>
+    <section className="content-intro"><h1>Places of Bangladesh</h1><p>Explore photographed places across all 64 districts. Search by district or place, then add a stop to your trip.</p></section>
+    <DiscoverExplorer />
+    <p className="content-footnote">Photographs are credited on each place. Check current travel conditions before going.</p>
   </main>;
 }

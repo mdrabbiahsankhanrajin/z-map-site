@@ -1,11 +1,12 @@
 import { highlights } from "./highlights";
+import districtAttractions from "./districtAttractions.json";
 
 export type Attraction = {
   id: string;
   district: string;
   title: string;
   category: string;
-  summary: string;
+  summary?: string;
   sourceUrl: string;
   image: {
     src: `/images/attractions/${string}.jpg`;
@@ -14,6 +15,7 @@ export type Attraction = {
     license: string;
     licenseUrl: string;
     sourceUrl: string;
+    note?: string;
   };
 };
 
@@ -45,4 +47,5 @@ export const attractions: Attraction[] = [
     licenseUrl: "https://creativecommons.org/licenses/by-sa/4.0/",
     sourceUrl: "https://commons.wikimedia.org/wiki/File:Ratargul_Swamp_Forest,_Sylhet_03.jpg",
   }),
+  ...districtAttractions.map((item) => ({ ...item, image: { ...item.image, src: item.image.src as Attraction["image"]["src"] } })),
 ];

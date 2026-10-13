@@ -120,9 +120,10 @@ function Detail({ scope, place, marked, onToggle, selectedCount, totalPlaces, on
       {place && <button className={`visit-action ${marked ? "is-marked" : ""}`} type="button" aria-pressed={marked} onClick={onToggle}>
         <span>{marked ? "✓ Marked as visited" : "Mark as visited"}</span><span aria-hidden="true">{marked ? "−" : "+"}</span>
       </button>}
+      {attraction && place && <div className="place-photo"><Link href={`/discover?district=${encodeURIComponent(place.name)}`} aria-label={`Explore photographed places in ${place.displayName ?? place.name}`}><Image src={publicPath(attraction.image.src)} alt={attraction.image.alt} width={800} height={600} unoptimized loading="lazy" /></Link><small>{attraction.title} · Photo: <a href={attraction.image.sourceUrl} target="_blank" rel="noreferrer">{attraction.image.author}</a> · <a href={attraction.image.licenseUrl} target="_blank" rel="noreferrer">{attraction.image.license}</a>{attraction.image.note && <> · {attraction.image.note}</>}</small></div>}
       {place && <GeoSilhouette name={place.displayName ?? place.name} src={publicPath(`/data/silhouettes/${scope}/${place.id}.svg`)} />}
       <button type="button" className="browse-button" onClick={onBrowse}>Browse {scope === "world" ? "places" : "districts"} <span aria-hidden="true">→</span></button>
-      <nav className="journey-links" aria-label="More ways to explore">{scope === "districts" && <><Link href="/discover">Places & photos</Link><Link href="/planner">Plan a trip</Link></>}<Link href="/insights">Your atlas in numbers</Link></nav>
+      <nav className="journey-links" aria-label="More ways to explore">{scope === "districts" && <><Link href={place ? `/discover?district=${encodeURIComponent(place.name)}` : "/discover"}>Places & photos</Link><Link href="/planner">Plan a trip</Link></>}<Link href="/insights">Your atlas in numbers</Link></nav>
 
       <div className="detail-rule" />
       <div className="detail-progress" aria-live="polite"><span>{scope === "world" ? "Your world atlas" : "District progress"}</span><strong>{selectedCount} <small>of {totalPlaces} {scope === "world" ? "mapped places" : "districts"}</small></strong></div>
@@ -130,7 +131,6 @@ function Detail({ scope, place, marked, onToggle, selectedCount, totalPlaces, on
       <p className="privacy-copy">Saved only in this browser. No account or location tracking.</p>
       <button type="button" className="profile-open" onClick={onOpenProfile}>Share or export atlas <span aria-hidden="true">↗</span></button>
       {highlight && <section className="place-note" aria-label="Sourced place note">
-        {attraction && <div className="place-photo"><Link href="/discover" aria-label={`See more places including ${attraction.title}`}><Image src={publicPath(attraction.image.src)} alt={attraction.image.alt} width={800} height={600} unoptimized loading="lazy" /></Link><small>Photo: <a href={attraction.image.sourceUrl} target="_blank" rel="noreferrer">{attraction.image.author}</a> · <a href={attraction.image.licenseUrl} target="_blank" rel="noreferrer">{attraction.image.license}</a></small></div>}
         <p className="eyebrow">Field note · {highlight.category}</p>
         <h3>{highlight.title}</h3>
         <p>{highlight.summary}</p>
