@@ -10,6 +10,7 @@ import { themes, type ThemeId } from "@/features/explorer/themes";
 import countries from "@/data/countries.json";
 import { publicPath } from "@/lib/publicPath";
 import { zoomFocus } from "./zoomFocus";
+import { getMapFocusBounds } from "./mapFocus";
 
 
 type Props = {
@@ -46,14 +47,14 @@ function perspectiveCamera(scope: Props["scope"], mobile: boolean) {
 
 function mapPadding(mobile: boolean, selected = false) {
   return mobile
-    ? { top: 100, right: 28, bottom: Math.max(Math.round(window.innerHeight * 0.34), 280) + 22, left: 28 }
+    ? { top: 100, right: 28, bottom: Math.max(Math.round(window.innerHeight * (selected ? 0.42 : 0.34)), selected ? 340 : 280) + 22, left: 28 }
     : { top: 65, right: selected ? 330 : 55, bottom: 65, left: 55 };
 }
 
 function fitOverview(map: MapLibreMap, scope: Props["scope"], places: Place[], overview: Place | undefined, mobile: boolean, perspective: boolean) {
   if (scope === "world") return;
   const camera = perspective ? perspectiveCamera(scope, mobile) : { pitch: 0, bearing: 0 };
-  const bounds = scope === "regions" && overview?.bounds ? overview.bounds : places.reduce<[number, number, number, number]>((box, place) => {
+  const bounds = scope === "regions" && overview?.bounds ? getMapFocusBounds(overview) : places.reduce<[number, number, number, number]>((box, place) => {
     if (!place.bounds) return box;
     return [Math.min(box[0], place.bounds[0]), Math.min(box[1], place.bounds[1]), Math.max(box[2], place.bounds[2]), Math.max(box[3], place.bounds[3])];
   }, [Infinity, Infinity, -Infinity, -Infinity]);
@@ -81,7 +82,7 @@ function mapStyle(scope: Props["scope"], theme: ThemeId, sourceUrl?: string): St
         "bd-division-lines": { type: "geojson" as const, data: publicPath("/data/bd-division-lines.geojson") },
         rivers: { type: "geojson" as const, data: publicPath("/data/bd-rivers.geojson") },
         "bd-imagery": { type: "raster" as const, tiles: [publicPath("/data/bd-blue-marble/{z}/{x}/{y}.jpeg")], tileSize: 256, minzoom: 5, maxzoom: 7, attribution: "NASA Blue Marble Next Generation (2004)" },
-      } : {}),
+      } : scope === "regions" ? { "country-context": { type: "geojson" as const, data: publicPath("/data/world.geojson") } } : {}),
       places: {
         type: "geojson",
         data: sourceUrl ?? (scope === "world" ? publicPath("/data/world.geojson") : publicPath("/data/bd-districts.geojson")),
@@ -92,6 +93,7 @@ function mapStyle(scope: Props["scope"], theme: ThemeId, sourceUrl?: string): St
     layers: [
       { id: "ocean", type: "background", paint: { "background-color": palette.ocean } },
       ...(scope !== "districts" ? [{ id: "world-terrain" as const, type: "raster" as const, source: "world-terrain", paint: { "raster-opacity": 1, "raster-fade-duration": 0, "raster-contrast": 0.24, "raster-saturation": 0.34, "raster-brightness-max": 0.82 } }] : []),
+      ...(scope === "regions" ? [{ id: "region-context" as const, type: "fill" as const, source: "country-context", paint: { "fill-color": "#d9dfc2", "fill-opacity": ["interpolate", ["linear"], ["zoom"], 5, 0, 6.5, 0.78] as ExpressionSpecification } }] : []),
       { id: "graticule", type: "line", source: "graticule", paint: { "line-color": "#f7f1dc", "line-opacity": 0.19, "line-width": 0.55 } },
       ...(scope === "districts" ? [
         { id: "context-land" as const, type: "fill" as const, source: "context", paint: { "fill-color": palette.land, "fill-opacity": 0.93 } },
@@ -135,8 +137,6 @@ export function MapAdapter({ scope, places, sourceUrl, overview, selectedIds, ac
   const mapRef = useRef<MapLibreMap | null>(null);
   const labelsRef = useRef<Array<{ remove: () => void }>>([]);
   const selectRef = useRef(onSelect);
-  const initialFocus = useRef(true);
-  const initialActiveId = useRef(activeId);
   const perspectiveRef = useRef(false);
   const lastViewportMobile = useRef<boolean | null>(null);
   const [viewportMobile, setViewportMobile] = useState(() => typeof window !== "undefined" && window.innerWidth <= 1060);
@@ -225,7 +225,7 @@ export function MapAdapter({ scope, places, sourceUrl, overview, selectedIds, ac
             map.on("mouseleave", layer, () => { map.getCanvas().style.cursor = ""; hoverLabel.remove(); });
           }
         });
-        map.on("error", () => setError(true));
+        map.on("error", (event) => { console.error("Atlas map error", event.error); setError(true); });
         resizeObserver = new ResizeObserver(() => {
           map.resize();
           const nextMobile = window.innerWidth <= 1060;
@@ -235,7 +235,8 @@ export function MapAdapter({ scope, places, sourceUrl, overview, selectedIds, ac
           }
         });
         resizeObserver.observe(container.current);
-      } catch {
+      } catch (reason) {
+        console.error("Atlas map initialization error", reason);
         setError(true);
       }
     }
@@ -284,7 +285,10 @@ export function MapAdapter({ scope, places, sourceUrl, overview, selectedIds, ac
       ? ["in", ["get", "id"], ["literal", ["ISR", "PSX"]]]
       : ["==", ["get", "id"], activeId ?? ""]);
     if (scope === "districts") map.setPaintProperty("bd-terrain", "raster-opacity", theme === "ink" ? 0.18 : theme === "dusk" ? 0.42 : 1);
-    else map.setPaintProperty("world-terrain", "raster-opacity", theme === "ink" ? 0.22 : theme === "dusk" ? 0.42 : 1);
+    else map.setPaintProperty("world-terrain", "raster-opacity", scope === "regions"
+      ? ["interpolate", ["linear"], ["zoom"], 5, theme === "ink" ? 0.22 : theme === "dusk" ? 0.42 : 1, 6.5, 0.38] as ExpressionSpecification
+      : theme === "ink" ? 0.22 : theme === "dusk" ? 0.42 : 1);
+    if (scope === "regions") map.setPaintProperty("region-context", "fill-color", palette.land);
     if (scope === "districts") {
       map.setPaintProperty("context-land", "fill-color", palette.land);
       map.setPaintProperty("context-land", "fill-opacity", 0.93);
@@ -326,28 +330,28 @@ export function MapAdapter({ scope, places, sourceUrl, overview, selectedIds, ac
       ["in", featureId, ["literal", selectedIds]], palette.visited,
       theme === "ink" || theme === "dusk" ? palette.land : scope === "world" ? worldColor : regionalColor,
     ]);
-    map.setPaintProperty("places-fill", "fill-opacity", [
-      "case", ["==", featureId, activeId ?? ""], scope === "world" ? 0.32 : scope === "districts" ? 0.2 : 0.32,
+    const baseOpacity: ExpressionSpecification = [
+      "case", ["==", featureId, activeId ?? ""], scope === "districts" ? 0.2 : 0.32,
       ["in", featureId, ["literal", selectedIds]], 0.62,
       theme === "ink" || theme === "dusk" ? 0.48 : scope === "districts" ? 0.025 : 0.06,
-    ]);
+    ];
+    map.setPaintProperty("places-fill", "fill-opacity", scope === "regions"
+      ? ["interpolate", ["linear"], ["zoom"], 5, baseOpacity, 6.5,
+        ["case", ["==", featureId, activeId ?? ""], 0.72, ["in", featureId, ["literal", selectedIds]], 0.82, 0.82]] as ExpressionSpecification
+      : baseOpacity);
   }, [theme, selectedIds, activeId, ready, scope, places]);
 
   useEffect(() => {
     if (!ready || !mapRef.current) return;
-    if (initialFocus.current) {
-      initialFocus.current = false;
-      if (activeId === initialActiveId.current) return;
-    }
     const place = places.find((item) => item.id === activeId);
     if (!place) return;
     const map = mapRef.current;
     const padding = mapPadding(viewportMobile, true);
     const camera = perspectiveRef.current ? perspectiveCamera(scope, viewportMobile) : { pitch: 0, bearing: 0 };
     const duration = window.matchMedia("(prefers-reduced-motion: reduce)").matches ? 0 : 700;
-    const bounds = place.bounds;
+    const bounds = scope === "world" ? getMapFocusBounds(place) : place.bounds;
     if (bounds?.length === 4 && bounds.every(Number.isFinite) && bounds[2] > bounds[0] && bounds[3] > bounds[1] && bounds[2] - bounds[0] < 180) {
-      map.fitBounds([[bounds[0], bounds[1]], [bounds[2], bounds[3]]], { padding, maxZoom: scope === "world" ? 5.2 : scope === "regions" ? 9 : 6.7, ...camera, duration });
+      map.fitBounds([[bounds[0], bounds[1]], [bounds[2], bounds[3]]], { padding, maxZoom: scope === "world" ? 5.2 : scope === "regions" ? 8 : 6.7, ...camera, duration });
     } else {
       map.flyTo({ center: [place.center[0], place.center[1]], zoom: scope === "world" ? 2.6 : 8, padding, ...camera, duration });
     }

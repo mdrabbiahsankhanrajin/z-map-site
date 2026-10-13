@@ -397,6 +397,7 @@ a{color:inherit;text-decoration:none}
   .detail-panel{scrollbar-width:none}
   .detail-panel::-webkit-scrollbar{display:none}
   .detail-panel.sheet-half{height:34dvh;min-height:280px}
+  .detail-panel.sheet-half:has(.world-place-card){height:42dvh;min-height:340px}
   .detail-panel.is-overview.sheet-half{overflow-y:hidden}
   .detail-panel.is-overview.sheet-half .detail-rule,
   .detail-panel.is-overview.sheet-half .progress-track,
