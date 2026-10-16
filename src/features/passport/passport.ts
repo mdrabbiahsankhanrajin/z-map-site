@@ -113,48 +113,96 @@ function coverCredit(data: PassportData, photoDataUrl: string | undefined, color
   return `<text x="57" y="${y}" fill="${color}" font-family="Arial,sans-serif" font-size="10">Photo: ${xml(data.photo.place)} · ${xml(data.photo.title)} · ${xml(data.photo.author)} · ${xml(data.photo.license)}</text><text x="57" y="${y + 15}" fill="${color}" font-family="Arial,sans-serif" font-size="9" textLength="${Math.min(760, Math.max(340, data.photo.sourceUrl.length * 5))}" lengthAdjust="spacingAndGlyphs">${xml(data.photo.sourceUrl)}</text><text x="57" y="${y + 29}" fill="${color}" font-family="Arial,sans-serif" font-size="9">${xml(data.photo.licenseUrl)}</text>`;
 }
 
-function renderExpeditionCover(data: PassportData, photoDataUrl?: string): string {
+type CoverAssets = { fontDataUrl?: string; tigerDataUrl?: string; lilyEngravingDataUrl?: string };
+
+function displayFont(fontDataUrl?: string): string {
+  return fontDataUrl ? `<style>@font-face{font-family:PassportDisplay;src:url('${fontDataUrl}') format('truetype');font-weight:400 900}</style>` : "";
+}
+
+function renderExpeditionCover(data: PassportData, photoDataUrl?: string, botanicalDataUrl?: string, assets?: CoverAssets): string {
+  const names = coverNames(data);
+  const destination = coverDestination(data);
+  const selected = names.slice(0, 6);
+  const list = selected.map((name, index) => {
+    const x = index < 3 ? 570 : 713;
+    const y = 1016 + (index % 3) * 34;
+    const maxWidth = index < 3 ? 132 : 119;
+    return `<text x="${x}" y="${y}" fill="#e9d4a9" font-family="Georgia,serif" font-size="15" ${name.length > 11 ? `textLength="${maxWidth}" lengthAdjust="spacingAndGlyphs"` : ""}>${xml(name)}</text>`;
+  }).join("");
+  const fallback = data.districts.length ? `<g transform="translate(390 430) scale(2.1)"><path d="${bangladeshSilhouette}" fill="#a7895b"/></g>` : `<circle cx="450" cy="560" r="130" fill="none" stroke="#b49a6a" stroke-width="3"/>`;
+  return `<svg xmlns="http://www.w3.org/2000/svg" width="900" height="1260" viewBox="0 0 900 1260" role="img" aria-label="Expedition Atlas passport cover"><defs>
+    ${displayFont(assets?.fontDataUrl)}
+    <pattern id="cloth" width="8" height="8" patternUnits="userSpaceOnUse"><path d="M0 1H8M1 0V8" stroke="#c7ac76" stroke-opacity=".12" stroke-width=".6"/></pattern>
+    <linearGradient id="gold" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#8d6236"/><stop offset=".25" stop-color="#f0d29a"/><stop offset=".52" stop-color="#ba8d52"/><stop offset=".77" stop-color="#f2dbac"/><stop offset="1" stop-color="#966b3a"/></linearGradient>
+    <linearGradient id="expShade" x1="0" y1="0" x2="0" y2="1"><stop stop-color="#08261d" stop-opacity=".30"/><stop offset=".4" stop-color="#08261d" stop-opacity=".03"/><stop offset="1" stop-color="#061d16" stop-opacity=".43"/></linearGradient>
+    <clipPath id="expPhoto"><rect x="55" y="265" width="790" height="645"/></clipPath>
+    <path id="sealTop" d="M115 1047a115 115 0 0 1 230 0" fill="none"/><path id="sealBottom" d="M115 1047a115 115 0 0 0 230 0" fill="none"/>
+    <filter id="goldFoliage"><feColorMatrix type="matrix" values=".53 .48 .15 0 0 .38 .33 .12 0 0 .19 .17 .08 0 0 0 0 0 .62 0"/></filter>
+    </defs>
+    <rect width="900" height="1260" fill="#082d24"/><rect width="900" height="1260" fill="url(#cloth)"/>
+    <rect x="29" y="22" width="842" height="1216" fill="none" stroke="url(#gold)" stroke-width="2"/><rect x="36" y="29" width="828" height="1202" fill="none" stroke="#967342" stroke-width=".8"/>
+    <path d="M29 76q43 0 43-54M29 52q22 0 22-30M871 76q-43 0-43-54M871 52q-22 0-22-30M29 1184q43 0 43 54M29 1208q22 0 22 30M871 1184q-43 0-43 54M871 1208q-22 0-22 30" fill="none" stroke="#d0a765" stroke-width="2"/>
+    <text x="450" y="172" text-anchor="middle" fill="#3a2918" stroke="#3a2918" stroke-width="2" font-family="PassportDisplay,'Bodoni MT',Georgia,serif" font-weight="700" font-size="150" textLength="677" lengthAdjust="spacingAndGlyphs">ATLAS</text>
+    <text x="450" y="168" text-anchor="middle" fill="url(#gold)" font-family="PassportDisplay,'Bodoni MT',Georgia,serif" font-weight="700" font-size="150" textLength="677" lengthAdjust="spacingAndGlyphs">ATLAS</text>
+    <line x1="200" y1="196" x2="409" y2="196" stroke="#c19a5d"/><circle cx="450" cy="196" r="13" fill="none" stroke="#c19a5d"/><path d="M450 178l5 18-5 18-5-18z" fill="#d7ae70"/><line x1="491" y1="196" x2="700" y2="196" stroke="#c19a5d"/>
+    <text x="450" y="252" text-anchor="middle" fill="url(#gold)" font-family="PassportDisplay,'Bodoni MT',Georgia,serif" font-size="43" letter-spacing="16" textLength="490" lengthAdjust="spacingAndGlyphs">PASSPORT</text>
+    <rect x="53" y="263" width="794" height="650" fill="#355d42"/>${photoDataUrl ? `<image x="55" y="265" width="790" height="645" preserveAspectRatio="xMidYMid slice" clip-path="url(#expPhoto)" href="${photoDataUrl}"/>` : fallback}<rect x="55" y="265" width="790" height="645" fill="url(#expShade)"/><rect x="54" y="264" width="792" height="647" fill="none" stroke="#c99b5d" stroke-width="2"/>
+    <rect x="54" y="902" width="792" height="272" fill="#06291f" opacity=".97"/><path d="M54 902H846M54 1174H846" stroke="#bb8e52" stroke-width="2"/>
+    <circle cx="230" cy="1047" r="117" fill="#073026" stroke="#ba854a" stroke-width="4"/><circle cx="230" cy="1047" r="106" fill="none" stroke="#d2a361" stroke-width="1.5"/><circle cx="230" cy="1047" r="80" fill="none" stroke="#906338" stroke-width="1.2"/>
+    ${assets?.tigerDataUrl ? `<image x="155" y="985" width="150" height="135" preserveAspectRatio="xMidYMid meet" href="${assets.tigerDataUrl}"/>` : `<text x="230" y="1072" text-anchor="middle" fill="#d3a668" font-family="PassportDisplay,Georgia,serif" font-size="96">${data.districts.length || data.world.length}</text>`}
+    <text fill="#d8ae70" font-family="Georgia,serif" font-size="21" letter-spacing="5"><textPath href="#sealTop" startOffset="50%" text-anchor="middle">VISITED</textPath></text>
+    <text fill="#d8ae70" font-family="Georgia,serif" font-size="18" letter-spacing="3"><textPath href="#sealBottom" startOffset="50%" text-anchor="middle">${xml(destination)}</textPath></text>
+    <path d="M365 937V1138M558 937V1138" stroke="#b28b52" stroke-width="1.5"/>
+    <g transform="translate(401 937) scale(.95)"><path d="${bangladeshSilhouette}" fill="url(#gold)"/></g>
+    <text x="580" y="968" fill="#d6b578" font-family="PassportDisplay,Georgia,serif" font-size="30" letter-spacing="6" textLength="235" lengthAdjust="spacingAndGlyphs">${xml(destination)}</text>
+    <line x1="575" y1="980" x2="818" y2="980" stroke="#b78b53"/>${list}
+    ${names.length > selected.length ? `<text x="570" y="1138" fill="#d8bb86" font-family="Georgia,serif" font-size="13">+ ${names.length - selected.length} more inside</text>` : ""}
+    ${botanicalDataUrl ? `<image x="62" y="1150" width="776" height="71" opacity=".48" filter="url(#goldFoliage)" href="${botanicalDataUrl}"/>` : ""}
+    <circle cx="450" cy="1189" r="25" fill="#082d24" stroke="#d0a765"/><path d="M450 1160l7 29-7 29-7-29zM421 1189l29-7 29 7-29 7z" fill="#c69a5d"/>
+    ${data.name ? `<text x="58" y="1200" fill="#e0c38e" font-family="Georgia,serif" font-size="15">Prepared for ${xml(data.name)}</text>` : ""}
+    ${coverCredit(data, photoDataUrl, "#dac69d", 1212)}
+  </svg>`;
+}
+
+function renderTravelogueCover(data: PassportData, photoDataUrl?: string, lilyDataUrl?: string, paperDataUrl?: string, assets?: CoverAssets): string {
   const names = coverNames(data);
   const selected = names.slice(0, 6);
   const destination = coverDestination(data);
   const list = selected.map((name, index) => {
-    const x = index < 3 ? 530 : 690;
-    const y = 1005 + (index % 3) * 34;
-    return `<text x="${x}" y="${y}" fill="#e6d4ae" font-family="Georgia,serif" font-size="17" ${name.length > 13 ? 'textLength="145" lengthAdjust="spacingAndGlyphs"' : ""}>${xml(name)}</text>`;
+    const y = 1070 + index * 23;
+    return `<text x="285" y="${y}" fill="#b45d37" font-family="Georgia,serif" font-size="16" font-weight="700">${String(index + 1).padStart(2, "0")}</text><text x="330" y="${y}" fill="#143a2c" font-family="Georgia,serif" font-size="18" ${name.length > 18 ? 'textLength="220" lengthAdjust="spacingAndGlyphs"' : ""}>${xml(name)}</text>`;
   }).join("");
-  const fallback = data.districts.length ? `<g transform="translate(385 440) scale(2.1)"><path d="${bangladeshSilhouette}" fill="#bca46f" opacity=".8"/></g>` : `<circle cx="452" cy="585" r="150" fill="none" stroke="#bca46f" stroke-width="3"/>`;
-  return `<svg xmlns="http://www.w3.org/2000/svg" width="900" height="1260" viewBox="0 0 900 1260" role="img" aria-label="Expedition Atlas passport cover"><defs><pattern id="cloth" width="10" height="10" patternUnits="userSpaceOnUse"><path d="M0 1H10M1 0V10" stroke="#d1bd8b" stroke-opacity=".09" stroke-width=".8"/></pattern><linearGradient id="expShade" x1="0" y1="0" x2="0" y2="1"><stop stop-color="#0b2b26" stop-opacity=".45"/><stop offset=".25" stop-color="#0b2b26" stop-opacity=".04"/><stop offset="1" stop-color="#071f1b" stop-opacity=".52"/></linearGradient><clipPath id="expPhoto"><rect x="56" y="273" width="788" height="674"/></clipPath></defs>
-    <rect width="900" height="1260" fill="#102f28"/><rect width="900" height="1260" fill="url(#cloth)"/><rect x="29" y="28" width="842" height="1204" fill="none" stroke="#bd955e" stroke-width="2"/><rect x="36" y="35" width="828" height="1190" fill="none" stroke="#8f774d" stroke-width=".8"/>
-    <text x="84" y="173" fill="#e8d6ae" font-family="Georgia,serif" font-size="142" font-weight="700" letter-spacing="-3" textLength="730" lengthAdjust="spacingAndGlyphs">ATLAS</text><line x1="180" y1="222" x2="285" y2="222" stroke="#b88d54"/><text x="450" y="238" text-anchor="middle" fill="#e5d3ab" font-family="Georgia,serif" font-size="49" letter-spacing="16">PASSPORT</text><line x1="615" y1="222" x2="720" y2="222" stroke="#b88d54"/>
-    <rect x="54" y="271" width="792" height="678" fill="#456c54"/>${photoDataUrl ? `<image x="56" y="273" width="788" height="674" preserveAspectRatio="xMidYMid slice" clip-path="url(#expPhoto)" href="${photoDataUrl}"/>` : fallback}<rect x="56" y="273" width="788" height="674" fill="url(#expShade)"/><rect x="55" y="272" width="790" height="676" fill="none" stroke="#c9a46e" stroke-width="3"/>
-    <rect x="55" y="924" width="790" height="261" fill="#102f28" opacity=".97"/><line x1="55" y1="925" x2="845" y2="925" stroke="#c69b61" stroke-width="2"/><circle cx="158" cy="1046" r="83" fill="none" stroke="#b58b56" stroke-width="3"/><circle cx="158" cy="1046" r="74" fill="none" stroke="#b58b56" stroke-width="1" stroke-dasharray="3 3"/><text x="158" y="999" text-anchor="middle" fill="#d9bf8f" font-family="Georgia,serif" font-size="13" letter-spacing="3">MARKED</text><text x="158" y="1091" text-anchor="middle" fill="#eed8a8" font-family="Georgia,serif" font-size="88">${data.districts.length || data.world.length}</text><text x="158" y="1121" text-anchor="middle" fill="#d9bf8f" font-family="Georgia,serif" font-size="11" letter-spacing="2">${data.districts.length ? "DISTRICTS" : "COUNTRIES"}</text>
-    <text x="286" y="980" fill="#be9a64" font-family="Arial,sans-serif" font-size="12" letter-spacing="4">DESTINATION</text><text x="282" y="1036" fill="#e7d7b3" font-family="Georgia,serif" font-size="43" ${destination.length >= 8 ? 'textLength="210" lengthAdjust="spacingAndGlyphs"' : ""}>${xml(destination)}</text><g transform="translate(344 1055) scale(.62)">${data.districts.length ? `<path d="${bangladeshSilhouette}" fill="#bea16e"/>` : `<circle cx="40" cy="45" r="35" fill="none" stroke="#bea16e" stroke-width="3"/>`}</g>
-    <line x1="515" y1="968" x2="515" y2="1158" stroke="#aa8758"/><text x="530" y="974" fill="#bfa070" font-family="Arial,sans-serif" font-size="11" letter-spacing="3">PLACES MARKED</text>${list}${names.length > selected.length ? `<text x="530" y="1138" fill="#d4bd91" font-family="Georgia,serif" font-size="13">+ ${names.length - selected.length} more inside</text>` : ""}
-    <line x1="55" y1="1187" x2="845" y2="1187" stroke="#b89461"/><text x="57" y="1206" fill="#e2cca0" font-family="Georgia,serif" font-size="12">${data.name ? `Prepared for ${xml(data.name)}` : "A personal record of places marked"}</text>${coverCredit(data, photoDataUrl, "#d1bf9b", 1220)}
+  return `<svg xmlns="http://www.w3.org/2000/svg" width="900" height="1260" viewBox="0 0 900 1260" role="img" aria-label="Travelogue Atlas passport cover"><defs>
+    ${displayFont(assets?.fontDataUrl)}
+    <clipPath id="journalPhoto"><rect x="0" y="340" width="900" height="590"/></clipPath>
+    <linearGradient id="journalTone" x1="0" y1="0" x2="0" y2="1"><stop stop-color="#f7e6bb" stop-opacity=".05"/><stop offset="1" stop-color="#0b3b35" stop-opacity=".18"/></linearGradient>
+    <filter id="lilyInk"><feColorMatrix type="matrix" values=".20 .32 .09 0 0 .28 .38 .16 0 0 .20 .28 .10 0 0 0 0 0 .76 0"/></filter>
+    </defs>
+    <rect width="900" height="1260" fill="#f6efdf"/>${paperDataUrl ? `<image x="0" y="0" width="900" height="1260" preserveAspectRatio="xMidYMid slice" opacity=".32" href="${paperDataUrl}"/>` : ""}
+    ${compass(128,124,69)}
+    <text x="235" y="180" fill="#0c3328" font-family="PassportDisplay,'Bodoni MT',Georgia,serif" font-weight="700" font-size="205" textLength="396" lengthAdjust="spacingAndGlyphs">ATLAS</text>
+    <text x="232" y="323" fill="#0c3328" font-family="PassportDisplay,'Bodoni MT',Georgia,serif" font-weight="700" font-size="177" textLength="474" lengthAdjust="spacingAndGlyphs">PASSPORT</text>
+    <text x="53" y="248" fill="#143a2d" font-family="Georgia,serif" font-size="15" letter-spacing="4"><tspan x="53">A</tspan><tspan x="53" dy="25">PERSONAL</tspan><tspan x="53" dy="25">TRAVEL</tspan><tspan x="53" dy="25">KEEPSAKE</tspan></text><line x1="53" y1="325" x2="200" y2="325" stroke="#b55c38" stroke-width="2"/>
+    <text x="738" y="130" fill="#ad5736" font-family="Georgia,serif" font-size="18" font-weight="700" letter-spacing="4" textLength="127" lengthAdjust="spacingAndGlyphs">TRAVELOGUE</text><line x1="738" y1="152" x2="865" y2="152" stroke="#b55c38" stroke-width="2"/>
+    <text x="739" y="201" fill="#133b2f" font-family="Georgia,serif" font-size="16" letter-spacing="4"><tspan x="739">PLACES</tspan><tspan x="739" dy="31">PEOPLE</tspan><tspan x="739" dy="31">CULTURE</tspan><tspan x="739" dy="31">NATURE</tspan></text><line x1="738" y1="326" x2="865" y2="326" stroke="#b55c38" stroke-width="2"/>
+    ${data.name ? `<text x="701" y="337" text-anchor="end" fill="#a65b3c" font-family="Georgia,serif" font-size="15" textLength="${Math.min(235, Math.max(55, data.name.length * 10))}" lengthAdjust="spacingAndGlyphs">For ${xml(data.name)}</text>` : ""}
+    <rect x="0" y="340" width="900" height="590" fill="#698d73"/>${photoDataUrl ? `<image x="0" y="340" width="900" height="590" preserveAspectRatio="xMidYMid slice" clip-path="url(#journalPhoto)" href="${photoDataUrl}"/>` : `<g transform="translate(390 440) scale(2.4)">${data.districts.length ? `<path d="${bangladeshSilhouette}" fill="#1f6049"/>` : `<circle cx="40" cy="45" r="65" fill="none" stroke="#1f6049" stroke-width="3"/>`}</g>`}<rect x="0" y="340" width="900" height="590" fill="url(#journalTone)"/>
+    <path d="M0 830L900 678V950L0 1102Z" fill="#f6efdf"/><path d="M0 830L900 678M0 1102L900 950" fill="none" stroke="#b96b43" stroke-width="2"/>
+    <g transform="rotate(-10 450 900)"><text x="88" y="937" fill="#0e362a" font-family="PassportDisplay,'Bodoni MT',Georgia,serif" font-weight="700" font-size="177" textLength="765" lengthAdjust="spacingAndGlyphs">${xml(destination)}</text></g>
+    <path d="M32 915q45 25 12 50t5 48m-33-92q50 38 21 84M825 801q-25 19-8 46t-10 42m45-91q-39 32-23 77" fill="none" stroke="#be7352" stroke-width="1.5" opacity=".6"/>
+    <text x="77" y="1184" fill="#b95b35" font-family="PassportDisplay,'Bodoni MT',Georgia,serif" font-size="214" font-style="italic" textLength="170" lengthAdjust="spacingAndGlyphs">${data.districts.length || data.world.length}</text>
+    <line x1="255" y1="1031" x2="255" y2="1194" stroke="#b86140" stroke-width="2"/>
+    <text x="285" y="1043" fill="#173b2e" font-family="Georgia,serif" font-size="19" font-weight="700" letter-spacing="3">${data.districts.length ? "DISTRICTS" : "PLACES"} VISITED</text>${list}
+    ${names.length > selected.length ? `<text x="330" y="1200" fill="#48614e" font-family="Georgia,serif" font-size="13">+ ${names.length - selected.length} more inside</text>` : ""}
+    <line x1="577" y1="1031" x2="577" y2="1194" stroke="#b86140" stroke-width="2"/>
+    ${assets?.lilyEngravingDataUrl ? `<image x="585" y="1022" width="315" height="182" preserveAspectRatio="xMidYMid meet" href="${assets.lilyEngravingDataUrl}"/>` : lilyDataUrl ? `<image x="591" y="1015" width="309" height="205" preserveAspectRatio="xMidYMid meet" filter="url(#lilyInk)" href="${lilyDataUrl}"/>` : ""}
+    <line x1="45" y1="1208" x2="855" y2="1208" stroke="#ad6a4e"/>${coverCredit(data, photoDataUrl, "#53634e", 1218)}
   </svg>`;
 }
 
-function renderTravelogueCover(data: PassportData, photoDataUrl?: string, botanicalDataUrl?: string, paperDataUrl?: string): string {
-  const names = coverNames(data);
-  const selected = names.slice(0, 6);
-  const destination = coverDestination(data);
-  const list = selected.map((name, index) => {
-    const x = index < 3 ? 345 : 555;
-    const y = 1068 + (index % 3) * 35;
-    return `<text x="${x}" y="${y}" fill="#a65f3f" font-family="Georgia,serif" font-size="15">${String(index + 1).padStart(2, "0")}</text><text x="${x + 31}" y="${y}" fill="#193f32" font-family="Georgia,serif" font-size="17" ${name.length > 17 ? 'textLength="167" lengthAdjust="spacingAndGlyphs"' : ""}>${xml(name)}</text>`;
-  }).join("");
-  return `<svg xmlns="http://www.w3.org/2000/svg" width="900" height="1260" viewBox="0 0 900 1260" role="img" aria-label="Travelogue Atlas passport cover"><defs><clipPath id="journalPhoto"><rect x="0" y="322" width="900" height="614"/></clipPath><linearGradient id="journalTone" x1="0" y1="0" x2="0" y2="1"><stop stop-color="#f3e5c5" stop-opacity=".10"/><stop offset="1" stop-color="#0b3b35" stop-opacity=".28"/></linearGradient></defs><rect width="900" height="1260" fill="#f6f0e2"/>${paperDataUrl ? `<image x="0" y="0" width="900" height="1260" preserveAspectRatio="xMidYMid slice" opacity=".38" href="${paperDataUrl}"/>` : ""}
-    <line x1="45" y1="42" x2="855" y2="42" stroke="#b66744" stroke-width="2"/>${compass(111,143,54)}<text x="282" y="166" fill="#143b2d" font-family="Georgia,serif" font-weight="700" font-size="125" letter-spacing="-4">ATLAS</text><text x="285" y="282" fill="#143b2d" font-family="Georgia,serif" font-weight="700" font-size="105" letter-spacing="-4" textLength="540" lengthAdjust="spacingAndGlyphs">PASSPORT</text><text x="45" y="308" fill="#315a44" font-family="Georgia,serif" font-size="13" letter-spacing="2.5">A PERSONAL TRAVEL KEEPSAKE</text>${data.name ? `<text x="855" y="308" text-anchor="end" fill="#a55c39" font-family="Georgia,serif" font-size="15" textLength="${Math.min(250, Math.max(35, data.name.length * 10))}" lengthAdjust="spacingAndGlyphs">For ${xml(data.name)}</text>` : ""}
-    <rect x="0" y="322" width="900" height="614" fill="#78a399"/>${photoDataUrl ? `<image x="0" y="322" width="900" height="614" preserveAspectRatio="xMidYMid slice" clip-path="url(#journalPhoto)" href="${photoDataUrl}"/>` : `<g transform="translate(390 440) scale(2.4)">${data.districts.length ? `<path d="${bangladeshSilhouette}" fill="#1f6049"/>` : `<circle cx="40" cy="45" r="65" fill="none" stroke="#1f6049" stroke-width="3"/>`}</g>`}<rect x="0" y="322" width="900" height="614" fill="url(#journalTone)"/>
-    <path d="M0 900L900 755V955L0 1096Z" fill="#f6f0e2"/><path d="M0 900L900 755" fill="none" stroke="#b66744" stroke-width="3"/><text x="45" y="1003" fill="#143b2d" font-family="Georgia,serif" font-size="112" font-weight="700" ${destination.length > 8 ? 'textLength="812" lengthAdjust="spacingAndGlyphs"' : ""}>${xml(destination)}</text><line x1="44" y1="1015" x2="846" y2="1015" stroke="#b66744" stroke-width="2"/>
-    <text x="61" y="1163" fill="#b46743" font-family="Georgia,serif" font-size="147" font-style="italic">${data.districts.length || data.world.length}</text><line x1="293" y1="1033" x2="293" y2="1184" stroke="#b66744" stroke-width="2"/><text x="345" y="1042" fill="#2c533e" font-family="Arial,sans-serif" font-size="13" letter-spacing="3">${data.districts.length ? "DISTRICTS VISITED" : "PLACES VISITED"}</text>${list}${names.length > selected.length ? `<text x="345" y="1182" fill="#52654e" font-family="Georgia,serif" font-size="13">+ ${names.length - selected.length} more inside</text>` : ""}
-    ${botanicalDataUrl && names.length <= 3 ? `<image x="686" y="1032" width="210" height="105" opacity=".52" href="${botanicalDataUrl}"/>` : ""}<line x1="45" y1="1203" x2="855" y2="1203" stroke="#b66744"/>${coverCredit(data, photoDataUrl, "#53634e", 1215)}
-  </svg>`;
-}
-
-export function renderPassportCover(data: PassportData, photoDataUrl?: string, botanicalDataUrl?: string, paperDataUrl?: string, lilyDataUrl?: string, style: PassportStyle = "archive"): string {
-  if (style === "expedition") return renderExpeditionCover(data, photoDataUrl);
-  if (style === "travelogue") return renderTravelogueCover(data, photoDataUrl, botanicalDataUrl, paperDataUrl);
+export function renderPassportCover(data: PassportData, photoDataUrl?: string, botanicalDataUrl?: string, paperDataUrl?: string, lilyDataUrl?: string, style: PassportStyle = "archive", assets?: CoverAssets): string {
+  if (style === "expedition") return renderExpeditionCover(data, photoDataUrl, botanicalDataUrl, assets);
+  if (style === "travelogue") return renderTravelogueCover(data, photoDataUrl, lilyDataUrl, paperDataUrl, assets);
   return renderArchiveCover(data, photoDataUrl, botanicalDataUrl, paperDataUrl, lilyDataUrl);
 }
 

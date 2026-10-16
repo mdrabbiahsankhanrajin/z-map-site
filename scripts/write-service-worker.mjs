@@ -21,6 +21,7 @@ if (process.env.GITHUB_PAGES === "true") {
     "data/bd-rivers.geojson", "data/bd-outline.geojson", "data/bd-outline-display.geojson", "data/bd-division-lines.geojson", "data/palestine-outline.geojson",
     "maplibre/maplibre-gl-worker.mjs", "maplibre/maplibre-gl-shared.mjs",
     "textures/atlas-paper.webp", "illustrations/bd-water-lily.webp", "illustrations/passport-delta-botanical.webp",
+    "fonts/LibreBodoni.ttf", "illustrations/passport-tiger-engraving.webp", "illustrations/passport-lily-engraving.webp",
     // Keep the opening collection offline; district photos cache when viewed.
     "images/attractions/lalbagh-fort.jpg", "images/attractions/coxs-bazar-beach.jpg", "images/attractions/ratargul-swamp.jpg", "images/attractions/bd-satkhira-sundarbans.jpg",
     ...await filesUnder("_next/static"),
