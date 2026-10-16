@@ -1,0 +1,42 @@
+import { describe, expect, it } from "vitest";
+import districts from "../../data/districts.json";
+import { worldPlaces } from "../../data/worldPlaces";
+import { createPassport, paginatePassport, renderPassportCover } from "./passport";
+
+describe("personal passport", () => {
+  it("uses only known marked visits and deduplicates them", () => {
+    const data = createPassport([worldPlaces[0].id, worldPlaces[0].id, "unknown"], [districts[0].id, "unknown"], "River Reader");
+    expect(data.world).toHaveLength(1);
+    expect(data.districts).toHaveLength(1);
+    expect(data.name).toBe("River Reader");
+  });
+
+  it("includes every marked place across manifest pages", () => {
+    const data = createPassport(worldPlaces.map((place) => place.id), districts.map((place) => place.id), "");
+    const pages = paginatePassport(data);
+    expect(pages.flatMap((page) => page.names).length).toBe(worldPlaces.length + districts.length);
+    expect(pages.every((page) => page.names.length <= 32)).toBe(true);
+  });
+
+  it("escapes optional names in the SVG cover", () => {
+    const data = createPassport([], [districts[0].id], "<Atlas & me>");
+    const cover = renderPassportCover(data);
+    expect(cover).toContain("&lt;Atlas &amp; me&gt;");
+    expect(cover).not.toContain("<Atlas & me>");
+  });
+
+  it("allows a cover photograph only from a marked district", () => {
+    const marked = districts[0];
+    const unmarked = districts[1];
+    const data = createPassport([], [marked.id], "", unmarked.id);
+    expect(data.photo?.district).toBeTruthy();
+    expect(data.photo?.district).not.toBe(unmarked.name);
+  });
+
+  it("does not print a photo credit when the photo could not load", () => {
+    const data = createPassport([], districts.map((district) => district.id), "");
+    expect(data.photo).toBeTruthy();
+    const cover = renderPassportCover(data);
+    expect(cover).not.toContain("Photo:");
+  });
+});

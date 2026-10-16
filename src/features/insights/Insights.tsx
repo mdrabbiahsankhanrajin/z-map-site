@@ -46,7 +46,7 @@ export function Insights() {
     {snapshot ? <div className="insights-layout">
       <div className="insight-totals"><div><strong>{snapshot.world}</strong><span>of {worldPlaces.length} world places visited</span></div><div><strong>{snapshot.districts}</strong><span>of 64 Bangladesh districts visited</span></div><div><strong>{snapshot.stops}</strong><span>stops in your trip plan</span></div></div>
       <section className="passport-section" aria-label="Your Bangladesh photo passport">
-        <header><div><h2>Your Bangladesh passport</h2><p>Districts you mark visited become entries here. Saved only on this device.</p></div><span>{snapshot.districts} / 64</span></header>
+        <header><div><h2>Your Bangladesh passport</h2><p>Districts you mark visited become entries here. Saved only on this device.</p><Link className="passport-export-link" href="/passport">Design &amp; download your passport →</Link></div><span>{snapshot.districts} / 64</span></header>
         {snapshot.visitedDistricts.length ? <><div className="passport-grid">{snapshot.visitedDistricts.slice(0, showAll ? undefined : 8).map((name) => {
           const attraction = attractions.find((item) => item.district === name);
           if (!attraction) return null;
