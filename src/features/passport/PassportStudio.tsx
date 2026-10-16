@@ -8,13 +8,20 @@ import { districtDisplayName } from "@/data/districtNames";
 import { resolveWorldPlaceId, worldPlaces } from "@/data/worldPlaces";
 import { TravelHeader } from "@/components/TravelHeader";
 import { parseSavedSelection } from "@/features/explorer/state";
-import { createPassport, paginatePassport, renderPassportCover } from "./passport";
+import { createPassport, paginatePassport, renderPassportCover, type PassportStyle } from "./passport";
+
+const styleOptions: { id: PassportStyle; label: string; detail: string }[] = [
+  { id: "archive", label: "Archive", detail: "Cartographic print" },
+  { id: "expedition", label: "Expedition", detail: "Dark field book" },
+  { id: "travelogue", label: "Travelogue", detail: "Editorial journal" },
+];
 
 export function PassportStudio() {
   const [worldIds, setWorldIds] = useState<string[]>([]);
   const [districtIds, setDistrictIds] = useState<string[]>([]);
   const [ready, setReady] = useState(false);
   const [name, setName] = useState("");
+  const [style, setStyle] = useState<PassportStyle>("archive");
   const [includeWorld, setIncludeWorld] = useState(true);
   const [includeDistricts, setIncludeDistricts] = useState(true);
   const [featuredDistrictId, setFeaturedDistrictId] = useState("atlas-cover");
@@ -75,7 +82,7 @@ export function PassportStudio() {
     return () => { cancelled = true; };
   }, []);
 
-  const cover = useMemo(() => renderPassportCover(data, photoDataUrl, ornament.dataUrl, paper.dataUrl, ornament.lilyDataUrl), [data, photoDataUrl, ornament.dataUrl, ornament.lilyDataUrl, paper.dataUrl]);
+  const cover = useMemo(() => renderPassportCover(data, photoDataUrl, ornament.dataUrl, paper.dataUrl, ornament.lilyDataUrl, style), [data, photoDataUrl, ornament.dataUrl, ornament.lilyDataUrl, paper.dataUrl, style]);
   useEffect(() => {
     const url = URL.createObjectURL(new Blob([cover], { type: "image/svg+xml;charset=utf-8" }));
     const frame = requestAnimationFrame(() => setPreviewUrl(url));
@@ -88,8 +95,8 @@ export function PassportStudio() {
     setStatus("");
     try {
       const { createPassportPng, createPassportPdf, downloadPassport } = await import("./exportPassport");
-      const blob = format === "png" ? await createPassportPng(data, photoDataUrl, ornament.dataUrl, paper.dataUrl, ornament.lilyDataUrl) : await createPassportPdf(data, photoDataUrl, ornament.dataUrl, paper.dataUrl, ornament.lilyDataUrl);
-      downloadPassport(blob, `atlas-passport.${format}`);
+      const blob = format === "png" ? await createPassportPng(data, photoDataUrl, ornament.dataUrl, paper.dataUrl, ornament.lilyDataUrl, style) : await createPassportPdf(data, photoDataUrl, ornament.dataUrl, paper.dataUrl, ornament.lilyDataUrl, style);
+      downloadPassport(blob, `atlas-passport-${style}.${format}`);
       setStatus(format === "png" ? "PNG cover downloaded." : `PDF passport downloaded with ${paginatePassport(data).length + 1} pages.`);
     } catch {
       setStatus("The download could not be created in this browser. Try again.");
@@ -114,7 +121,7 @@ export function PassportStudio() {
           <div className="passport-downloads"><button type="button" disabled={!hasVisits || Boolean(busy) || photoLoading || !ornament.done || !paper.done} onClick={() => void exportFile("png")}>{busy === "png" ? "Creating PNG…" : "Download PNG cover"}<span aria-hidden="true">↓</span></button><button type="button" disabled={!hasVisits || Boolean(busy) || photoLoading || !ornament.done || !paper.done} onClick={() => void exportFile("pdf")}>{busy === "pdf" ? "Creating PDF…" : "Download full PDF"}<span aria-hidden="true">↓</span></button><p>The PNG is a shareable cover. The PDF includes every visited place across as many pages as needed.</p>{photoFailed && <p>The cover photo could not load. Exports will use the illustrated cover.</p>}<p className="passport-status" role="status">{status}</p></div>
         </>}
       </section>
-      <section className="passport-preview" aria-label="Passport cover preview"><div className="passport-preview-heading"><span>Live preview</span><span>{placeCount} {placeCount === 1 ? "place" : "places"} · {paginatePassport(data).length + 1} PDF {paginatePassport(data).length === 0 ? "page" : "pages"}</span></div>{previewUrl && <Image src={previewUrl} alt={`Atlas passport cover with ${data.world.length} visited world ${data.world.length === 1 ? "place" : "places"} and ${data.districts.length} visited Bangladesh ${data.districts.length === 1 ? "district" : "districts"}`} width={900} height={1260} unoptimized />}<p>Photo credits are printed on the cover when a place photograph is used.</p></section>
+      <section className="passport-preview" aria-label="Passport cover preview"><div className="passport-preview-heading"><span>Live preview</span><span>{placeCount} {placeCount === 1 ? "place" : "places"} · {paginatePassport(data).length + 1} PDF {paginatePassport(data).length === 0 ? "page" : "pages"}</span></div><div className="passport-style-switch" role="group" aria-label="Passport cover style">{styleOptions.map((option) => <button key={option.id} type="button" className={`passport-style-choice passport-style-${option.id}`} aria-pressed={style === option.id} onClick={() => setStyle(option.id)}><span className="passport-style-swatch" aria-hidden="true"/><span><strong>{option.label}</strong><small>{option.detail}</small></span></button>)}</div>{previewUrl && <Image src={previewUrl} alt={`${styleOptions.find((option) => option.id === style)?.label} Atlas passport cover with ${data.world.length} visited world ${data.world.length === 1 ? "place" : "places"} and ${data.districts.length} visited Bangladesh ${data.districts.length === 1 ? "district" : "districts"}`} width={900} height={1260} unoptimized />}<p>Photo credits are printed on the cover when a place photograph is used.</p></section>
     </div>
     <p className="passport-back"><Link href="/insights">← Back to your atlas in numbers</Link></p>
   </main>;

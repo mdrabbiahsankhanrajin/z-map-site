@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import districts from "../../data/districts.json";
 import { worldPlaces } from "../../data/worldPlaces";
-import { createPassport, paginatePassport, renderPassportCover } from "./passport";
+import { createPassport, paginatePassport, renderManifestPage, renderPassportCover } from "./passport";
 
 describe("personal passport", () => {
   it("uses only known marked visits and deduplicates them", () => {
@@ -52,5 +52,26 @@ describe("personal passport", () => {
     expect(data.photo).toBeTruthy();
     const cover = renderPassportCover(data);
     expect(cover).not.toContain("Photo:");
+  });
+
+  it("renders three distinct cover layouts from the same visited data", () => {
+    const data = createPassport(["FRA"], [districts[0].id], "Maya");
+    const outputs = (["archive", "expedition", "travelogue"] as const).map((style) => renderPassportCover(data, undefined, undefined, undefined, undefined, style));
+    expect(new Set(outputs).size).toBe(3);
+    for (const output of outputs) {
+      expect(output).toContain("BANGLADESH");
+      expect(output).toContain(data.districts[0]);
+      expect(output).toContain("Maya");
+    }
+  });
+
+  it("keeps the complete PDF place list while changing page treatment", () => {
+    const data = createPassport([], districts.map((district) => district.id), "");
+    const page = paginatePassport(data)[0];
+    const archive = renderManifestPage(page, 2, "archive");
+    const expedition = renderManifestPage(page, 2, "expedition");
+    const travelogue = renderManifestPage(page, 2, "travelogue");
+    expect(new Set([archive, expedition, travelogue]).size).toBe(3);
+    for (const output of [archive, expedition, travelogue]) expect(output).toContain(page.names[0]);
   });
 });

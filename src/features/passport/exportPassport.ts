@@ -1,5 +1,5 @@
 import { publicPath } from "@/lib/publicPath";
-import { PASSPORT_HEIGHT, PASSPORT_WIDTH, paginatePassport, renderManifestPage, renderPassportCover, type PassportData } from "./passport";
+import { PASSPORT_HEIGHT, PASSPORT_WIDTH, paginatePassport, renderManifestPage, renderPassportCover, type PassportData, type PassportStyle } from "./passport";
 
 export async function loadPassportAsset(src: `/${string}`): Promise<string> {
   const response = await fetch(publicPath(src));
@@ -42,14 +42,14 @@ export function downloadPassport(blob: Blob, filename: string): void {
   window.setTimeout(() => URL.revokeObjectURL(url), 30_000);
 }
 
-export async function createPassportPng(data: PassportData, photoDataUrl?: string, botanicalDataUrl?: string, paperDataUrl?: string, lilyDataUrl?: string): Promise<Blob> {
-  return rasterize(renderPassportCover(data, photoDataUrl, botanicalDataUrl, paperDataUrl, lilyDataUrl), 2, "image/png");
+export async function createPassportPng(data: PassportData, photoDataUrl?: string, botanicalDataUrl?: string, paperDataUrl?: string, lilyDataUrl?: string, style: PassportStyle = "archive"): Promise<Blob> {
+  return rasterize(renderPassportCover(data, photoDataUrl, botanicalDataUrl, paperDataUrl, lilyDataUrl, style), 2, "image/png");
 }
 
-export async function createPassportPdf(data: PassportData, photoDataUrl?: string, botanicalDataUrl?: string, paperDataUrl?: string, lilyDataUrl?: string): Promise<Blob> {
+export async function createPassportPdf(data: PassportData, photoDataUrl?: string, botanicalDataUrl?: string, paperDataUrl?: string, lilyDataUrl?: string, style: PassportStyle = "archive"): Promise<Blob> {
   const { PDFDocument } = await import("pdf-lib");
   const pdf = await PDFDocument.create();
-  const pages = [renderPassportCover(data, photoDataUrl, botanicalDataUrl, paperDataUrl, lilyDataUrl), ...paginatePassport(data).map((page, index) => renderManifestPage(page, index + 2))];
+  const pages = [renderPassportCover(data, photoDataUrl, botanicalDataUrl, paperDataUrl, lilyDataUrl, style), ...paginatePassport(data).map((page, index) => renderManifestPage(page, index + 2, style))];
   for (const svg of pages) {
     const jpeg = await rasterize(svg, 1.5, "image/jpeg");
     const image = await pdf.embedJpg(await jpeg.arrayBuffer());
