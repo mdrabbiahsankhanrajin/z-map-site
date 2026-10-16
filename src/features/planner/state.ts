@@ -19,6 +19,10 @@ export function addStop(stops: string[], id: string): string[] {
   return stops.includes(id) ? stops : [...stops, id];
 }
 
+export function addStops(stops: string[], ids: string[]): string[] {
+  return ids.reduce(addStop, stops);
+}
+
 export function removeStop(stops: string[], id: string): string[] {
   return stops.filter((stop) => stop !== id);
 }

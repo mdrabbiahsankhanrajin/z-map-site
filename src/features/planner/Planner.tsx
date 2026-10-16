@@ -5,7 +5,8 @@ import { useEffect, useState } from "react";
 import { attractions } from "@/data/attractions";
 import { districtDisplayName } from "@/data/districtNames";
 import { TravelHeader } from "@/components/TravelHeader";
-import { addStop, customStopId, customStopName, emptyTripDetails, moveStop, parseTrip, parseTripDetails, removeStop, serializeTrip, type TripDetails } from "./state";
+import { parseSavedPlaces, SAVED_PLACES_KEY } from "@/features/discovery/savedPlaces";
+import { addStop, addStops, customStopId, customStopName, emptyTripDetails, moveStop, parseTrip, parseTripDetails, removeStop, serializeTrip, type TripDetails } from "./state";
 
 const STORAGE_KEY = "atlas:trip:v1";
 const knownIds = attractions.map((item) => item.id);
@@ -17,15 +18,19 @@ export function Planner() {
   const [custom, setCustom] = useState("");
   const [error, setError] = useState("");
   const [hydrated, setHydrated] = useState(false);
+  const [savedIds, setSavedIds] = useState<string[]>([]);
 
   useEffect(() => {
     const frame = requestAnimationFrame(() => {
       let saved: string | null = null;
       try { saved = localStorage.getItem(STORAGE_KEY); } catch { /* Planner still works without storage. */ }
       let loaded = parseTrip(saved, knownIds);
+      let savedPlaces: string[] = [];
+      try { savedPlaces = parseSavedPlaces(localStorage.getItem(SAVED_PLACES_KEY), knownIds); } catch { /* Saved collection is optional. */ }
+      setSavedIds(savedPlaces);
       const add = new URLSearchParams(window.location.search).get("add");
-      if (add && knownIds.includes(add)) {
-        loaded = addStop(loaded, add);
+      if (add === "saved" || add && knownIds.includes(add)) {
+        loaded = add === "saved" ? addStops(loaded, savedPlaces) : addStop(loaded, add);
         window.history.replaceState(null, "", window.location.pathname);
       }
       setStops(loaded);
@@ -59,6 +64,8 @@ export function Planner() {
     return attractions.find((item) => item.id === id)?.title ?? customStopName(id) ?? "Unknown stop";
   }
 
+  const savedNotInTrip = savedIds.filter((id) => !stops.includes(id));
+
   return <main className="atlas-content-page planner-page">
     <TravelHeader active="planner" />
     <section className="content-intro"><p className="content-locale">Your journey · private on this device</p><h1>Plan a trip, your way</h1><p>Choose photographed places or add your own stops. Use the move controls to put them in your preferred order.</p></section>
@@ -66,6 +73,7 @@ export function Planner() {
       <section className="planner-editor" aria-label="Itinerary editor">
         <h2>Stops</h2>
         <div className="planner-add"><label htmlFor="known-stop">From the collection</label><div><select id="known-stop" value={destination} onChange={(event) => setDestination(event.target.value)}><option value="">Choose a place</option>{[...attractions].sort((a, b) => a.title.localeCompare(b.title, "en")).map((item) => <option key={item.id} value={item.id}>{item.title} · {districtDisplayName(item.district)}</option>)}</select><button type="button" onClick={addDestination} disabled={!destination}>Add stop</button></div></div>
+        {savedIds.length > 0 && <div className="planner-saved"><div><strong>{savedIds.length} saved {savedIds.length === 1 ? "place" : "places"}</strong><span>{savedNotInTrip.length ? "Add your shortlist after the stops already here." : "Your saved places are already in this trip."}</span></div>{savedNotInTrip.length ? <button type="button" onClick={() => setStops((current) => addStops(current, savedIds))}>Add {savedNotInTrip.length} to trip</button> : <Link href="/discover?view=saved">View saved →</Link>}</div>}
         <div className="planner-add"><label htmlFor="custom-stop">Another destination</label><div><input id="custom-stop" value={custom} maxLength={80} onChange={(event) => { setCustom(event.target.value); setError(""); }} onKeyDown={(event) => { if (event.key === "Enter") addCustom(); }} placeholder="District, city or place name" /><button type="button" onClick={addCustom} disabled={!custom.trim()}>Add stop</button></div>{error && <p role="alert" className="planner-error">{error}</p>}</div>
         {stops.length === 0 ? <p className="planner-empty">Start with a place above. Your itinerary stays on this device.</p> : <ol className="trip-stops">{stops.map((id, index) => <li key={id}><span className="stop-number">{String(index + 1).padStart(2, "0")}</span><span className="stop-name">{stopName(id)}{attractions.find((item) => item.id === id) && <small>{districtDisplayName(attractions.find((item) => item.id === id)?.district ?? "")}</small>}</span><div className="stop-controls"><button type="button" disabled={index === 0} onClick={() => setStops((current) => moveStop(current, id, -1))} aria-label={`Move ${stopName(id)} up`}>↑</button><button type="button" disabled={index === stops.length - 1} onClick={() => setStops((current) => moveStop(current, id, 1))} aria-label={`Move ${stopName(id)} down`}>↓</button><button type="button" onClick={() => setStops((current) => removeStop(current, id))} aria-label={`Remove ${stopName(id)}`}>×</button></div></li>)}</ol>}
       </section>

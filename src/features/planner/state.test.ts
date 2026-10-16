@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { addStop, customStopId, customStopName, moveStop, parseTrip, parseTripDetails, removeStop, serializeTrip } from "./state";
+import { addStop, addStops, customStopId, customStopName, moveStop, parseTrip, parseTripDetails, removeStop, serializeTrip } from "./state";
 
 const known = ["lalbagh-fort", "coxs-bazar-beach", "ratargul-swamp"];
 
@@ -32,5 +32,10 @@ describe("local itinerary", () => {
     expect(customStopName(id)).toBe("Rangamati town");
     expect(parseTrip(serializeTrip([id, known[0]]), known)).toEqual([id, known[0]]);
     expect(parseTrip(JSON.stringify({ version: 1, stops: ["custom:", "custom:" + "x".repeat(81)] }), known)).toEqual([]);
+  });
+
+  it("appends saved places without replacing the user's existing trip order", () => {
+    expect(addStops([known[1], "custom:Rangamati"], [known[0], known[1], known[2]]))
+      .toEqual([known[1], "custom:Rangamati", known[0], known[2]]);
   });
 });
