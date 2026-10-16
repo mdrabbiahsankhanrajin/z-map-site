@@ -37,6 +37,7 @@ export function PassportStudio() {
   const markedDistricts = districts.filter((district) => districtIds.includes(district.id)).sort((a, b) => districtDisplayName(a.name).localeCompare(districtDisplayName(b.name), "en"));
   const data = useMemo(() => createPassport(includeWorld ? worldIds : [], includeDistricts ? districtIds : [], name, featuredDistrictId), [worldIds, districtIds, includeWorld, includeDistricts, name, featuredDistrictId]);
   const hasVisits = data.world.length + data.districts.length > 0;
+  const placeCount = data.world.length + data.districts.length;
   const photoSrc = data.photo?.src;
   const photoDataUrl = loadedPhoto?.src === photoSrc ? loadedPhoto?.dataUrl : undefined;
   const photoLoading = Boolean(photoSrc && loadedPhoto?.src !== photoSrc);
@@ -92,7 +93,7 @@ export function PassportStudio() {
           <div className="passport-downloads"><span>02 / Take it with you</span><button type="button" disabled={!hasVisits || Boolean(busy) || photoLoading} onClick={() => void exportFile("png")}>{busy === "png" ? "Creating PNG…" : "Download PNG cover"}<span aria-hidden="true">↓</span></button><button type="button" disabled={!hasVisits || Boolean(busy) || photoLoading} onClick={() => void exportFile("pdf")}>{busy === "pdf" ? "Creating PDF…" : "Download full PDF"}<span aria-hidden="true">↓</span></button><p>The PNG is a shareable cover. The PDF includes every visited place across as many pages as needed.</p>{photoFailed && <p>The cover photo could not load. Exports will use the illustrated cover.</p>}<p className="passport-status" role="status">{status}</p></div>
         </>}
       </section>
-      <section className="passport-preview" aria-label="Passport cover preview"><div className="passport-preview-heading"><span>Live preview</span><span>{data.world.length + data.districts.length} places · {paginatePassport(data).length + 1} PDF {paginatePassport(data).length === 0 ? "page" : "pages"}</span></div>{previewUrl && <Image src={previewUrl} alt={`Atlas passport cover with ${data.world.length} world places and ${data.districts.length} Bangladesh districts marked visited`} width={900} height={1260} unoptimized />}<p>Photo credits are printed on the cover when a district photo is used.</p></section>
+      <section className="passport-preview" aria-label="Passport cover preview"><div className="passport-preview-heading"><span>Live preview</span><span>{placeCount} {placeCount === 1 ? "place" : "places"} · {paginatePassport(data).length + 1} PDF {paginatePassport(data).length === 0 ? "page" : "pages"}</span></div>{previewUrl && <Image src={previewUrl} alt={`Atlas passport cover with ${data.world.length} visited world ${data.world.length === 1 ? "place" : "places"} and ${data.districts.length} visited Bangladesh ${data.districts.length === 1 ? "district" : "districts"}`} width={900} height={1260} unoptimized />}<p>Photo credits are printed on the cover when a district photo is used.</p></section>
     </div>
     <p className="passport-back"><Link href="/insights">← Back to your atlas in numbers</Link></p>
   </main>;
