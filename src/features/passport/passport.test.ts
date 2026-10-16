@@ -29,8 +29,15 @@ describe("personal passport", () => {
     const marked = districts[0];
     const unmarked = districts[1];
     const data = createPassport([], [marked.id], "", unmarked.id);
-    expect(data.photo?.district).toBeTruthy();
-    expect(data.photo?.district).not.toBe(unmarked.name);
+    expect(data.photo?.place).toBeTruthy();
+    expect(data.photo?.place).not.toBe(unmarked.name);
+  });
+
+  it("uses a credited world photograph when a marked country has one and no district is marked", () => {
+    const data = createPassport(["FRA"], [], "");
+    expect(data.photo?.place).toBe("France");
+    expect(data.photo?.src).toMatch(/^\/images\/world\//);
+    expect(data.photo?.sourceUrl).toMatch(/^https:\/\//);
   });
 
   it("does not print a photo credit when the photo could not load", () => {

@@ -1,9 +1,9 @@
 import { publicPath } from "@/lib/publicPath";
 import { PASSPORT_HEIGHT, PASSPORT_WIDTH, paginatePassport, renderManifestPage, renderPassportCover, type PassportData } from "./passport";
 
-export async function loadPassportPhoto(src: `/${string}`): Promise<string> {
+export async function loadPassportAsset(src: `/${string}`): Promise<string> {
   const response = await fetch(publicPath(src));
-  if (!response.ok) throw new Error("The district photograph could not be loaded.");
+  if (!response.ok) throw new Error("The passport image could not be loaded.");
   const blob = await response.blob();
   return await new Promise<string>((resolve, reject) => {
     const reader = new FileReader();
@@ -42,14 +42,14 @@ export function downloadPassport(blob: Blob, filename: string): void {
   window.setTimeout(() => URL.revokeObjectURL(url), 30_000);
 }
 
-export async function createPassportPng(data: PassportData, photoDataUrl?: string): Promise<Blob> {
-  return rasterize(renderPassportCover(data, photoDataUrl), 2, "image/png");
+export async function createPassportPng(data: PassportData, photoDataUrl?: string, botanicalDataUrl?: string): Promise<Blob> {
+  return rasterize(renderPassportCover(data, photoDataUrl, botanicalDataUrl), 2, "image/png");
 }
 
-export async function createPassportPdf(data: PassportData, photoDataUrl?: string): Promise<Blob> {
+export async function createPassportPdf(data: PassportData, photoDataUrl?: string, botanicalDataUrl?: string): Promise<Blob> {
   const { PDFDocument } = await import("pdf-lib");
   const pdf = await PDFDocument.create();
-  const pages = [renderPassportCover(data, photoDataUrl), ...paginatePassport(data).map((page, index) => renderManifestPage(page, index + 2))];
+  const pages = [renderPassportCover(data, photoDataUrl, botanicalDataUrl), ...paginatePassport(data).map((page, index) => renderManifestPage(page, index + 2))];
   for (const svg of pages) {
     const jpeg = await rasterize(svg, 1.5, "image/jpeg");
     const image = await pdf.embedJpg(await jpeg.arrayBuffer());
