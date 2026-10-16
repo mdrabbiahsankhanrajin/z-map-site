@@ -42,14 +42,14 @@ export function downloadPassport(blob: Blob, filename: string): void {
   window.setTimeout(() => URL.revokeObjectURL(url), 30_000);
 }
 
-export async function createPassportPng(data: PassportData, photoDataUrl?: string, botanicalDataUrl?: string): Promise<Blob> {
-  return rasterize(renderPassportCover(data, photoDataUrl, botanicalDataUrl), 2, "image/png");
+export async function createPassportPng(data: PassportData, photoDataUrl?: string, botanicalDataUrl?: string, paperDataUrl?: string, lilyDataUrl?: string): Promise<Blob> {
+  return rasterize(renderPassportCover(data, photoDataUrl, botanicalDataUrl, paperDataUrl, lilyDataUrl), 2, "image/png");
 }
 
-export async function createPassportPdf(data: PassportData, photoDataUrl?: string, botanicalDataUrl?: string): Promise<Blob> {
+export async function createPassportPdf(data: PassportData, photoDataUrl?: string, botanicalDataUrl?: string, paperDataUrl?: string, lilyDataUrl?: string): Promise<Blob> {
   const { PDFDocument } = await import("pdf-lib");
   const pdf = await PDFDocument.create();
-  const pages = [renderPassportCover(data, photoDataUrl, botanicalDataUrl), ...paginatePassport(data).map((page, index) => renderManifestPage(page, index + 2))];
+  const pages = [renderPassportCover(data, photoDataUrl, botanicalDataUrl, paperDataUrl, lilyDataUrl), ...paginatePassport(data).map((page, index) => renderManifestPage(page, index + 2))];
   for (const svg of pages) {
     const jpeg = await rasterize(svg, 1.5, "image/jpeg");
     const image = await pdf.embedJpg(await jpeg.arrayBuffer());

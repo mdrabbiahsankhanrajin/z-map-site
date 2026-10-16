@@ -20,9 +20,9 @@ if (process.env.GITHUB_PAGES === "true") {
     "data/world.geojson", "data/bd-districts.geojson", "data/bd-context.geojson",
     "data/bd-rivers.geojson", "data/bd-outline.geojson", "data/bd-outline-display.geojson", "data/bd-division-lines.geojson", "data/palestine-outline.geojson",
     "maplibre/maplibre-gl-worker.mjs", "maplibre/maplibre-gl-shared.mjs",
-    "textures/atlas-paper.webp", "illustrations/bd-water-lily.webp",
+    "textures/atlas-paper.webp", "illustrations/bd-water-lily.webp", "illustrations/passport-delta-botanical.webp",
     // Keep the opening collection offline; district photos cache when viewed.
-    "images/attractions/lalbagh-fort.jpg", "images/attractions/coxs-bazar-beach.jpg", "images/attractions/ratargul-swamp.jpg",
+    "images/attractions/lalbagh-fort.jpg", "images/attractions/coxs-bazar-beach.jpg", "images/attractions/ratargul-swamp.jpg", "images/attractions/bd-satkhira-sundarbans.jpg",
     ...await filesUnder("_next/static"),
     // Keep the overview maps available offline without downloading every deep-zoom tile
     // during installation. Tiles outside these zooms are cached when explored.

@@ -33,6 +33,13 @@ describe("personal passport", () => {
     expect(data.photo?.place).not.toBe(unmarked.name);
   });
 
+  it("uses a credited editorial cover photo without adding that district to visits", () => {
+    const data = createPassport([], [districts[0].id], "", "atlas-cover");
+    expect(data.photo?.place).toBe("Satkhira");
+    expect(data.photo?.sourceUrl).toMatch(/^https:\/\/commons\.wikimedia\.org\//);
+    expect(data.districts).toHaveLength(1);
+  });
+
   it("uses a credited world photograph when a marked country has one and no district is marked", () => {
     const data = createPassport(["FRA"], [], "");
     expect(data.photo?.place).toBe("France");
