@@ -8,6 +8,8 @@ import districts from "@/data/districts.json";
 import Link from "next/link";
 import { AttractionCard } from "./AttractionCard";
 import { parseSavedPlaces, SAVED_PLACES_KEY, serializeSavedPlaces, toggleSavedPlace } from "./savedPlaces";
+import { SeasonalDiscovery } from "./SeasonalDiscovery";
+import { seasonalCollections, type SeasonId } from "./seasonalPlaces";
 
 const districtNames = districts.map((district) => district.name).sort((a, b) => districtDisplayName(a).localeCompare(districtDisplayName(b), "en"));
 const countByDistrict = new Map(districtNames.map((name) => [name, attractions.filter((item) => item.district === name).length]));
@@ -17,7 +19,8 @@ export function DiscoverExplorer() {
   const [division, setDivision] = useState("All divisions");
   const [search, setSearch] = useState("");
   const [selected, setSelected] = useState("Dhaka");
-  const [view, setView] = useState<"districts" | "saved">("districts");
+  const [view, setView] = useState<"districts" | "seasons" | "saved">("districts");
+  const [seasonId, setSeasonId] = useState<SeasonId>("rainy");
   const [savedIds, setSavedIds] = useState<string[]>([]);
   const [hydrated, setHydrated] = useState(false);
 
@@ -26,7 +29,11 @@ export function DiscoverExplorer() {
       const requested = new URLSearchParams(window.location.search).get("district");
       const match = districtNames.find((name) => name.toLowerCase() === requested?.toLowerCase());
       if (match) setSelected(match);
-      if (new URLSearchParams(window.location.search).get("view") === "saved") setView("saved");
+      const query = new URLSearchParams(window.location.search);
+      if (query.get("view") === "saved") setView("saved");
+      if (query.get("view") === "seasons") setView("seasons");
+      const season = seasonalCollections.find((item) => item.id === query.get("season"));
+      if (season) setSeasonId(season.id);
       try { setSavedIds(parseSavedPlaces(localStorage.getItem(SAVED_PLACES_KEY), knownIds)); } catch { setSavedIds([]); }
       setHydrated(true);
     });
@@ -54,11 +61,19 @@ export function DiscoverExplorer() {
     return !term || item.title.toLowerCase().includes(term) || districtDisplayName(item.district).toLowerCase().includes(term);
   });
 
-  function selectView(next: "districts" | "saved") {
+  function selectView(next: "districts" | "seasons" | "saved") {
     setView(next);
     const url = new URL(window.location.href);
-    if (next === "saved") url.searchParams.set("view", "saved");
+    if (next !== "districts") url.searchParams.set("view", next);
     else url.searchParams.delete("view");
+    window.history.replaceState(null, "", url.pathname + url.search);
+  }
+
+  function selectSeason(next: SeasonId) {
+    setSeasonId(next);
+    const url = new URL(window.location.href);
+    url.searchParams.set("view", "seasons");
+    url.searchParams.set("season", next);
     window.history.replaceState(null, "", url.pathname + url.search);
   }
 
@@ -69,7 +84,7 @@ export function DiscoverExplorer() {
     window.history.replaceState(null, "", url.pathname + url.search);
   }
 
-  return <><nav className="discovery-views" aria-label="Place collections"><button type="button" className={view === "districts" ? "current" : ""} aria-current={view === "districts" ? "page" : undefined} onClick={() => selectView("districts")}>By district <span>64</span></button><button type="button" className={view === "saved" ? "current" : ""} aria-current={view === "saved" ? "page" : undefined} onClick={() => selectView("saved")}>Saved places <span>{savedIds.length}</span></button></nav><div className={`discovery-layout ${view === "saved" ? "saved-view" : ""}`}>
+  return <><nav className="discovery-views" aria-label="Place collections"><button type="button" className={view === "districts" ? "current" : ""} aria-current={view === "districts" ? "page" : undefined} onClick={() => selectView("districts")}>By district <span>64</span></button><button type="button" className={view === "seasons" ? "current" : ""} aria-current={view === "seasons" ? "page" : undefined} onClick={() => selectView("seasons")}>By season <span>02</span></button><button type="button" className={view === "saved" ? "current" : ""} aria-current={view === "saved" ? "page" : undefined} onClick={() => selectView("saved")}>Saved places <span>{savedIds.length}</span></button></nav>{view === "seasons" ? <SeasonalDiscovery seasonId={seasonId} onSelect={selectSeason} savedIds={savedIds} onToggleSaved={(id) => setSavedIds((current) => toggleSavedPlace(current, id))} /> : <div className={`discovery-layout ${view === "saved" ? "saved-view" : ""}`}>
     <aside className="district-finder" aria-label={view === "saved" ? "Filter saved places" : "Browse Bangladesh districts"}>
       <div className="district-finder-heading"><h2>{view === "saved" ? "Your collection" : "Browse districts"}</h2><span>{view === "saved" ? `${savedIds.length} saved` : "64 districts"}</span></div>
       <label htmlFor="district-search">Find a district or place</label>
@@ -82,5 +97,5 @@ export function DiscoverExplorer() {
     <section className="district-places" aria-live="polite">
       {view === "saved" ? <><header className="district-places-heading"><div><p>Private on this device</p><h2>Saved for later</h2></div><span>{savedPlaces.length} photographed {savedPlaces.length === 1 ? "place" : "places"}</span></header>{savedPlaces.length ? <div className="attraction-grid">{savedPlaces.map((attraction) => <AttractionCard key={attraction.id} attraction={attraction} saved onToggleSaved={(id) => setSavedIds((current) => toggleSavedPlace(current, id))} />)}</div> : <div className="district-empty">{savedIds.length ? "No saved places match these filters." : <>Your collection starts with a place you love. <button type="button" onClick={() => selectView("districts")}>Browse districts →</button></>}</div>}</> : shown ? <><header className="district-places-heading"><div><p>{divisions.find((item) => item.districts.some((district) => district === shown))?.name} division</p><h2>{districtDisplayName(shown)}</h2></div><span>{places.length} photographed {places.length === 1 ? "place" : "places"}</span></header><div className="attraction-grid">{places.map((attraction) => <AttractionCard key={attraction.id} attraction={attraction} saved={savedIds.includes(attraction.id)} onToggleSaved={(id) => setSavedIds((current) => toggleSavedPlace(current, id))} />)}</div></> : <div className="district-empty">No district matches. Try another name or choose all divisions.</div>}
     </section>
-  </div></>;
+  </div>}</>;
 }

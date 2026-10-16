@@ -65,6 +65,31 @@
 .district-places .attraction-body>p:not(.attraction-location):not(.photo-credit){min-height:0}
 .district-empty{padding:50px 10px;color:#476353;font:normal 24px Georgia,serif}
 .district-empty button{border:0;background:transparent;color:#1c6346;font:inherit;text-decoration:underline;text-underline-offset:4px;cursor:pointer}
+.seasonal-discovery{max-width:1160px;margin:0 auto;padding:0 24px 46px}
+.seasonal-intro{display:grid;grid-template-columns:minmax(0,1fr) minmax(230px,350px);gap:24px;align-items:end;padding:0 0 18px;border-bottom:1px solid #b9c2b0}
+.seasonal-kicker{grid-column:1/-1;margin:0;color:#9a6748;font-size:11px;font-weight:700;letter-spacing:.18em;text-transform:uppercase}
+.seasonal-intro h2{margin:0;color:#173d30;font:normal clamp(35px,4vw,50px)/1.04 Georgia,serif;letter-spacing:-.03em}
+.seasonal-intro>p:last-child{margin:0 0 5px;color:#435f50;font-size:14px;line-height:1.65}
+.seasonal-selector{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin:16px 0 26px}
+.seasonal-selector button{display:flex;flex-direction:column;align-items:flex-start;gap:9px;min-height:112px;padding:15px 19px;border:1px solid #bfc6b7;background:#f4f0e5;color:#224333;text-align:left;cursor:pointer}
+.seasonal-selector button.current{border-color:#214d39;background:#214d39;color:#fffaf0}
+.seasonal-selector button:hover,.seasonal-selector button:focus-visible{outline:2px solid #ac7048;outline-offset:2px}
+.seasonal-index{color:#a66a43;font-size:10px;font-weight:700;letter-spacing:.13em;text-transform:uppercase}
+.seasonal-selector button.current .seasonal-index{color:#e4bd98}
+.seasonal-selector strong{font:normal 27px/1 Georgia,serif}
+.seasonal-selector button>span:last-child{font-size:12px}
+.seasonal-heading{display:flex;align-items:end;justify-content:space-between;gap:20px;margin-bottom:22px;padding-bottom:17px;border-bottom:1px solid #b9c2b0}
+.seasonal-heading p{margin:0;color:#567061;font-size:13px;line-height:1.5}
+.seasonal-heading p:first-child{margin-bottom:7px;color:#a06742;font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase}
+.seasonal-heading h3{margin:0 0 7px;color:#173d30;font:normal 42px/1.1 Georgia,serif}
+.seasonal-heading a,.seasonal-context a{flex:none;color:#1b5c43;font-size:12px;font-weight:700;text-decoration:underline;text-underline-offset:3px}
+.seasonal-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:18px}
+.seasonal-entry{min-width:0;background:#fffdf6}
+.seasonal-entry .attraction-card{height:auto;border:0;box-shadow:none}
+.seasonal-entry .attraction-body>p:not(.attraction-location):not(.photo-credit){min-height:0}
+.seasonal-context{display:flex;flex-wrap:wrap;align-items:baseline;justify-content:space-between;gap:8px;padding:0 20px 18px;border-top:1px solid #d4d9c9}
+.seasonal-context p{max-width:280px;margin:12px 0 0;color:#334d3e;font:normal 17px/1.4 Georgia,serif}
+.seasonal-caveat{margin:23px 0 0;color:#5c705f;font-size:12px}
 .credits-content{max-width:780px;margin:0 auto;padding:70px 24px 100px}
 .credits-content h1{margin:0 0 22px;color:#193c30;font:normal clamp(48px,7vw,76px)/1 Georgia,serif;letter-spacing:-.035em}
 .credits-content h2{margin:0 0 9px;color:#1d4938;font:normal 25px/1.2 Georgia,serif}
@@ -145,6 +170,8 @@
 @media(max-width:800px){.discovery-page .content-intro{padding:38px 20px 25px}.discovery-layout{display:block;padding:0 20px 35px}.district-finder{margin-bottom:30px}.district-list{max-height:190px}.district-places .attraction-grid{grid-template-columns:1fr;max-width:540px}.district-places-heading{align-items:start}.district-places-heading>span{white-space:normal;text-align:right}}
 @media(max-width:800px){.discovery-views{margin-bottom:22px;padding:0 20px}.discovery-views button{font-size:17px}.planner-saved{align-items:flex-start;flex-direction:column}.planner-saved button{width:100%}}
 @media(max-width:800px){.saved-view .district-finder{padding:12px 16px;margin-bottom:20px}.saved-view .district-finder-heading,.saved-view .saved-finder-note p{display:none}.saved-view .district-finder label{margin:8px 0 4px}.saved-view .finder-count{margin:10px 0 6px}.saved-view .saved-finder-note{padding-top:7px}.saved-view .saved-finder-note a{margin-top:0}}
+@media(max-width:800px){.seasonal-discovery{padding:0 20px 32px}.seasonal-intro{display:block;padding:3px 0 19px}.seasonal-kicker{margin-bottom:11px}.seasonal-intro h2{font-size:37px}.seasonal-intro>p:last-child{margin-top:12px;font-size:13px}.seasonal-selector{gap:8px;margin:16px 0 25px}.seasonal-selector button{min-height:118px;padding:13px}.seasonal-selector strong{font-size:23px}.seasonal-selector button>span:last-child{font-size:11px}.seasonal-heading h3{font-size:34px}.seasonal-grid{grid-template-columns:1fr;max-width:540px}.seasonal-entry .attraction-photo{aspect-ratio:4/3}}
+@media(max-width:480px){.discovery-views{gap:14px}.discovery-views button{font-size:15px}.discovery-views button span{font-size:10px}.seasonal-heading{align-items:start}.seasonal-heading a{margin-top:6px;max-width:75px}}
 @media(max-width:800px){.insights-layout{padding:0 20px 50px}.insight-totals{gap:7px}.insight-totals>div{min-height:112px;padding:12px}.insight-totals strong{font-size:40px}.insight-totals span{font-size:10px}.insight-tables{grid-template-columns:1fr;gap:16px}.insight-section{padding:19px}}
 @media(max-width:800px){.passport-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}.passport-section h2{font-size:30px}.passport-section header>span{font-size:20px}.passport-entry strong{font-size:19px}}
 @media(max-width:480px){.content-topbar>a span{display:none}.content-topbar nav{gap:12px;font-size:13px}.content-topbar nav a{padding:24px 0 17px}.content-topbar>a svg{width:27px;height:27px}}
