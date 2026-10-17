@@ -17,8 +17,8 @@ if (process.env.GITHUB_PAGES === "true") {
 
   const core = [
     "index.html", "index.txt", "bd/index.html", "bd/index.txt", "discover/index.html", "discover/index.txt", "planner/index.html", "planner/index.txt", "insights/index.html", "insights/index.txt", "passport/index.html", "passport/index.txt", "share/index.html", "share/index.txt", "credits/index.html", "credits/index.txt",
-    "data/world.geojson", "data/bd-districts.geojson", "data/bd-context.geojson",
-    "data/bd-rivers.geojson", "data/bd-outline.geojson", "data/bd-outline-display.geojson", "data/bd-division-lines.geojson", "data/palestine-outline.geojson",
+    "data/world.geojson", "data/bd-districts.geojson", "data/bd-context-display.geojson",
+    "data/bd-rivers.geojson", "data/bd-outline.geojson", "data/bd-outline-display.geojson", "data/bd-division-lines.geojson", "data/bd-context-lines.geojson", "data/palestine-outline.geojson",
     "maplibre/maplibre-gl-worker.mjs", "maplibre/maplibre-gl-shared.mjs",
     "textures/atlas-paper.webp", "illustrations/bd-water-lily.webp", "illustrations/passport-delta-botanical.webp",
     "fonts/LibreBodoni.ttf", "illustrations/passport-tiger-engraving.webp", "illustrations/passport-lily-engraving.webp",

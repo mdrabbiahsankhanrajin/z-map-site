@@ -17,6 +17,9 @@ SOURCE = Path("public/data/bd-districts.geojson")
 TARGET = Path("public/data/bd-outline.geojson")
 DISPLAY_TARGET = Path("public/data/bd-outline-display.geojson")
 DIVISIONS_TARGET = Path("public/data/bd-division-lines.geojson")
+CONTEXT_SOURCE = Path("public/data/bd-context.geojson")
+CONTEXT_DISPLAY_TARGET = Path("public/data/bd-context-display.geojson")
+CONTEXT_LINES_TARGET = Path("public/data/bd-context-lines.geojson")
 districts = json.loads(SOURCE.read_text(encoding="utf-8"))["features"]
 if len(districts) != 64:
     raise ValueError("Expected 64 pinned district polygons")
@@ -48,6 +51,23 @@ def line_parts(geometry):
 
 
 divisions = MultiLineString([line.simplify(0.0006, preserve_topology=True) for line in line_parts(internal)])
+# Natural Earth context does not share the ADM2 national edge. Suppress nearby
+# context strokes so they cannot draw a second, conflicting Bangladesh border.
+context_features = json.loads(CONTEXT_SOURCE.read_text(encoding="utf-8"))["features"]
+context_display = {"type": "FeatureCollection", "features": [
+    {
+        "type": "Feature",
+        "properties": feature["properties"],
+        "geometry": mapping(country if feature["properties"]["id"] == "BGD"
+                            else make_valid(shape(feature["geometry"])).difference(country)),
+    }
+    for feature in context_features
+]}
+context_edges = unary_union([
+    make_valid(shape(feature["geometry"])).boundary
+    for feature in context_features if feature["properties"]["id"] != "BGD"
+])
+context_lines = MultiLineString(line_parts(context_edges.difference(country.buffer(0.16))))
 
 
 def geojson(geometry):
@@ -57,13 +77,19 @@ def geojson(geometry):
 output = geojson(country)
 display_output = geojson(display)
 divisions_output = geojson(divisions)
+context_lines_output = geojson(context_lines)
+context_display_output = json.dumps(context_display, separators=(",", ":")) + "\n"
 if "--check" in sys.argv:
     if (TARGET.read_text(encoding="utf-8") != output
             or DISPLAY_TARGET.read_text(encoding="utf-8") != display_output
-            or DIVISIONS_TARGET.read_text(encoding="utf-8") != divisions_output):
+            or DIVISIONS_TARGET.read_text(encoding="utf-8") != divisions_output
+            or CONTEXT_DISPLAY_TARGET.read_text(encoding="utf-8") != context_display_output
+            or CONTEXT_LINES_TARGET.read_text(encoding="utf-8") != context_lines_output):
         raise ValueError("Bangladesh outline is stale")
 else:
     TARGET.write_text(output, encoding="utf-8")
     DISPLAY_TARGET.write_text(display_output, encoding="utf-8")
     DIVISIONS_TARGET.write_text(divisions_output, encoding="utf-8")
-print(f"Bangladesh cartography: {len(districts)} districts, {len(display.geoms)} outlined parts, {len(divisions.geoms)} interior line parts")
+    CONTEXT_DISPLAY_TARGET.write_text(context_display_output, encoding="utf-8")
+    CONTEXT_LINES_TARGET.write_text(context_lines_output, encoding="utf-8")
+print(f"Bangladesh cartography: {len(districts)} districts, {len(display.geoms)} outlined parts, {len(divisions.geoms)} interior line parts, {len(context_lines.geoms)} context lines")
