@@ -21,10 +21,8 @@ if (process.env.GITHUB_PAGES === "true") {
     "data/bd-rivers.geojson", "data/bd-outline.geojson", "data/bd-outline-display.geojson", "data/bd-division-lines.geojson", "data/bd-context-lines.geojson", "data/palestine-outline.geojson",
     "maplibre/maplibre-gl-worker.mjs", "maplibre/maplibre-gl-shared.mjs",
     "textures/atlas-paper.webp", "illustrations/bd-water-lily.webp", "illustrations/passport-delta-botanical.webp",
-    "fonts/LibreBodoni.ttf", "illustrations/passport-tiger-engraving.webp", "illustrations/passport-lily-engraving.webp",
-    // Keep the opening collection offline; district photos cache when viewed.
-    "images/attractions/lalbagh-fort.jpg", "images/attractions/coxs-bazar-beach.jpg", "images/attractions/ratargul-swamp.jpg", "images/attractions/bd-satkhira-sundarbans.jpg",
-    ...await filesUnder("_next/static"),
+    // Optional passport art and place photos cache when viewed.
+    ...await filesUnder("_next/static").then((files) => files.filter((file) => !/maplibre-gl(?:-shared|-worker)?-dev\./.test(file))),
     // Keep the overview maps available offline without downloading every deep-zoom tile
     // during installation. Tiles outside these zooms are cached when explored.
     ...await Promise.all([0, 1, 2, 3].map((zoom) => filesUnder(`data/world-terrain/${zoom}`))).then((groups) => groups.flat()),
@@ -47,8 +45,8 @@ const CORE = ${JSON.stringify(urls)};
 self.addEventListener('install', (event) => {
   event.waitUntil((async () => {
     const cache = await caches.open(CACHE);
-    for (let i = 0; i < CORE.length; i += 16) {
-      await Promise.all(CORE.slice(i, i + 16).map(async (url) => {
+    for (let i = 0; i < CORE.length; i += 4) {
+      await Promise.all(CORE.slice(i, i + 4).map(async (url) => {
         const response = await fetch(url, { cache: 'reload' });
         if (!response.ok) throw new Error('Offline asset unavailable: ' + url);
         await cache.put(url, response);

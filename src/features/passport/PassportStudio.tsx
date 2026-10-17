@@ -28,7 +28,7 @@ export function PassportStudio() {
   const [loadedPhoto, setLoadedPhoto] = useState<{ src: string; dataUrl?: string; failed?: boolean }>();
   const [ornament, setOrnament] = useState<{ done: boolean; dataUrl?: string; lilyDataUrl?: string }>({ done: false });
   const [paper, setPaper] = useState<{ done: boolean; dataUrl?: string }>({ done: false });
-  const [coverAssets, setCoverAssets] = useState<{ done: boolean; fontDataUrl?: string; tigerDataUrl?: string; lilyEngravingDataUrl?: string }>({ done: false });
+  const [coverAssets, setCoverAssets] = useState<{ readyStyles: PassportStyle[]; fontDataUrl?: string; tigerDataUrl?: string; lilyEngravingDataUrl?: string }>({ readyStyles: [] });
   const [previewUrl, setPreviewUrl] = useState("");
   const [busy, setBusy] = useState<"png" | "pdf" | null>(null);
   const [status, setStatus] = useState("");
@@ -52,6 +52,7 @@ export function PassportStudio() {
   const photoDataUrl = loadedPhoto?.src === photoSrc ? loadedPhoto?.dataUrl : undefined;
   const photoLoading = Boolean(photoSrc && loadedPhoto?.src !== photoSrc);
   const photoFailed = Boolean(photoSrc && loadedPhoto?.src === photoSrc && loadedPhoto?.failed);
+  const styleReady = style === "archive" || coverAssets.readyStyles.includes(style);
 
   useEffect(() => {
     if (!photoSrc) return;
@@ -84,17 +85,16 @@ export function PassportStudio() {
   }, []);
 
   useEffect(() => {
-    if (style === "archive" || coverAssets.done) return;
+    if (style === "archive" || styleReady) return;
     let cancelled = false;
     void import("./exportPassport").then(({ loadPassportAsset }) => Promise.all([
-      loadPassportAsset("/fonts/LibreBodoni.ttf").catch(() => undefined),
-      loadPassportAsset("/illustrations/passport-tiger-engraving.webp").catch(() => undefined),
-      loadPassportAsset("/illustrations/passport-lily-engraving.webp").catch(() => undefined),
-    ])).then(([fontDataUrl, tigerDataUrl, lilyEngravingDataUrl]) => {
-      if (!cancelled) setCoverAssets({ done: true, fontDataUrl, tigerDataUrl, lilyEngravingDataUrl });
-    }).catch(() => { if (!cancelled) setCoverAssets({ done: true }); });
+      coverAssets.fontDataUrl ? Promise.resolve(coverAssets.fontDataUrl) : loadPassportAsset("/fonts/LibreBodoni.ttf").catch(() => undefined),
+      loadPassportAsset(style === "expedition" ? "/illustrations/passport-tiger-engraving.webp" : "/illustrations/passport-lily-engraving.webp").catch(() => undefined),
+    ])).then(([fontDataUrl, engravingDataUrl]) => {
+      if (!cancelled) setCoverAssets((previous) => ({ ...previous, fontDataUrl, ...(style === "expedition" ? { tigerDataUrl: engravingDataUrl } : { lilyEngravingDataUrl: engravingDataUrl }), readyStyles: [...previous.readyStyles, style] }));
+    }).catch(() => { if (!cancelled) setCoverAssets((previous) => ({ ...previous, readyStyles: [...previous.readyStyles, style] })); });
     return () => { cancelled = true; };
-  }, [style, coverAssets.done]);
+  }, [style, styleReady, coverAssets.fontDataUrl]);
 
   const cover = useMemo(() => renderPassportCover(data, photoDataUrl, ornament.dataUrl, paper.dataUrl, ornament.lilyDataUrl, style, coverAssets), [data, photoDataUrl, ornament.dataUrl, ornament.lilyDataUrl, paper.dataUrl, style, coverAssets]);
   useEffect(() => {
@@ -104,7 +104,7 @@ export function PassportStudio() {
   }, [cover]);
 
   async function exportFile(format: "png" | "pdf") {
-    if (!hasVisits || busy || photoLoading || !ornament.done || !paper.done || (style !== "archive" && !coverAssets.done)) return;
+    if (!hasVisits || busy || photoLoading || !ornament.done || !paper.done || !styleReady) return;
     setBusy(format);
     setStatus("");
     try {
@@ -132,10 +132,10 @@ export function PassportStudio() {
           {includeDistricts && markedDistricts.length > 0 && <><label className="passport-field" htmlFor="passport-photo">Cover photograph <small>cover image does not claim a visit</small></label><select id="passport-photo" value={featuredDistrictId} onChange={(event) => setFeaturedDistrictId(event.target.value)}><option value="atlas-cover">Sundarbans · editorial cover</option><option value="">First visited district</option>{markedDistricts.map((district) => <option key={district.id} value={district.id}>{districtDisplayName(district.name)}</option>)}</select></>}
           <p className="passport-private">Only marked countries and districts appear. Trip stops, visit dates and location traces stay out.</p>
           {!hasVisits && <p className="passport-no-visits">No visited places selected yet. <Link href="/bd">Mark a district on the map →</Link></p>}
-          <div className="passport-downloads"><button type="button" disabled={!hasVisits || Boolean(busy) || photoLoading || !ornament.done || !paper.done || (style !== "archive" && !coverAssets.done)} onClick={() => void exportFile("png")}>{busy === "png" ? "Creating PNG…" : "Download PNG cover"}<span aria-hidden="true">↓</span></button><button type="button" disabled={!hasVisits || Boolean(busy) || photoLoading || !ornament.done || !paper.done || (style !== "archive" && !coverAssets.done)} onClick={() => void exportFile("pdf")}>{busy === "pdf" ? "Creating PDF…" : "Download full PDF"}<span aria-hidden="true">↓</span></button><p>The PNG is a shareable cover. The PDF includes every visited place across as many pages as needed.</p>{photoFailed && <p>The cover photo could not load. Exports will use the illustrated cover.</p>}<p className="passport-status" role="status">{status}</p></div>
+          <div className="passport-downloads"><button type="button" disabled={!hasVisits || Boolean(busy) || photoLoading || !ornament.done || !paper.done || !styleReady} onClick={() => void exportFile("png")}>{busy === "png" ? "Creating PNG…" : "Download PNG cover"}<span aria-hidden="true">↓</span></button><button type="button" disabled={!hasVisits || Boolean(busy) || photoLoading || !ornament.done || !paper.done || !styleReady} onClick={() => void exportFile("pdf")}>{busy === "pdf" ? "Creating PDF…" : "Download full PDF"}<span aria-hidden="true">↓</span></button><p>The PNG is a shareable cover. The PDF includes every visited place across as many pages as needed.</p>{photoFailed && <p>The cover photo could not load. Exports will use the illustrated cover.</p>}<p className="passport-status" role="status">{status}</p></div>
         </>}
       </section>
-      <section className="passport-preview" aria-label="Passport cover preview"><div className="passport-preview-heading"><span>Live preview</span><span>{placeCount} {placeCount === 1 ? "place" : "places"} · {paginatePassport(data).length + 1} PDF {paginatePassport(data).length === 0 ? "page" : "pages"}</span></div><div className="passport-style-switch" role="group" aria-label="Passport cover style">{styleOptions.map((option) => <button key={option.id} type="button" className={`passport-style-choice passport-style-${option.id}`} aria-pressed={style === option.id} onClick={() => setStyle(option.id)}><span className="passport-style-swatch" aria-hidden="true"/><span><strong>{option.label}</strong><small>{option.detail}</small></span></button>)}</div>{previewUrl && <Image src={previewUrl} alt={`${styleOptions.find((option) => option.id === style)?.label} Atlas passport cover with ${data.world.length} visited world ${data.world.length === 1 ? "place" : "places"} and ${data.districts.length} visited Bangladesh ${data.districts.length === 1 ? "district" : "districts"}`} width={900} height={1260} unoptimized />}<p>Photo credits are printed on the cover when a place photograph is used.</p></section>
+      <section className="passport-preview" aria-label="Passport cover preview"><div className="passport-preview-heading"><span>Live preview</span><span>{placeCount} {placeCount === 1 ? "place" : "places"} · {paginatePassport(data).length + 1} PDF {paginatePassport(data).length === 0 ? "page" : "pages"}</span></div><div className="passport-style-switch" role="group" aria-label="Passport cover style">{styleOptions.map((option) => <button key={option.id} type="button" className={`passport-style-choice passport-style-${option.id}`} aria-pressed={style === option.id} onClick={() => setStyle(option.id)}><span className="passport-style-swatch" aria-hidden="true"/><span><strong>{option.label}</strong><small>{option.detail}</small></span></button>)}</div>{previewUrl && <Image src={previewUrl} alt={`${styleOptions.find((option) => option.id === style)?.label} Atlas passport cover with ${data.world.length} visited world ${data.world.length === 1 ? "place" : "places"} and ${data.districts.length} visited Bangladesh ${data.districts.length === 1 ? "district" : "districts"}`} width={900} height={1260} unoptimized />}{data.photo && photoDataUrl && <details><summary>Cover photo details</summary><p>{data.photo.title} by {data.photo.author} · <a href={data.photo.sourceUrl} target="_blank" rel="noopener noreferrer">Original image</a> · <a href={data.photo.licenseUrl} target="_blank" rel="noopener noreferrer">{data.photo.license}</a></p></details>}</section>
     </div>
     <p className="passport-back"><Link href="/insights">← Back to your atlas in numbers</Link></p>
   </main>;
