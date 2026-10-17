@@ -83,10 +83,10 @@ function mapStyle(scope: Props["scope"], theme: ThemeId, sourceUrl?: string): St
         "bd-division-lines": { type: "geojson" as const, data: publicPath("/data/bd-division-lines.geojson") },
         rivers: { type: "geojson" as const, data: publicPath("/data/bd-rivers.geojson") },
         "bd-imagery": { type: "raster" as const, tiles: [publicPath("/data/bd-blue-marble/{z}/{x}/{y}.jpeg")], tileSize: 256, minzoom: 5, maxzoom: 7, attribution: "NASA Blue Marble Next Generation (2004)" },
-      } : scope === "regions" ? { "country-context": { type: "geojson" as const, data: publicPath("/data/world.geojson") } } : {}),
+      } : scope === "regions" ? { "country-context": { type: "geojson" as const, data: publicPath("/data/world-display.geojson") } } : {}),
       places: {
         type: "geojson",
-        data: sourceUrl ?? (scope === "world" ? publicPath("/data/world.geojson") : publicPath("/data/bd-districts.geojson")),
+        data: sourceUrl ?? (scope === "world" ? publicPath("/data/world-display.geojson") : publicPath("/data/bd-districts.geojson")),
         promoteId: "id",
       },
       ...(scope === "world" ? { "palestine-outline": { type: "geojson" as const, data: publicPath("/data/palestine-outline.geojson") } } : {}),
