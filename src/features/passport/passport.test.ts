@@ -54,14 +54,16 @@ describe("personal passport", () => {
     expect(cover).not.toContain("Photo:");
   });
 
-  it("keeps source and license URLs off every photographed cover", () => {
+  it("keeps photo attribution on the website rather than the photographed covers", () => {
     const data = createPassport([], [districts[0].id], "");
     expect(data.photo).toBeTruthy();
     for (const style of ["archive", "expedition", "travelogue"] as const) {
       const cover = renderPassportCover(data, "data:image/jpeg;base64,AA==", undefined, undefined, undefined, style);
       expect(cover).not.toContain(data.photo!.sourceUrl);
       expect(cover).not.toContain(data.photo!.licenseUrl);
-      expect(cover).toContain(data.photo!.author);
+      expect(cover).not.toContain(data.photo!.author);
+      expect(cover).not.toContain(data.photo!.license);
+      expect(cover).not.toContain("Photo:");
     }
   });
 

@@ -84,7 +84,7 @@ function renderArchiveCover(data: PassportData, photoDataUrl?: string, botanical
   const remaining = featuredNames.length - names.length;
   const destination = hasDistricts ? "BANGLADESH" : data.world.length === 1 ? data.world[0].toUpperCase() : "WORLD";
   const nameLines = names.map((name, index) => `<text x="602" y="${812 + index * 27}" fill="#a45d35" font-family="Georgia,serif" font-size="14">${String(index + 1).padStart(2, "0")}</text><text x="634" y="${812 + index * 27}" fill="#193b2e" font-family="Georgia,serif" font-size="16" ${name.length > 19 ? 'textLength="202" lengthAdjust="spacingAndGlyphs"' : ""}>${xml(name)}</text><line x1="602" y1="${820 + index * 27}" x2="842" y2="${820 + index * 27}" stroke="#c1b49b" stroke-width=".6" stroke-dasharray="2 2"/>`).join("");
-  const photoCredit = data.photo && photoDataUrl ? `<text x="42" y="1148" fill="#173b2d" font-family="Georgia,serif" font-size="17">${xml(data.photo.place)} · ${xml(data.photo.title)}</text><text x="42" y="1183" fill="#47604e" font-family="Arial,sans-serif" font-size="10">Photo: ${xml(data.photo.author)} · ${xml(data.photo.license)}</text>` : `<text x="42" y="1148" fill="#173b2d" font-family="Georgia,serif" font-size="17">A record drawn from your own marks</text>`;
+  const photoCaption = data.photo && photoDataUrl ? `<text x="42" y="1148" fill="#173b2d" font-family="Georgia,serif" font-size="17">${xml(data.photo.place)} · ${xml(data.photo.title)}</text>` : `<text x="42" y="1148" fill="#173b2d" font-family="Georgia,serif" font-size="17">A record drawn from your own marks</text>`;
   const botanical = botanicalDataUrl ? `<image x="0" y="875" width="570" height="250" opacity=".95" href="${botanicalDataUrl}"/>` : "";
   const waterLily = lilyDataUrl && names.length <= 5 ? `<image x="${names.length <= 2 ? 638 : 690}" y="${names.length <= 2 ? 836 : 954}" width="${names.length <= 2 ? 205 : 140}" height="${names.length <= 2 ? 271 : 170}" opacity=".7" href="${lilyDataUrl}"/>` : "";
   return frame(`<text x="43" y="61" fill="#1d4937" font-family="Georgia,serif" font-size="12" letter-spacing="4">${hasDistricts ? "SOUTH ASIA" : "YOUR WORLD"}</text><line x1="178" y1="56" x2="601" y2="56" stroke="#a75832" stroke-width="1.4"/><text x="617" y="61" fill="#1d4937" font-family="Georgia,serif" font-size="12" letter-spacing="2.8">RIVERS · PEOPLE · PLACES</text>
@@ -97,7 +97,7 @@ function renderArchiveCover(data: PassportData, photoDataUrl?: string, botanical
     <g transform="rotate(-3 667 590)"><path d="M591 510l146 -3 4 169 -148 3z" fill="none" stroke="#a75832" stroke-width="3"/><path d="M598 517l132 -2 3 154 -133 3z" fill="none" stroke="#a75832" stroke-width="1.3" stroke-dasharray="5 2"/><text x="666" y="542" text-anchor="middle" fill="#a75832" font-family="Georgia,serif" font-size="14" letter-spacing=".4">${hasDistricts ? "DISTRICTS VISITED" : "COUNTRIES VISITED"}</text><line x1="608" y1="551" x2="723" y2="551" stroke="#a75832"/><text x="666" y="638" text-anchor="middle" fill="#123a2a" font-family="Georgia,serif" font-size="89" font-weight="700">${hasDistricts ? data.districts.length : data.world.length}</text><path d="M611 656q12 -8 24 0t24 0t24 0t24 0" fill="none" stroke="#a75832" stroke-width="1.6"/></g>
     <g transform="translate(4 -27)">${coverMap(hasDistricts)}</g><text x="795" y="706" text-anchor="middle" fill="#315541" font-family="Georgia,serif" font-size="10" letter-spacing="1.3">${hasDistricts ? "ONE DELTA" : "ONE ATLAS"}</text>
     <text x="602" y="765" fill="#315541" font-family="Georgia,serif" font-size="15" letter-spacing="2.1">${hasDistricts ? "DISTRICTS VISITED" : "PLACES VISITED"}</text><line x1="602" y1="778" x2="842" y2="778" stroke="#a75832" stroke-width="1.5"/>${nameLines}${remaining > 0 ? `<text x="602" y="${823 + names.length * 27}" fill="#48614c" font-family="Georgia,serif" font-size="12" font-style="italic">+ ${remaining} more in the full record</text>` : ""}${waterLily}
-    <line x1="42" y1="1129" x2="858" y2="1129" stroke="#a75832" stroke-width="1.6"/>${photoCredit}<text x="844" y="1150" text-anchor="end" fill="#315541" font-family="Georgia,serif" font-size="13" font-style="italic">Every journey begins with a mark.</text><text x="844" y="1221" text-anchor="end" fill="#9b6949" font-family="Arial,sans-serif" font-size="10">ATLAS / 01</text><text x="42" y="1231" fill="#607060" font-family="Arial,sans-serif" font-size="7">${data.name ? `Prepared for ${xml(data.name)} · ` : ""}Only marked visits in this browser. No dates, routes or trip stops are inferred.</text>`, paperDataUrl);
+    <line x1="42" y1="1129" x2="858" y2="1129" stroke="#a75832" stroke-width="1.6"/>${photoCaption}<text x="844" y="1150" text-anchor="end" fill="#315541" font-family="Georgia,serif" font-size="13" font-style="italic">Every journey begins with a mark.</text><text x="844" y="1221" text-anchor="end" fill="#9b6949" font-family="Arial,sans-serif" font-size="10">ATLAS / 01</text><text x="42" y="1231" fill="#607060" font-family="Arial,sans-serif" font-size="7">${data.name ? `Prepared for ${xml(data.name)} · ` : ""}Only marked visits in this browser. No dates, routes or trip stops are inferred.</text>`, paperDataUrl);
 }
 
 function coverDestination(data: PassportData): string {
@@ -108,9 +108,9 @@ function coverNames(data: PassportData): string[] {
   return data.districts.length ? data.districts : data.world;
 }
 
-function coverCredit(data: PassportData, photoDataUrl: string | undefined, color: string, y: number): string {
+function coverCaption(data: PassportData, photoDataUrl: string | undefined, color: string, y: number): string {
   if (!data.photo || !photoDataUrl) return "";
-  return `<text x="57" y="${y}" fill="${color}" font-family="Arial,sans-serif" font-size="10">Photo: ${xml(data.photo.place)} · ${xml(data.photo.title)} · ${xml(data.photo.author)} · ${xml(data.photo.license)}</text>`;
+  return `<text x="57" y="${y}" fill="${color}" font-family="Arial,sans-serif" font-size="10">${xml(data.photo.place)} · ${xml(data.photo.title)}</text>`;
 }
 
 type CoverAssets = { fontDataUrl?: string; tigerDataUrl?: string; lilyEngravingDataUrl?: string };
@@ -160,7 +160,7 @@ function renderExpeditionCover(data: PassportData, photoDataUrl?: string, botani
     ${botanicalDataUrl ? `<image x="62" y="1150" width="776" height="71" opacity=".48" filter="url(#goldFoliage)" href="${botanicalDataUrl}"/>` : ""}
     <circle cx="450" cy="1189" r="25" fill="#082d24" stroke="#d0a765"/><path d="M450 1160l7 29-7 29-7-29zM421 1189l29-7 29 7-29 7z" fill="#c69a5d"/>
     ${data.name ? `<text x="58" y="1200" fill="#e0c38e" font-family="Georgia,serif" font-size="15">Prepared for ${xml(data.name)}</text>` : ""}
-    ${coverCredit(data, photoDataUrl, "#dac69d", 1212)}
+    ${coverCaption(data, photoDataUrl, "#dac69d", 1212)}
   </svg>`;
 }
 
@@ -196,7 +196,7 @@ function renderTravelogueCover(data: PassportData, photoDataUrl?: string, lilyDa
     ${names.length > selected.length ? `<text x="330" y="1200" fill="#48614e" font-family="Georgia,serif" font-size="13">+ ${names.length - selected.length} more inside</text>` : ""}
     <line x1="577" y1="1031" x2="577" y2="1194" stroke="#b86140" stroke-width="2"/>
     ${assets?.lilyEngravingDataUrl ? `<image x="585" y="1022" width="315" height="182" preserveAspectRatio="xMidYMid meet" href="${assets.lilyEngravingDataUrl}"/>` : lilyDataUrl ? `<image x="591" y="1015" width="309" height="205" preserveAspectRatio="xMidYMid meet" filter="url(#lilyInk)" href="${lilyDataUrl}"/>` : ""}
-    <line x1="45" y1="1208" x2="855" y2="1208" stroke="#ad6a4e"/>${coverCredit(data, photoDataUrl, "#53634e", 1218)}
+    <line x1="45" y1="1208" x2="855" y2="1208" stroke="#ad6a4e"/>${coverCaption(data, photoDataUrl, "#53634e", 1218)}
   </svg>`;
 }
 
