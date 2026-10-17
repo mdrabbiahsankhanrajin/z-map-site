@@ -89,6 +89,7 @@ function mapStyle(scope: Props["scope"], theme: ThemeId, sourceUrl?: string): St
         data: sourceUrl ?? (scope === "world" ? publicPath("/data/world-display.geojson") : publicPath("/data/bd-districts.geojson")),
         promoteId: "id",
       },
+      ...(scope === "world" ? { "bd-world-outline": { type: "geojson" as const, data: publicPath("/data/bd-outline-display.geojson") } } : {}),
       ...(scope === "world" ? { "palestine-outline": { type: "geojson" as const, data: publicPath("/data/palestine-outline.geojson") } } : {}),
     },
     layers: [
@@ -120,10 +121,14 @@ function mapStyle(scope: Props["scope"], theme: ThemeId, sourceUrl?: string): St
           "fill-extrusion-opacity": 0.44,
         },
       },
-      ...(scope === "world" ? [{ id: "country-line-shadow" as const, type: "line" as const, source: "places", paint: { "line-color": "#153b2f", "line-width": 1.9, "line-opacity": ["case", ["in", ["get", "id"], ["literal", ["ISR", "PSX"]]], 0, 0.38] as ExpressionSpecification } }] : []),
-      { id: "places-line", type: "line", source: scope === "districts" ? "bd-division-lines" : "places", paint: { "line-color": palette.line, "line-width": scope === "world" ? 1.4 : 1.15, "line-opacity": scope === "world" ? ["case", ["in", ["get", "id"], ["literal", ["ISR", "PSX"]]], 0, 1] : 0.83 } },
+      ...(scope === "world" ? [{ id: "country-line-shadow" as const, type: "line" as const, source: "places", filter: ["!=", ["get", "id"], "BGD"] as FilterSpecification, paint: { "line-color": "#153b2f", "line-width": 1.9, "line-opacity": ["case", ["in", ["get", "id"], ["literal", ["ISR", "PSX"]]], 0, 0.38] as ExpressionSpecification } }] : []),
+      { id: "places-line", type: "line", source: scope === "districts" ? "bd-division-lines" : "places", ...(scope === "world" ? { filter: ["!=", ["get", "id"], "BGD"] as FilterSpecification } : {}), paint: { "line-color": palette.line, "line-width": scope === "world" ? 1.4 : 1.15, "line-opacity": scope === "world" ? ["case", ["in", ["get", "id"], ["literal", ["ISR", "PSX"]]], 0, 1] : 0.83 } },
       { id: "selected-outline-casing", type: "line", source: "places", filter: ["==", ["get", "id"], ""], paint: { "line-color": "#fff9df", "line-width": 4, "line-opacity": 0.96 } },
       { id: "selected-outline", type: "line", source: "places", filter: ["==", ["get", "id"], ""], paint: { "line-color": "#135641", "line-width": 2.2, "line-opacity": 1 } },
+      ...(scope === "world" ? [
+        { id: "bd-world-outline-casing" as const, type: "line" as const, source: "bd-world-outline", layout: { "line-join": "round" as const }, paint: { "line-color": "#153b2f", "line-width": 1.9, "line-opacity": 0.38 } },
+        { id: "bd-world-outline-line" as const, type: "line" as const, source: "bd-world-outline", layout: { "line-join": "round" as const }, paint: { "line-color": palette.line, "line-width": 1.2, "line-opacity": 1 } },
+      ] : []),
       ...(scope === "districts" ? [
         { id: "bd-border-casing" as const, type: "line" as const, source: "bd-outline-display", maxzoom: 6.15, layout: { "line-join": "round" as const }, paint: { "line-color": "#17432d", "line-width": 3.2, "line-opacity": 0.9 } },
         { id: "bd-border" as const, type: "line" as const, source: "bd-outline-display", maxzoom: 6.15, layout: { "line-join": "round" as const }, paint: { "line-color": "#fff8dc", "line-width": 1.2, "line-opacity": 0.96 } },
@@ -286,7 +291,7 @@ export function MapAdapter({ scope, places, sourceUrl, overview, selectedIds, ac
       : ["==", ["get", "id"], activeId ?? ""]);
     for (const layer of ["selected-outline-casing", "selected-outline"]) map.setFilter(layer, activeId === "PSX" && scope === "world"
       ? ["in", ["get", "id"], ["literal", ["ISR", "PSX"]]]
-      : ["==", ["get", "id"], activeId ?? ""]);
+      : ["==", ["get", "id"], activeId === "BGD" && scope === "world" ? "" : activeId ?? ""]);
     if (scope === "districts") map.setPaintProperty("bd-terrain", "raster-opacity", theme === "ink" ? 0.18 : theme === "dusk" ? 0.42 : 1);
     else map.setPaintProperty("world-terrain", "raster-opacity", scope === "regions"
       ? ["interpolate", ["linear"], ["zoom"], 5, theme === "ink" ? 0.22 : theme === "dusk" ? 0.42 : 1, 6.5, 0.38] as ExpressionSpecification
@@ -310,6 +315,11 @@ export function MapAdapter({ scope, places, sourceUrl, overview, selectedIds, ac
     if (scope === "world") {
       map.setPaintProperty("palestine-outline", "line-color", activeId === "PSX" ? palette.selected : palette.line);
       map.setPaintProperty("palestine-outline", "line-width", activeId === "PSX" ? 2.6 : 1.2);
+      map.setPaintProperty("bd-world-outline-casing", "line-color", activeId === "BGD" ? "#fff9df" : "#153b2f");
+      map.setPaintProperty("bd-world-outline-casing", "line-width", activeId === "BGD" ? 4 : 1.9);
+      map.setPaintProperty("bd-world-outline-casing", "line-opacity", activeId === "BGD" ? 0.96 : 0.38);
+      map.setPaintProperty("bd-world-outline-line", "line-color", activeId === "BGD" ? "#135641" : palette.line);
+      map.setPaintProperty("bd-world-outline-line", "line-width", activeId === "BGD" ? 2.2 : 1.2);
     }
     map.setPaintProperty("places-line", "line-width", scope === "districts"
       ? ["interpolate", ["linear"], ["zoom"], 5, 1.1, 7.1, 0.8] as ExpressionSpecification
