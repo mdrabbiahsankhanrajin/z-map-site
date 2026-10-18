@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import Image from "next/image";
+import { PlacePhoto } from "@/components/PlacePhoto";
 import dynamic from "next/dynamic";
 import { useEffect, useMemo, useState } from "react";
 import { MapAdapter } from "@/components/map/MapAdapter";
@@ -121,7 +121,7 @@ function Detail({ scope, place, marked, onToggle, selectedCount, totalPlaces, on
       {place && <button className={`visit-action ${marked ? "is-marked" : ""}`} type="button" aria-pressed={marked} onClick={onToggle}>
         <span>{marked ? "✓ Marked as visited" : "Mark as visited"}</span><span aria-hidden="true">{marked ? "−" : "+"}</span>
       </button>}
-      {attraction && place && <div className="place-photo"><Link href={`/discover?district=${encodeURIComponent(place.name)}`} aria-label={`Explore photographed places in ${place.displayName ?? place.name}`}><Image src={publicPath(attraction.image.src)} alt={attraction.image.alt} width={800} height={600} unoptimized loading="lazy" /></Link><small>{attraction.title} · Photo: <a href={attraction.image.sourceUrl} target="_blank" rel="noreferrer">{attraction.image.author}</a> · <a href={attraction.image.licenseUrl} target="_blank" rel="noreferrer">{attraction.image.license}</a>{attraction.image.note && <> · {attraction.image.note}</>}</small></div>}
+      {attraction && place && <div className="place-photo"><Link href={`/discover?district=${encodeURIComponent(place.name)}`} aria-label={`Explore photographed places in ${place.displayName ?? place.name}`}><PlacePhoto src={attraction.image.src} alt={attraction.image.alt} sizes="(max-width: 1060px) calc(100vw - 44px), 310px" /></Link><small>{attraction.title} · Photo: <a href={attraction.image.sourceUrl} target="_blank" rel="noreferrer">{attraction.image.author}</a> · <a href={attraction.image.licenseUrl} target="_blank" rel="noreferrer">{attraction.image.license}</a>{attraction.image.note && <> · {attraction.image.note}</>}</small></div>}
       {scope === "world" && place && <WorldPlaceCard countryId={place.id} />}
       {place && <GeoSilhouette name={place.displayName ?? place.name} src={publicPath(`/data/silhouettes/${scope}/${place.id}.svg`)} />}
       <button type="button" className="browse-button" onClick={onBrowse}>Browse {scope === "world" ? "places" : "districts"} <span aria-hidden="true">→</span></button>

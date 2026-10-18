@@ -410,3 +410,10 @@ a{color:inherit;text-decoration:none}
   .detail-inner.is-country-overview h2{font-size:39px!important}
   .atlas-app[data-scope="districts"] .detail-inner.is-country-overview::before{opacity:.12}
 }
+
+/* Preserve each photo frame while the browser chooses a local image size. */
+.place-photo-picture{display:block;width:100%;height:100%}
+.place-photo-unavailable{display:flex;width:100%;height:100%;min-height:150px;align-items:center;justify-content:center;flex-direction:column;gap:8px;padding:20px;text-align:center;color:#254d40;background:#e5ecdd;font-size:13px}
+.place-photo-unavailable svg{width:30px;height:30px;stroke:currentColor;stroke-width:1.4}
+.place-photo-unavailable strong{font:500 19px Georgia,serif}
+.place-photo-unavailable>span{max-width:29ch;line-height:1.5}

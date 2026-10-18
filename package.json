@@ -11,6 +11,7 @@
     "typecheck": "tsc --noEmit",
     "lint": "eslint .",
     "test": "vitest run",
+    "photos:build": "node ./scripts/build-photo-variants.mjs",
     "predev": "node ./scripts/copy-maplibre-worker.mjs",
     "prebuild": "node ./scripts/copy-maplibre-worker.mjs",
     "postbuild": "node ./scripts/write-service-worker.mjs"
@@ -30,6 +31,7 @@
     "@types/react-dom": "^19.3.0",
     "eslint": "^9.39.5",
     "eslint-config-next": "^16.3.8",
+    "sharp": "0.35.5",
     "typescript": "^5.9.3",
     "vitest": "^5.0.3"
   }

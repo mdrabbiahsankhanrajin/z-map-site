@@ -1,9 +1,8 @@
 "use client";
 
-import Image from "next/image";
+import { PlacePhoto } from "@/components/PlacePhoto";
 import Link from "next/link";
 import { featuredRegionForCountry, regionNotes } from "@/data/regionNotes";
-import { publicPath } from "@/lib/publicPath";
 
 export function WorldPlaceCard({ regionId, countryId }: { regionId?: string; countryId?: string }) {
   const resolvedId = regionId ?? (countryId ? featuredRegionForCountry(countryId) : undefined);
@@ -11,7 +10,7 @@ export function WorldPlaceCard({ regionId, countryId }: { regionId?: string; cou
   if (!note) return null;
   const image = note.image;
   return <section className="world-place-card" aria-label={`Photographed place: ${note.title}`}>
-    <div className="world-place-photo"><Image src={publicPath(image.src as `/${string}`)} alt={image.alt} width={1200} height={900} unoptimized loading="lazy" /></div>
+    <div className="world-place-photo"><PlacePhoto src={image.src} alt={image.alt} sizes="(max-width: 1060px) calc(100vw - 44px), 310px" /></div>
     <div className="world-place-copy">
       <p className="eyebrow">From the atlas · photographed place</p>
       <h3>{note.title}</h3><p>{note.summary}</p>

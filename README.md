@@ -18,6 +18,12 @@ pnpm test
 
 Open `http://127.0.0.1:3000/` for the world map or `/bd` for Bangladesh. To reproduce the Pages export, set `GITHUB_PAGES=true` and `NEXT_PUBLIC_BASE_PATH=/z-map-site`, then run `pnpm build`. The result is in `out/`. Pushes to `main` verify and deploy that export through `.github/workflows/pages.yml`.
 
-The Atlas map uses local boundaries, illustrated physical terrain, textures, and map worker files. After a successful first visit, the world, Bangladesh, discovery, planner, personal insights, passport studio, and three opening photographs cache for offline return visits; district and world photographs, deeper terrain and Bangladesh imagery tiles, and other country pages cache when opened. The first world photo set covers 16 countries and their matching regions. Source links and external credits are ordinary links, not required for the Atlas map to render.
+The Atlas map uses local boundaries, illustrated physical terrain, textures, and map worker files. After a successful first visit, the world, Bangladesh, discovery, planner, personal insights, and passport studio cache for offline return visits; district and world photographs, deeper terrain and Bangladesh imagery tiles, and other country pages cache when opened. The first world photo set covers 16 countries and their matching regions. Source links and external credits are ordinary links, not required for the Atlas map to render.
 
 Original site material is all rights reserved; this repository is not offered under an open-source license. See [RIGHTS.md](RIGHTS.md) and [THIRD-PARTY-NOTICES.md](THIRD-PARTY-NOTICES.md) for the scope of that notice and the separate terms for geographic data, imagery, and bundled software.
+
+## Place photograph sizes
+
+Credited JPEG originals remain unchanged. Cards use committed 480px and 960px WebP alternatives with responsive source selection, lazy loading, and a visible unavailable state when a photo fails. Browsers without WebP support use the original JPEG. All variants cache when viewed, rather than being downloaded during offline installation.
+
+After adding or replacing an original under `public/images/attractions` or `public/images/world`, run `pnpm photos:build`, commit the generated files and `src/data/photoVariants.json`, then run the verification commands above. The generator preserves the original framing and does not upscale small photos.
