@@ -79,7 +79,6 @@ function mapStyle(scope: Props["scope"], theme: ThemeId, sourceUrl?: string): St
         context: { type: "geojson" as const, data: publicPath("/data/bd-context-display.geojson") },
         "context-lines": { type: "geojson" as const, data: publicPath("/data/bd-context-lines.geojson") },
         "bd-outline": { type: "geojson" as const, data: publicPath("/data/bd-outline.geojson") },
-        "bd-outline-display": { type: "geojson" as const, data: publicPath("/data/bd-outline-display.geojson") },
         "bd-division-lines": { type: "geojson" as const, data: publicPath("/data/bd-division-lines.geojson") },
         rivers: { type: "geojson" as const, data: publicPath("/data/bd-rivers.geojson") },
         "bd-imagery": { type: "raster" as const, tiles: [publicPath("/data/bd-blue-marble/{z}/{x}/{y}.jpeg")], tileSize: 256, minzoom: 5, maxzoom: 7, attribution: "NASA Blue Marble Next Generation (2004)" },
@@ -89,7 +88,7 @@ function mapStyle(scope: Props["scope"], theme: ThemeId, sourceUrl?: string): St
         data: sourceUrl ?? (scope === "world" ? publicPath("/data/world-display.geojson") : publicPath("/data/bd-districts.geojson")),
         promoteId: "id",
       },
-      ...(scope === "world" ? { "bd-world-outline": { type: "geojson" as const, data: publicPath("/data/bd-outline-display.geojson") } } : {}),
+      ...(scope === "world" ? { "bd-world-outline": { type: "geojson" as const, data: publicPath("/data/bd-outline.geojson") } } : {}),
       ...(scope === "world" ? { "palestine-outline": { type: "geojson" as const, data: publicPath("/data/palestine-outline.geojson") } } : {}),
     },
     layers: [
@@ -126,14 +125,10 @@ function mapStyle(scope: Props["scope"], theme: ThemeId, sourceUrl?: string): St
       { id: "selected-outline-casing", type: "line", source: "places", filter: ["==", ["get", "id"], ""], paint: { "line-color": "#fff9df", "line-width": 4, "line-opacity": 0.96 } },
       { id: "selected-outline", type: "line", source: "places", filter: ["==", ["get", "id"], ""], paint: { "line-color": "#135641", "line-width": 2.2, "line-opacity": 1 } },
       ...(scope === "world" ? [
-        { id: "bd-world-outline-casing" as const, type: "line" as const, source: "bd-world-outline", layout: { "line-join": "round" as const }, paint: { "line-color": "#153b2f", "line-width": 1.9, "line-opacity": 0.38 } },
-        { id: "bd-world-outline-line" as const, type: "line" as const, source: "bd-world-outline", layout: { "line-join": "round" as const }, paint: { "line-color": palette.line, "line-width": 1.2, "line-opacity": 1 } },
+        { id: "bd-world-outline-line" as const, type: "line" as const, source: "bd-world-outline", layout: { "line-join": "round" as const }, paint: { "line-color": "#153b2f", "line-width": 0.9, "line-opacity": 0.92 } },
       ] : []),
       ...(scope === "districts" ? [
-        { id: "bd-border-casing" as const, type: "line" as const, source: "bd-outline-display", maxzoom: 6.15, layout: { "line-join": "round" as const }, paint: { "line-color": "#17432d", "line-width": 3.2, "line-opacity": 0.9 } },
-        { id: "bd-border" as const, type: "line" as const, source: "bd-outline-display", maxzoom: 6.15, layout: { "line-join": "round" as const }, paint: { "line-color": "#fff8dc", "line-width": 1.2, "line-opacity": 0.96 } },
-        { id: "bd-border-detail-casing" as const, type: "line" as const, source: "bd-outline", minzoom: 6.15, layout: { "line-join": "round" as const }, paint: { "line-color": "#17432d", "line-width": 2.3, "line-opacity": 0.9 } },
-        { id: "bd-border-detail" as const, type: "line" as const, source: "bd-outline", minzoom: 6.15, layout: { "line-join": "round" as const }, paint: { "line-color": "#fff8dc", "line-width": 0.95, "line-opacity": 0.96 } },
+        { id: "bd-border" as const, type: "line" as const, source: "bd-outline", layout: { "line-join": "round" as const }, paint: { "line-color": "#173f34", "line-width": ["interpolate", ["linear"], ["zoom"], 5, 0.9, 6.3, 1.4] as ExpressionSpecification, "line-opacity": 0.92 } },
       ] : []),
       ...(scope === "world" ? [{ id: "palestine-outline" as const, type: "line" as const, source: "palestine-outline", paint: { "line-color": palette.line, "line-width": 1.2 } }] : []),
     ],
@@ -315,11 +310,8 @@ export function MapAdapter({ scope, places, sourceUrl, overview, selectedIds, ac
     if (scope === "world") {
       map.setPaintProperty("palestine-outline", "line-color", activeId === "PSX" ? palette.selected : palette.line);
       map.setPaintProperty("palestine-outline", "line-width", activeId === "PSX" ? 2.6 : 1.2);
-      map.setPaintProperty("bd-world-outline-casing", "line-color", activeId === "BGD" ? "#fff9df" : "#153b2f");
-      map.setPaintProperty("bd-world-outline-casing", "line-width", activeId === "BGD" ? 4 : 1.9);
-      map.setPaintProperty("bd-world-outline-casing", "line-opacity", activeId === "BGD" ? 0.96 : 0.38);
-      map.setPaintProperty("bd-world-outline-line", "line-color", activeId === "BGD" ? "#135641" : palette.line);
-      map.setPaintProperty("bd-world-outline-line", "line-width", activeId === "BGD" ? 2.2 : 1.2);
+      map.setPaintProperty("bd-world-outline-line", "line-color", activeId === "BGD" ? "#135641" : "#153b2f");
+      map.setPaintProperty("bd-world-outline-line", "line-width", activeId === "BGD" ? 1.5 : 0.9);
     }
     map.setPaintProperty("places-line", "line-width", scope === "districts"
       ? ["interpolate", ["linear"], ["zoom"], 5, 1.1, 7.1, 0.8] as ExpressionSpecification
