@@ -550,6 +550,18 @@ a { text-underline-offset: .2em; }
 .active-map-label { position: absolute; top: 48%; left: 52%; z-index: 4; display: flex; align-items: center; gap: 8px; padding: 8px 11px; color: #fff; background: var(--chart-ink); box-shadow: 0 7px 18px rgba(16,44,35,.22); font-size: 11px; font-weight: 750; letter-spacing: .06em; text-transform: uppercase; pointer-events: none; }
 .active-map-label i { width: 12px; height: 12px; border: 3px solid #fff; border-radius: 50% 50% 50% 0; background: var(--chart-coral); transform: rotate(-45deg); }
 .detail-kicker { margin: 0 0 9px; color: var(--chart-coral-deep); font-size: 9px; font-weight: 800; letter-spacing: .18em; text-transform: uppercase; }
+.content-intro h1,
+.district-places-heading h2,
+.detail-inner h2,
+.attraction-body h2,
+.planner-editor h2,
+.planner-notes h2,
+.insight-section h2,
+.passport-section h2 { overflow-wrap: break-word; text-wrap: balance; }
+.content-intro p,
+.detail-description,
+.attraction-body > p,
+.planner-detail-lede { text-wrap: pretty; }
 .detail-inner { position: relative; }
 .detail-close { position:absolute; top:18px; right:18px; width:44px; height:44px; display:grid; place-items:center; border:1px solid var(--chart-line); border-radius:50%; color:var(--chart-ink); background:rgba(251,247,237,.85); font-size:25px; cursor:pointer; }
 .rail-tabs { display:grid; grid-template-columns:1fr 1fr; margin:18px 0 0; border-bottom:1px solid var(--chart-line); }
@@ -602,7 +614,8 @@ a { text-underline-offset: .2em; }
 @media (max-width: 1060px) {
   .map-compass { top: 74px; right: 13px; width: 44px; height: 52px; }
   .map-compass svg { width: 38px; height: 38px; }
-  .map-scale { bottom: calc(35dvh + 18px); left: 14px; }
+  .map-scale { bottom: calc(max(35dvh, 286px) + 18px); left: 14px; }
+  .map-country-label:not(.is-home):not(.is-water) { display: none !important; }
   .active-map-label { top: 43%; left: 50%; transform: translateX(-50%); }
 }
 
