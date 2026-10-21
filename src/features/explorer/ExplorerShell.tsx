@@ -90,11 +90,12 @@ function DivisionPicker({ id, value, onChange, selected, places }: {
   </section>;
 }
 
-function Detail({ scope, place, marked, onToggle, selectedCount, totalPlaces, onBrowse, onOpenProfile, sheetMode, onSheetMode }: {
+function Detail({ scope, place, marked, onToggle, onClose, selectedCount, totalPlaces, onBrowse, onOpenProfile, sheetMode, onSheetMode }: {
   scope: Scope;
   place: Place | undefined;
   marked: boolean;
   onToggle: () => void;
+  onClose: () => void;
   selectedCount: number;
   totalPlaces: number;
   onBrowse: () => void;
@@ -108,6 +109,8 @@ function Detail({ scope, place, marked, onToggle, selectedCount, totalPlaces, on
   return <>
     <button className="sheet-handle" type="button" onClick={onSheetMode} aria-label={`Expand district or country panel; current position ${sheetMode}`}><span /></button>
     <div className={`detail-inner ${scope === "districts" && !place ? "is-country-overview" : ""}`}>
+      {place && <button type="button" className="detail-close" onClick={onClose} aria-label="Close place details">×</button>}
+      {place && <p className="detail-kicker">{scope === "world" ? "Atlas place" : `${divisionForDistrict(place.name)} division`}</p>}
       <h2>{place ? place.displayName ?? place.name : scope === "world" ? "Choose a place" : "Bangladesh"}</h2>
       {place?.nameBn && <p className="bangla-name" lang="bn">{place.nameBn}</p>}
       {scope === "districts" && !place && <p className="bangla-name" lang="bn">বাংলাদেশ</p>}
@@ -150,9 +153,10 @@ export function ExplorerShell({ scope, places }: { scope: Scope; places: Place[]
   const [query, setQuery] = useState("");
   const [theme, setTheme] = useState<ThemeId>("atlas");
   const [division, setDivision] = useState("");
+  const [railMode, setRailMode] = useState<"places" | "visited">("places");
   const [sheetMode, setSheetMode] = useState<SheetMode>("half");
   const [profileOpen, setProfileOpen] = useState(false);
-  const filtered = useMemo(() => filterPlaces(places.filter((place) => !division || divisionForDistrict(place.name) === division), query), [places, query, division]);
+  const filtered = useMemo(() => filterPlaces(places.filter((place) => (!division || divisionForDistrict(place.name) === division) && (railMode === "places" || selected.includes(place.id))), query), [places, query, division, railMode, selected]);
   const shownIds = filtered.map((place) => place.id);
   const hasMarkedShown = shownIds.some((id) => selected.includes(id));
   const activePlace = places.find((place) => place.id === activeId);
@@ -219,7 +223,8 @@ export function ExplorerShell({ scope, places }: { scope: Scope; places: Place[]
         {scope === "districts" && <><Link href="/discover" className="featured-link">Places & photos <span aria-hidden="true">→</span></Link><Link href="/planner" className="featured-link">Plan a trip <span aria-hidden="true">→</span></Link></>}
         <Link href="/insights" className="featured-link">Atlas insights <span aria-hidden="true">→</span></Link>
         {scope === "districts" && <DivisionPicker id="division-filter-desktop" value={division} onChange={setDivision} selected={selected} places={places} />}
-        <div className="list-heading"><h3>{scope === "world" ? "Places" : "Districts"}</h3><span>{filtered.length}</span></div>
+        <div className="rail-tabs" role="tablist" aria-label="Place list"><button type="button" role="tab" aria-selected={railMode === "places"} className={railMode === "places" ? "is-current" : ""} onClick={() => setRailMode("places")}>Places</button><button type="button" role="tab" aria-selected={railMode === "visited"} className={railMode === "visited" ? "is-current" : ""} onClick={() => setRailMode("visited")}>Visited <span>{selected.length}</span></button></div>
+        <div className="list-heading"><h3>{railMode === "visited" ? "Your marked places" : scope === "world" ? "Places" : "Districts"}</h3><span>{filtered.length}</span></div>
         <div className="bulk-actions"><button type="button" onClick={selectShown} disabled={shownIds.length === 0}>Mark shown visited</button><button type="button" onClick={clearShown} disabled={!hasMarkedShown}>Clear shown</button></div>
         {!compact && <PlaceList places={filtered} selected={selected} activeId={activeId} onPick={pick} onToggle={toggleVisited} scope={scope} />}
         <ThemePicker theme={theme} onChange={setTheme} />
@@ -228,11 +233,14 @@ export function ExplorerShell({ scope, places }: { scope: Scope; places: Place[]
       <section className="map-area" aria-label={scope === "world" ? "World explorer" : "Bangladesh explorer"}>
         <MapAdapter scope={scope} places={places} selectedIds={selected} activeId={activeId} theme={theme} onSelect={pick} />
         <div className="map-top-caption">{activePlace ? `${activePlace.displayName ?? activePlace.name} · ${scope === "world" ? "World" : "District"}` : scope === "world" ? `World · ${places.length} places` : "Bangladesh · 64 districts"}</div>
+        <div className="map-compass" aria-hidden="true"><AtlasMark /><span>N</span></div>
+        <div className="map-scale" aria-hidden="true"><span />Map scale changes with zoom</div>
+        {activePlace && <div className="active-map-label" aria-hidden="true"><i />{activePlace.displayName ?? activePlace.name}</div>}
         <div className="map-legend" aria-label="Map color key"><span><span className="legend-swatch active" aria-hidden="true" />Selected</span><span><span className="legend-swatch visited" aria-hidden="true" />Visited</span><span><span className="legend-swatch" aria-hidden="true" />Not visited</span></div>
       </section>
 
       <aside className={`detail-panel sheet-${sheetMode}${activePlace ? "" : " is-overview"}`} aria-label="Selected place details">
-        <Detail scope={scope} place={activePlace} marked={Boolean(activeId && selected.includes(activeId))} onToggle={() => { if (activeId) toggleVisited(activeId); }} selectedCount={selected.length} totalPlaces={places.length} onBrowse={() => setSheetMode("expanded")} onOpenProfile={() => setProfileOpen(true)} sheetMode={sheetMode} onSheetMode={cycleSheet} />
+        <Detail scope={scope} place={activePlace} marked={Boolean(activeId && selected.includes(activeId))} onToggle={() => { if (activeId) toggleVisited(activeId); }} onClose={() => setActiveId(null)} selectedCount={selected.length} totalPlaces={places.length} onBrowse={() => setSheetMode("expanded")} onOpenProfile={() => setProfileOpen(true)} sheetMode={sheetMode} onSheetMode={cycleSheet} />
         <div className="mobile-browse">{scope === "districts" && <DivisionPicker id="division-filter-mobile" value={division} onChange={setDivision} selected={selected} places={places} />}<div className="list-heading"><h3>{scope === "world" ? "Places" : "Districts"}</h3><span>{filtered.length}</span></div><div className="bulk-actions"><button type="button" onClick={selectShown} disabled={shownIds.length === 0}>Mark shown visited</button><button type="button" onClick={clearShown} disabled={!hasMarkedShown}>Clear shown</button></div>{compact && <PlaceList places={filtered} selected={selected} activeId={activeId} onPick={pick} onToggle={toggleVisited} scope={scope} />}<ThemePicker theme={theme} onChange={setTheme} /></div>
       </aside>
     </main>
