@@ -563,7 +563,6 @@ a { text-underline-offset: .2em; }
   .atlas-app .world-place-photo, .atlas-app .place-photo { margin-right: -31px; margin-left: -31px; }
   .atlas-app .world-place-card { margin-right: -31px; margin-left: -31px; border-right: 0; border-left: 0; }
   .atlas-app .world-place-copy { padding-right: 31px; padding-left: 31px; }
-  .atlas-app .map-area { margin-right: 385px; }
   .atlas-app .map-compass { right: 22px; }
 }
 
