@@ -77,6 +77,15 @@ self.addEventListener('fetch', (event) => {
         return (await cache.match(request)) || (await cache.match(SCOPE)) || Response.error();
       }
     }
+    if (url.pathname.includes('/_next/static/')) {
+      try {
+        const response = await fetch(request, { cache: 'no-cache' });
+        if (response.ok) await cache.put(request, response.clone());
+        return response;
+      } catch {
+        return (await cache.match(request)) || Response.error();
+      }
+    }
     const cached = await cache.match(request);
     if (cached) return cached;
     try {
