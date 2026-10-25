@@ -530,7 +530,7 @@ a { text-underline-offset: .2em; }
 .passport-book.is-actual { place-items:start center; overflow:auto; padding:24px; background:#d9d4c8; scrollbar-color:var(--passport-coral) rgba(18,59,48,.12); scrollbar-width:thin; }
 .passport-book::after { position:absolute; right:5%; bottom:4%; left:7%; height:9%; z-index:-1; border-radius:50%; background:rgba(23,45,35,.24); filter:blur(17px); content:""; }
 .passport-book.is-actual::after { display:none; }
-.passport-cover-image,.passport-inside-page { display:block; position:absolute; width:auto; max-width:61%; height:82%; object-fit:contain; border:1px solid rgba(63,50,37,.28); box-shadow:0 25px 45px rgba(24,43,34,.25); }
+.passport-preview .passport-cover-image,.passport-preview .passport-inside-page { display:block; position:absolute; width:auto; max-width:61%; height:82%; margin:0; object-fit:contain; border:1px solid rgba(63,50,37,.28); box-shadow:0 25px 45px rgba(24,43,34,.25); }
 .passport-cover-image { z-index:2; left:12%; transform:rotate(-1.4deg); transform-origin:bottom left; }
 .passport-inside-page { z-index:1; right:8%; transform:translate(9%,1.5%) rotate(3.2deg); filter:saturate(.86) brightness(1.03); }
 .passport-active-page { display:block; width:auto; max-width:calc(100% - 52px); height:auto; max-height:590px; object-fit:contain; border:1px solid rgba(63,50,37,.28); box-shadow:0 23px 42px rgba(24,43,34,.22); }
@@ -623,9 +623,9 @@ a { text-underline-offset: .2em; }
   .passport-viewer-toolbar > span { display:none; }
   .passport-viewer-toolbar button { min-height:44px; }
   .passport-book { height:540px; min-height:540px; border-color:rgba(18,59,48,.21); background:radial-gradient(circle at 49% 45%,rgba(255,249,236,.72),transparent 46%),#d4ccbe; }
-  .passport-cover-image,.passport-inside-page { max-width:64%; height:94%; }
+  .passport-preview .passport-cover-image,.passport-preview .passport-inside-page { max-width:64%; height:94%; }
   .passport-cover-image { top:50%; left:22%; transform:translateY(-50%) rotate(-.35deg); }
-  .passport-inside-page { top:50%; right:6%; height:88%; transform:translate(5%,-47.7%) rotate(3.4deg); }
+  .passport-preview .passport-inside-page { top:50%; right:6%; height:88%; transform:translate(5%,-47.7%) rotate(3.4deg); }
   .passport-active-page { max-height:498px; }
   .passport-pager { max-width:310px; margin:0 auto; padding-top:9px; }
   .passport-object-caption { max-width:720px; margin-top:12px; }
@@ -662,7 +662,7 @@ a { text-underline-offset: .2em; }
   .passport-page .passport-intro { grid-template-columns:minmax(0,1fr) 340px; gap:42px; padding-right:28px; padding-left:28px; }
   .passport-page .passport-studio { grid-template-columns:minmax(390px,.95fr) minmax(420px,1fr); gap:38px; padding-right:28px; padding-left:28px; }
   .passport-book { min-height:560px; }
-  .passport-cover-image,.passport-inside-page,.passport-empty-page { height:78%; }
+  .passport-preview .passport-cover-image,.passport-preview .passport-inside-page,.passport-empty-page { height:78%; }
   .passport-active-page { max-height:510px; }
 }
 
@@ -674,7 +674,7 @@ a { text-underline-offset: .2em; }
   .passport-page .passport-studio { display:flex; flex-direction:column; gap:39px; padding:25px 20px 45px; }
   .passport-page .passport-preview,.passport-page .passport-controls { width:100%; }
   .passport-book { min-height:min(138vw,610px); }
-  .passport-cover-image,.passport-inside-page,.passport-empty-page { height:82%; }
+  .passport-preview .passport-cover-image,.passport-preview .passport-inside-page,.passport-empty-page { height:82%; }
   .passport-active-page { max-height:min(128vw,560px); }
   .passport-control-head h2 { font-size:38px; }
   .passport-page .passport-back { padding:0 20px 43px; }
@@ -693,7 +693,7 @@ a { text-underline-offset: .2em; }
   .passport-viewer-toolbar > div { display:grid; grid-template-columns:1fr 1fr 1.25fr; }
   .passport-viewer-toolbar button,.passport-viewer-toolbar button:last-child { min-width:0; width:100%; }
   .passport-book { min-height:min(132vw,520px); }
-  .passport-cover-image,.passport-inside-page { max-width:78%; height:88%; }
+  .passport-preview .passport-cover-image,.passport-preview .passport-inside-page { max-width:78%; height:88%; }
   .passport-cover-image { left:5%; }
   .passport-inside-page { right:3%; }
   .passport-active-page { max-width:calc(100% - 28px); max-height:min(122vw,490px); }
