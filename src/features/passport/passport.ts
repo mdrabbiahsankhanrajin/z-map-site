@@ -3,7 +3,7 @@ import { districtDisplayName } from "../../data/districtNames";
 import districts from "../../data/districts.json";
 import { featuredRegionForCountry, regionNotes } from "../../data/regionNotes";
 import { worldPlaces } from "../../data/worldPlaces";
-import { bangladeshSilhouette, bangladeshSoutheastIslet } from "./bangladeshSilhouette";
+import { bangladeshSilhouette, bangladeshSoutheastIslet, bangladeshWesternIslands } from "./bangladeshSilhouette";
 
 export const PASSPORT_WIDTH = 900;
 export const PASSPORT_HEIGHT = 1260;
@@ -14,7 +14,7 @@ export type PassportPhoto = { src: `/${string}`; place: string; title: string; a
 export type PassportData = { name: string; world: string[]; districts: string[]; photo?: PassportPhoto };
 export type ManifestPage = { section: "World places" | "Bangladesh districts"; names: string[]; index: number; total: number };
 
-const bangladeshOrnament = `${bangladeshSilhouette} ${bangladeshSoutheastIslet}`;
+const bangladeshOrnament = `${bangladeshSilhouette} ${bangladeshWesternIslands} ${bangladeshSoutheastIslet}`;
 
 export function createPassport(worldIds: readonly string[], districtIds: readonly string[], name: string, photoDistrictId?: string): PassportData {
   const world = new Set(worldIds);

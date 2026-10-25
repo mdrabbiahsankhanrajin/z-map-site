@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 import districts from "../../data/districts.json";
 import { worldPlaces } from "../../data/worldPlaces";
 import { createPassport, paginatePassport, renderManifestPage, renderPassportCover } from "./passport";
-import { bangladeshSoutheastIslet } from "./bangladeshSilhouette";
+import { bangladeshSoutheastIslet, bangladeshWesternIslands } from "./bangladeshSilhouette";
 
 describe("personal passport", () => {
   it("uses only known marked visits and deduplicates them", () => {
@@ -83,6 +83,13 @@ describe("personal passport", () => {
     const data = createPassport([], [districts[0].id], "");
     for (const style of ["archive", "expedition", "travelogue"] as const) {
       expect(renderPassportCover(data, undefined, undefined, undefined, undefined, style)).toContain(bangladeshSoutheastIslet);
+    }
+  });
+
+  it("retains the western delta islands on every Bangladesh cover", () => {
+    const data = createPassport([], [districts[0].id], "");
+    for (const style of ["archive", "expedition", "travelogue"] as const) {
+      expect(renderPassportCover(data, undefined, undefined, undefined, undefined, style)).toContain(bangladeshWesternIslands);
     }
   });
 

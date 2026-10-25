@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import Image from "next/image";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import districts from "@/data/districts.json";
 import { districtDisplayName } from "@/data/districtNames";
 import { resolveWorldPlaceId, worldPlaces } from "@/data/worldPlaces";
@@ -30,8 +30,11 @@ export function PassportStudio() {
   const [paper, setPaper] = useState<{ done: boolean; dataUrl?: string }>({ done: false });
   const [coverAssets, setCoverAssets] = useState<{ readyStyles: PassportStyle[]; fontDataUrl?: string; tigerDataUrl?: string; lilyEngravingDataUrl?: string }>({ readyStyles: [] });
   const [previewUrl, setPreviewUrl] = useState("");
+  const [previewPage, setPreviewPage] = useState(0);
+  const [previewMode, setPreviewMode] = useState<"fit" | "actual">("fit");
   const [busy, setBusy] = useState<"png" | "pdf" | null>(null);
   const [status, setStatus] = useState("");
+  const viewerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const frame = requestAnimationFrame(() => {
@@ -54,9 +57,8 @@ export function PassportStudio() {
   const photoFailed = Boolean(photoSrc && loadedPhoto?.src === photoSrc && loadedPhoto?.failed);
   const styleReady = style === "archive" || coverAssets.readyStyles.includes(style);
   const manifestPages = useMemo(() => paginatePassport(data), [data]);
-  const manifestPreviewUrl = useMemo(() => {
-    const firstPage = manifestPages[0];
-    return firstPage ? `data:image/svg+xml;charset=utf-8,${encodeURIComponent(renderManifestPage(firstPage, 2, style))}` : "";
+  const manifestPreviewUrls = useMemo(() => {
+    return manifestPages.map((page, index) => `data:image/svg+xml;charset=utf-8,${encodeURIComponent(renderManifestPage(page, index + 2, style))}`);
   }, [manifestPages, style]);
 
   useEffect(() => {
@@ -126,6 +128,15 @@ export function PassportStudio() {
 
   const exportDisabled = !hasVisits || Boolean(busy) || photoLoading || !ornament.done || !paper.done || !styleReady;
   const pageCount = manifestPages.length + 1;
+  const currentPreviewPage = Math.min(previewPage, pageCount - 1);
+  const activePreviewUrl = currentPreviewPage === 0 ? previewUrl : manifestPreviewUrls[currentPreviewPage - 1] ?? previewUrl;
+  const activePageLabel = currentPreviewPage === 0 ? "Cover" : manifestPages[currentPreviewPage - 1]?.section ?? "Places";
+
+  async function toggleFullscreen() {
+    if (!viewerRef.current) return;
+    if (document.fullscreenElement) await document.exitFullscreen();
+    else await viewerRef.current.requestFullscreen();
+  }
 
   return <main className="atlas-content-page passport-page">
     <TravelHeader active="passport" />
@@ -136,9 +147,26 @@ export function PassportStudio() {
     <div className="passport-studio">
       <section className={`passport-preview passport-object-stage is-${style}`} aria-label="Passport live preview">
         <div className="passport-preview-heading"><span>Live edition preview</span><span>{placeCount} {placeCount === 1 ? "place" : "places"} · {pageCount} {pageCount === 1 ? "page" : "pages"}</span></div>
-        <div className="passport-book">
-          {manifestPreviewUrl ? <Image className="passport-inside-page" src={manifestPreviewUrl} alt="Preview of the passport places page" width={900} height={1260} unoptimized /> : <div className="passport-empty-page" aria-hidden="true"><span>ATLAS</span><strong>Your marked places will appear here.</strong></div>}
-          {previewUrl && <Image className="passport-cover-image" src={previewUrl} alt={`${styleOptions.find((option) => option.id === style)?.label} Atlas passport cover with ${data.world.length} world places and ${data.districts.length} Bangladesh districts`} width={900} height={1260} unoptimized />}
+        <div className="passport-viewer" ref={viewerRef}>
+          <div className="passport-viewer-toolbar" aria-label="Preview size">
+            <span>{activePageLabel}</span>
+            <div role="group" aria-label="Preview zoom">
+              <button type="button" aria-pressed={previewMode === "fit"} onClick={() => setPreviewMode("fit")}>Fit</button>
+              <button type="button" aria-pressed={previewMode === "actual"} onClick={() => setPreviewMode("actual")}>100%</button>
+              <button type="button" onClick={() => void toggleFullscreen()}>Full screen</button>
+            </div>
+          </div>
+          <div className={`passport-book is-${previewMode}`}>
+            {currentPreviewPage === 0 && previewMode === "fit" ? <>
+              {manifestPreviewUrls[0] ? <Image className="passport-inside-page" src={manifestPreviewUrls[0]} alt="Preview of the first passport places page" width={900} height={1260} unoptimized /> : <div className="passport-empty-page" aria-hidden="true"><span>ATLAS</span><strong>Your marked places will appear here.</strong></div>}
+              {previewUrl && <Image className="passport-cover-image" src={previewUrl} alt={`${styleOptions.find((option) => option.id === style)?.label} Atlas passport cover with ${data.world.length} world places and ${data.districts.length} Bangladesh districts`} width={900} height={1260} priority unoptimized />}
+            </> : activePreviewUrl && <Image className="passport-active-page" src={activePreviewUrl} alt={`${activePageLabel}, page ${currentPreviewPage + 1} of ${pageCount}`} width={900} height={1260} unoptimized />}
+          </div>
+          <nav className="passport-pager" aria-label="Passport pages">
+            <button type="button" disabled={currentPreviewPage === 0} onClick={() => setPreviewPage(Math.max(0, currentPreviewPage - 1))} aria-label="Previous passport page">←</button>
+            <span><strong>{activePageLabel}</strong><small>Page {currentPreviewPage + 1} of {pageCount}</small></span>
+            <button type="button" disabled={currentPreviewPage === pageCount - 1} onClick={() => setPreviewPage(Math.min(pageCount - 1, currentPreviewPage + 1))} aria-label="Next passport page">→</button>
+          </nav>
         </div>
         <p className="passport-object-caption"><span>Edition {String(Math.max(placeCount, 1)).padStart(3, "0")}</span> A printable cover and a complete place manifest, composed from your Atlas selections.</p>
         {data.photo && photoDataUrl && <details><summary>Cover photo credit</summary><p>{data.photo.title} by {data.photo.author} · <a href={data.photo.sourceUrl} target="_blank" rel="noopener noreferrer">Original image</a> · <a href={data.photo.licenseUrl} target="_blank" rel="noopener noreferrer">{data.photo.license}</a></p></details>}
