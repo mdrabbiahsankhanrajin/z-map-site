@@ -604,6 +604,60 @@ a { text-underline-offset: .2em; }
 .passport-private strong { color:var(--passport-ink); }
 .passport-page .passport-back { max-width:1380px; margin:0 auto; padding:0 42px 56px; color:var(--passport-ink); font-size:12px; font-weight:750; }
 
+/* Desktop composition — matched to the approved Passport studio reference. */
+@media (min-width: 1180px) {
+  .passport-page .passport-intro { max-width:1460px; grid-template-columns:minmax(0,2.05fr) minmax(390px,.95fr); align-items:center; gap:42px; padding:30px 64px 28px; }
+  .passport-page .passport-intro > div:first-child { display:grid; grid-template-columns:minmax(440px,1.2fr) minmax(245px,.68fr); align-items:center; column-gap:44px; }
+  .passport-page .passport-intro .passport-kicker { grid-column:1 / -1; margin-bottom:11px; }
+  .passport-page .passport-intro h1 { grid-column:1; max-width:650px; font-size:clamp(64px,5.35vw,78px); line-height:.82; letter-spacing:-.038em; }
+  .passport-page .passport-intro .passport-lede { grid-column:2; grid-row:2; max-width:31ch; margin:0; font-size:14px; line-height:1.55; }
+  .passport-summary div { padding:16px 14px 14px; }
+  .passport-summary dd { margin-top:7px; font-size:25px; }
+  .passport-summary div:last-child dd { font-size:19px; }
+
+  .passport-page .passport-studio { max-width:1460px; grid-template-columns:minmax(700px,1.72fr) minmax(400px,.9fr); gap:28px; padding:14px 64px 66px; }
+  .passport-page .passport-preview { position:relative; }
+  .passport-preview-heading { min-height:48px; align-items:center; margin:0; padding:0; }
+  .passport-preview-heading span:last-child { display:none; }
+  .passport-viewer-toolbar { position:absolute; top:0; right:0; z-index:4; min-height:44px; padding:0; }
+  .passport-viewer-toolbar > span { display:none; }
+  .passport-viewer-toolbar button { min-height:44px; }
+  .passport-book { min-height:540px; border-color:rgba(18,59,48,.21); background:radial-gradient(circle at 49% 45%,rgba(255,249,236,.72),transparent 46%),#d4ccbe; }
+  .passport-cover-image,.passport-inside-page { max-width:64%; height:91%; }
+  .passport-cover-image { left:22%; transform:rotate(-.35deg); }
+  .passport-inside-page { right:6%; height:86%; transform:translate(5%,2.3%) rotate(3.4deg); }
+  .passport-active-page { max-height:498px; }
+  .passport-pager { max-width:310px; margin:0 auto; padding-top:9px; }
+  .passport-object-caption { max-width:720px; margin-top:12px; }
+  .passport-preview details { margin-top:10px; }
+
+  .passport-page .passport-controls { padding-left:28px; border-left:1px solid rgba(18,59,48,.22); }
+  .passport-control-head { padding:0 0 15px; }
+  .passport-control-head p { margin-bottom:6px; }
+  .passport-control-head h2 { font-size:36px; }
+  .passport-step { grid-template-columns:34px minmax(0,1fr); gap:8px; padding:17px 0 18px; }
+  .passport-step-number { padding-top:2px; }
+  .passport-step h3 { font-size:21px; }
+  .passport-step-copy { margin:5px 0 11px; font-size:10px; line-height:1.4; }
+  .passport-check { min-height:52px; padding:8px 40px 8px 10px; font-size:16px; }
+  .passport-check + .passport-check { margin-top:6px; }
+  .passport-check input { width:18px; height:18px; }
+  .passport-check small { margin-top:3px; font-size:9px; }
+  .passport-field { margin:12px 0 6px; font-size:9px; }
+  .passport-page .passport-controls input[type="text"],.passport-page .passport-controls select { min-height:42px; padding:8px 10px; font-size:12px; }
+  .passport-style-switch { gap:6px; }
+  .passport-style-choice { min-height:82px; gap:6px; padding:6px; }
+  .passport-style-choice strong { font-size:13px; }
+  .passport-style-choice small { font-size:7px; }
+  .passport-style-swatch { height:31px; }
+  .passport-downloads button { min-height:51px; padding:8px 12px; }
+  .passport-downloads button + button { margin-top:6px; }
+  .passport-downloads button span { font-size:11px; }
+  .passport-private { margin-top:12px; padding-top:11px; }
+  .passport-private > span { top:12px; }
+  .passport-page .passport-back { max-width:1460px; padding-right:64px; padding-left:64px; }
+}
+
 @media (max-width: 1040px) {
   .passport-page .passport-intro { grid-template-columns:minmax(0,1fr) 340px; gap:42px; padding-right:28px; padding-left:28px; }
   .passport-page .passport-studio { grid-template-columns:minmax(390px,.95fr) minmax(420px,1fr); gap:38px; padding-right:28px; padding-left:28px; }
