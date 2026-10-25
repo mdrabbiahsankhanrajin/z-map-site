@@ -607,9 +607,9 @@ a { text-underline-offset: .2em; }
 /* Desktop composition — matched to the approved Passport studio reference. */
 @media (min-width: 1180px) {
   .passport-page .passport-intro { max-width:1460px; grid-template-columns:minmax(0,2.05fr) minmax(390px,.95fr); align-items:center; gap:42px; padding:30px 64px 28px; }
-  .passport-page .passport-intro > div:first-child { display:grid; grid-template-columns:minmax(440px,1.2fr) minmax(245px,.68fr); align-items:center; column-gap:44px; }
+  .passport-page .passport-intro > div:first-child { display:grid; grid-template-columns:minmax(440px,1.35fr) minmax(210px,.65fr); align-items:center; column-gap:36px; }
   .passport-page .passport-intro .passport-kicker { grid-column:1 / -1; margin-bottom:11px; }
-  .passport-page .passport-intro h1 { grid-column:1; max-width:650px; font-size:clamp(64px,5.35vw,78px); line-height:.82; letter-spacing:-.038em; }
+  .passport-page .passport-intro h1 { grid-column:1; max-width:650px; font-size:clamp(62px,4.85vw,72px); line-height:.84; letter-spacing:-.035em; }
   .passport-page .passport-intro .passport-lede { grid-column:2; grid-row:2; max-width:31ch; margin:0; font-size:14px; line-height:1.55; }
   .passport-summary div { padding:16px 14px 14px; }
   .passport-summary dd { margin-top:7px; font-size:25px; }
@@ -624,8 +624,8 @@ a { text-underline-offset: .2em; }
   .passport-viewer-toolbar button { min-height:44px; }
   .passport-book { min-height:540px; border-color:rgba(18,59,48,.21); background:radial-gradient(circle at 49% 45%,rgba(255,249,236,.72),transparent 46%),#d4ccbe; }
   .passport-cover-image,.passport-inside-page { max-width:64%; height:91%; }
-  .passport-cover-image { left:22%; transform:rotate(-.35deg); }
-  .passport-inside-page { right:6%; height:86%; transform:translate(5%,2.3%) rotate(3.4deg); }
+  .passport-cover-image { top:50%; left:22%; transform:translateY(-50%) rotate(-.35deg); }
+  .passport-inside-page { top:50%; right:6%; height:86%; transform:translate(5%,-47.7%) rotate(3.4deg); }
   .passport-active-page { max-height:498px; }
   .passport-pager { max-width:310px; margin:0 auto; padding-top:9px; }
   .passport-object-caption { max-width:720px; margin-top:12px; }
