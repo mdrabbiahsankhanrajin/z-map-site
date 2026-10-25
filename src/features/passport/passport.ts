@@ -3,7 +3,7 @@ import { districtDisplayName } from "../../data/districtNames";
 import districts from "../../data/districts.json";
 import { featuredRegionForCountry, regionNotes } from "../../data/regionNotes";
 import { worldPlaces } from "../../data/worldPlaces";
-import { bangladeshSilhouette } from "./bangladeshSilhouette";
+import { bangladeshSilhouette, bangladeshSoutheastIslet } from "./bangladeshSilhouette";
 
 export const PASSPORT_WIDTH = 900;
 export const PASSPORT_HEIGHT = 1260;
@@ -13,6 +13,8 @@ export type PassportStyle = typeof PASSPORT_STYLES[number];
 export type PassportPhoto = { src: `/${string}`; place: string; title: string; author: string; license: string; licenseUrl: string; sourceUrl: string };
 export type PassportData = { name: string; world: string[]; districts: string[]; photo?: PassportPhoto };
 export type ManifestPage = { section: "World places" | "Bangladesh districts"; names: string[]; index: number; total: number };
+
+const bangladeshOrnament = `${bangladeshSilhouette} ${bangladeshSoutheastIslet}`;
 
 export function createPassport(worldIds: readonly string[], districtIds: readonly string[], name: string, photoDistrictId?: string): PassportData {
   const world = new Set(worldIds);
@@ -65,7 +67,7 @@ function compass(x: number, y: number, size: number): string {
 function coverPhoto(data: PassportData, photoDataUrl?: string): string {
   const cut = "M53 345 H524 L552 373 V1091 L524 1119 H53 L36 1102 V362 Z";
   const fallback = data.districts.length
-    ? `<g transform="translate(165 570) scale(2.35)"><path d="${bangladeshSilhouette}" fill="#2e604c" stroke="#173e33" stroke-width=".7"/></g>`
+    ? `<g transform="translate(165 570) scale(2.35)"><path d="${bangladeshOrnament}" fill="#2e604c" stroke="#173e33" stroke-width=".7"/></g>`
     : `<g fill="none" stroke="#35634d"><circle cx="304" cy="707" r="160" stroke-width="2"/><ellipse cx="304" cy="707" rx="80" ry="160" stroke-width="1.5"/><path d="M144 707h320M169 627h270M169 787h270" stroke-width="1.5"/></g>`;
   return `<path d="${cut}" fill="#bed0b7"/>${photoDataUrl ? `<image x="36" y="345" width="516" height="774" preserveAspectRatio="xMidYMid slice" clip-path="url(#photoCut)" href="${photoDataUrl}"/><path d="${cut}" fill="url(#photoTone)"/>` : `<path d="M36 865 Q190 805 310 853 T552 825 M36 935 Q185 883 312 925 T552 905" fill="none" stroke="#7eaa96" stroke-width="2"/>${fallback}<text x="304" y="1020" text-anchor="middle" fill="#1a4233" font-family="Georgia,serif" font-size="26">A record made by you</text>`}
     <path d="${cut}" fill="none" stroke="#fff5da" stroke-width="11"/><path d="${cut}" fill="none" stroke="#a75832" stroke-width="4"/><path d="${cut}" fill="none" stroke="#223e2e" stroke-width="1"/>`;
@@ -73,7 +75,7 @@ function coverPhoto(data: PassportData, photoDataUrl?: string): string {
 
 function coverMap(hasDistricts: boolean): string {
   return hasDistricts
-    ? `<g transform="translate(756 554) scale(.67)" shape-rendering="geometricPrecision"><path d="${bangladeshSilhouette}" fill="#28513d" stroke="#28513d" stroke-width="3.5" stroke-linejoin="round"/><path d="${bangladeshSilhouette}" fill="none" stroke="#174030" stroke-width="1.2" stroke-linejoin="round"/></g>`
+    ? `<g transform="translate(756 554) scale(.67)" shape-rendering="geometricPrecision"><path d="${bangladeshOrnament}" fill="#28513d" stroke="#28513d" stroke-width="3.5" stroke-linejoin="round"/><path d="${bangladeshOrnament}" fill="none" stroke="#174030" stroke-width="1.2" stroke-linejoin="round"/></g>`
     : `<g transform="translate(799 612)" fill="none" stroke="#27523f"><circle r="45" stroke-width="2"/><ellipse rx="23" ry="45"/><path d="M-45 0h90M-39 -22h78M-39 22h78"/></g>`;
 }
 
@@ -129,7 +131,7 @@ function renderExpeditionCover(data: PassportData, photoDataUrl?: string, botani
     const maxWidth = index < 3 ? 132 : 119;
     return `<text x="${x}" y="${y}" fill="#e9d4a9" font-family="Georgia,serif" font-size="15" ${name.length > 11 ? `textLength="${maxWidth}" lengthAdjust="spacingAndGlyphs"` : ""}>${xml(name)}</text>`;
   }).join("");
-  const fallback = data.districts.length ? `<g transform="translate(390 430) scale(2.1)"><path d="${bangladeshSilhouette}" fill="#a7895b"/></g>` : `<circle cx="450" cy="560" r="130" fill="none" stroke="#b49a6a" stroke-width="3"/>`;
+  const fallback = data.districts.length ? `<g transform="translate(390 430) scale(2.1)"><path d="${bangladeshOrnament}" fill="#a7895b"/></g>` : `<circle cx="450" cy="560" r="130" fill="none" stroke="#b49a6a" stroke-width="3"/>`;
   return `<svg xmlns="http://www.w3.org/2000/svg" width="900" height="1260" viewBox="0 0 900 1260" role="img" aria-label="Expedition Atlas passport cover"><defs>
     ${displayFont(assets?.fontDataUrl)}
     <pattern id="cloth" width="8" height="8" patternUnits="userSpaceOnUse"><path d="M0 1H8M1 0V8" stroke="#c7ac76" stroke-opacity=".12" stroke-width=".6"/></pattern>
@@ -153,7 +155,7 @@ function renderExpeditionCover(data: PassportData, photoDataUrl?: string, botani
     <text fill="#d8ae70" font-family="Georgia,serif" font-size="21" letter-spacing="5"><textPath href="#sealTop" startOffset="50%" text-anchor="middle">VISITED</textPath></text>
     <text fill="#d8ae70" font-family="Georgia,serif" font-size="18" letter-spacing="3"><textPath href="#sealBottom" startOffset="50%" text-anchor="middle">${xml(destination)}</textPath></text>
     <path d="M365 937V1138M558 937V1138" stroke="#b28b52" stroke-width="1.5"/>
-    <g transform="translate(401 937) scale(.95)"><path d="${bangladeshSilhouette}" fill="url(#gold)"/></g>
+    <g transform="translate(401 937) scale(.95)"><path d="${bangladeshOrnament}" fill="url(#gold)"/></g>
     <text x="580" y="968" fill="#d6b578" font-family="PassportDisplay,Georgia,serif" font-size="30" letter-spacing="6" textLength="235" lengthAdjust="spacingAndGlyphs">${xml(destination)}</text>
     <line x1="575" y1="980" x2="818" y2="980" stroke="#b78b53"/>${list}
     ${names.length > selected.length ? `<text x="570" y="1138" fill="#d8bb86" font-family="Georgia,serif" font-size="13">+ ${names.length - selected.length} more inside</text>` : ""}
@@ -186,7 +188,7 @@ function renderTravelogueCover(data: PassportData, photoDataUrl?: string, lilyDa
     <text x="738" y="130" fill="#ad5736" font-family="Georgia,serif" font-size="18" font-weight="700" letter-spacing="4" textLength="127" lengthAdjust="spacingAndGlyphs">TRAVELOGUE</text><line x1="738" y1="152" x2="865" y2="152" stroke="#b55c38" stroke-width="2"/>
     <text x="739" y="201" fill="#133b2f" font-family="Georgia,serif" font-size="16" letter-spacing="4"><tspan x="739">PLACES</tspan><tspan x="739" dy="31">PEOPLE</tspan><tspan x="739" dy="31">CULTURE</tspan><tspan x="739" dy="31">NATURE</tspan></text><line x1="738" y1="326" x2="865" y2="326" stroke="#b55c38" stroke-width="2"/>
     ${data.name ? `<text x="701" y="337" text-anchor="end" fill="#a65b3c" font-family="Georgia,serif" font-size="15" textLength="${Math.min(235, Math.max(55, data.name.length * 10))}" lengthAdjust="spacingAndGlyphs">For ${xml(data.name)}</text>` : ""}
-    <rect x="0" y="340" width="900" height="590" fill="#698d73"/>${photoDataUrl ? `<image x="0" y="340" width="900" height="590" preserveAspectRatio="xMidYMid slice" clip-path="url(#journalPhoto)" href="${photoDataUrl}"/>` : `<g transform="translate(390 440) scale(2.4)">${data.districts.length ? `<path d="${bangladeshSilhouette}" fill="#1f6049"/>` : `<circle cx="40" cy="45" r="65" fill="none" stroke="#1f6049" stroke-width="3"/>`}</g>`}<rect x="0" y="340" width="900" height="590" fill="url(#journalTone)"/>
+    <rect x="0" y="340" width="900" height="590" fill="#698d73"/>${photoDataUrl ? `<image x="0" y="340" width="900" height="590" preserveAspectRatio="xMidYMid slice" clip-path="url(#journalPhoto)" href="${photoDataUrl}"/>` : `<g transform="translate(390 440) scale(2.4)">${data.districts.length ? `<path d="${bangladeshOrnament}" fill="#1f6049"/>` : `<circle cx="40" cy="45" r="65" fill="none" stroke="#1f6049" stroke-width="3"/>`}</g>`}<rect x="0" y="340" width="900" height="590" fill="url(#journalTone)"/>
     <path d="M0 830L900 678V950L0 1102Z" fill="#f6efdf"/><path d="M0 830L900 678M0 1102L900 950" fill="none" stroke="#b96b43" stroke-width="2"/>
     <g transform="rotate(-10 450 900)"><text x="88" y="937" fill="#0e362a" font-family="PassportDisplay,'Bodoni MT',Georgia,serif" font-weight="700" font-size="177" textLength="765" lengthAdjust="spacingAndGlyphs">${xml(destination)}</text></g>
     <path d="M32 915q45 25 12 50t5 48m-33-92q50 38 21 84M825 801q-25 19-8 46t-10 42m45-91q-39 32-23 77" fill="none" stroke="#be7352" stroke-width="1.5" opacity=".6"/>

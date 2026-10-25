@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import districts from "../../data/districts.json";
 import { worldPlaces } from "../../data/worldPlaces";
 import { createPassport, paginatePassport, renderManifestPage, renderPassportCover } from "./passport";
+import { bangladeshSoutheastIslet } from "./bangladeshSilhouette";
 
 describe("personal passport", () => {
   it("uses only known marked visits and deduplicates them", () => {
@@ -75,6 +76,13 @@ describe("personal passport", () => {
       expect(output).toContain("BANGLADESH");
       expect(output).toContain(data.districts[0]);
       expect(output).toContain("Maya");
+    }
+  });
+
+  it("retains the southeastern offshore mark on every Bangladesh cover", () => {
+    const data = createPassport([], [districts[0].id], "");
+    for (const style of ["archive", "expedition", "travelogue"] as const) {
+      expect(renderPassportCover(data, undefined, undefined, undefined, undefined, style)).toContain(bangladeshSoutheastIslet);
     }
   });
 
