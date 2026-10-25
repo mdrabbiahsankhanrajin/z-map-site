@@ -622,10 +622,10 @@ a { text-underline-offset: .2em; }
   .passport-viewer-toolbar { position:absolute; top:0; right:0; z-index:4; min-height:44px; padding:0; }
   .passport-viewer-toolbar > span { display:none; }
   .passport-viewer-toolbar button { min-height:44px; }
-  .passport-book { min-height:540px; border-color:rgba(18,59,48,.21); background:radial-gradient(circle at 49% 45%,rgba(255,249,236,.72),transparent 46%),#d4ccbe; }
-  .passport-cover-image,.passport-inside-page { max-width:64%; height:91%; }
+  .passport-book { height:540px; min-height:540px; border-color:rgba(18,59,48,.21); background:radial-gradient(circle at 49% 45%,rgba(255,249,236,.72),transparent 46%),#d4ccbe; }
+  .passport-cover-image,.passport-inside-page { max-width:64%; height:94%; }
   .passport-cover-image { top:50%; left:22%; transform:translateY(-50%) rotate(-.35deg); }
-  .passport-inside-page { top:50%; right:6%; height:86%; transform:translate(5%,-47.7%) rotate(3.4deg); }
+  .passport-inside-page { top:50%; right:6%; height:88%; transform:translate(5%,-47.7%) rotate(3.4deg); }
   .passport-active-page { max-height:498px; }
   .passport-pager { max-width:310px; margin:0 auto; padding-top:9px; }
   .passport-object-caption { max-width:720px; margin-top:12px; }
