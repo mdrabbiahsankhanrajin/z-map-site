@@ -8,7 +8,7 @@ import { districtDisplayName } from "@/data/districtNames";
 import { resolveWorldPlaceId, worldPlaces } from "@/data/worldPlaces";
 import { TravelHeader } from "@/components/TravelHeader";
 import { parseSavedSelection } from "@/features/explorer/state";
-import { createPassport, paginatePassport, renderPassportCover, type PassportStyle } from "./passport";
+import { createPassport, paginatePassport, renderManifestPage, renderPassportCover, type PassportStyle } from "./passport";
 
 const styleOptions: { id: PassportStyle; label: string; detail: string }[] = [
   { id: "archive", label: "Archive", detail: "Cartographic print" },
@@ -53,6 +53,11 @@ export function PassportStudio() {
   const photoLoading = Boolean(photoSrc && loadedPhoto?.src !== photoSrc);
   const photoFailed = Boolean(photoSrc && loadedPhoto?.src === photoSrc && loadedPhoto?.failed);
   const styleReady = style === "archive" || coverAssets.readyStyles.includes(style);
+  const manifestPages = useMemo(() => paginatePassport(data), [data]);
+  const manifestPreviewUrl = useMemo(() => {
+    const firstPage = manifestPages[0];
+    return firstPage ? `data:image/svg+xml;charset=utf-8,${encodeURIComponent(renderManifestPage(firstPage, 2, style))}` : "";
+  }, [manifestPages, style]);
 
   useEffect(() => {
     if (!photoSrc) return;
@@ -119,23 +124,48 @@ export function PassportStudio() {
     }
   }
 
+  const exportDisabled = !hasVisits || Boolean(busy) || photoLoading || !ornament.done || !paper.done || !styleReady;
+  const pageCount = manifestPages.length + 1;
+
   return <main className="atlas-content-page passport-page">
-    <TravelHeader active="insights" />
-    <section className="passport-intro"><h1>A passport of your places.</h1><p>Compose a personal travel print from the places you marked. Your record and downloads stay on this device.</p></section>
+    <TravelHeader active="passport" />
+    <section className="passport-intro">
+      <div><p className="passport-kicker">Atlas / Passport studio</p><h1>Your places,<br />bound together.</h1><p className="passport-lede">Turn the places you marked into a considered travel keepsake—made privately, right in this browser.</p></div>
+      <dl className="passport-summary" aria-label="Passport summary"><div><dt>Places</dt><dd>{placeCount}</dd></div><div><dt>PDF pages</dt><dd>{pageCount}</dd></div><div><dt>Data</dt><dd>Private</dd></div></dl>
+    </section>
     <div className="passport-studio">
-      <section className="passport-controls" aria-label="Passport options">
-        <div className="passport-control-head"><h2>Make it yours</h2></div>
+      <section className={`passport-preview passport-object-stage is-${style}`} aria-label="Passport live preview">
+        <div className="passport-preview-heading"><span>Live edition preview</span><span>{placeCount} {placeCount === 1 ? "place" : "places"} · {pageCount} {pageCount === 1 ? "page" : "pages"}</span></div>
+        <div className="passport-book">
+          {manifestPreviewUrl ? <Image className="passport-inside-page" src={manifestPreviewUrl} alt="Preview of the passport places page" width={900} height={1260} unoptimized /> : <div className="passport-empty-page" aria-hidden="true"><span>ATLAS</span><strong>Your marked places will appear here.</strong></div>}
+          {previewUrl && <Image className="passport-cover-image" src={previewUrl} alt={`${styleOptions.find((option) => option.id === style)?.label} Atlas passport cover with ${data.world.length} world places and ${data.districts.length} Bangladesh districts`} width={900} height={1260} unoptimized />}
+        </div>
+        <p className="passport-object-caption"><span>Edition {String(Math.max(placeCount, 1)).padStart(3, "0")}</span> A printable cover and a complete place manifest, composed from your Atlas selections.</p>
+        {data.photo && photoDataUrl && <details><summary>Cover photo credit</summary><p>{data.photo.title} by {data.photo.author} · <a href={data.photo.sourceUrl} target="_blank" rel="noopener noreferrer">Original image</a> · <a href={data.photo.licenseUrl} target="_blank" rel="noopener noreferrer">{data.photo.license}</a></p></details>}
+      </section>
+
+      <section className="passport-controls passport-workflow" aria-label="Build your passport">
+        <header className="passport-control-head"><p>Four simple steps</p><h2>Build your edition</h2></header>
         {!ready ? <p role="status">Reading your marked places…</p> : <>
-          <label className="passport-check"><input type="checkbox" checked={includeWorld} onChange={(event) => setIncludeWorld(event.target.checked)} /><span>World places <small>{worldIds.length} marked visited</small></span></label>
-          <label className="passport-check"><input type="checkbox" checked={includeDistricts} onChange={(event) => setIncludeDistricts(event.target.checked)} /><span>Bangladesh districts <small>{districtIds.length} marked visited</small></span></label>
-          <label className="passport-field" htmlFor="passport-name">Name on the cover <small>optional · not saved</small></label><input id="passport-name" type="text" value={name} maxLength={40} onChange={(event) => setName(event.target.value)} placeholder="Your name or a title" />
-          {includeDistricts && markedDistricts.length > 0 && <><label className="passport-field" htmlFor="passport-photo">Cover photograph <small>cover image does not claim a visit</small></label><select id="passport-photo" value={featuredDistrictId} onChange={(event) => setFeaturedDistrictId(event.target.value)}><option value="atlas-cover">Sundarbans · editorial cover</option><option value="">First visited district</option>{markedDistricts.map((district) => <option key={district.id} value={district.id}>{districtDisplayName(district.name)}</option>)}</select></>}
-          <p className="passport-private">Only marked countries and districts appear. Trip stops, visit dates and location traces stay out.</p>
-          {!hasVisits && <p className="passport-no-visits">No visited places selected yet. <Link href="/bd">Mark a district on the map →</Link></p>}
-          <div className="passport-downloads"><button type="button" disabled={!hasVisits || Boolean(busy) || photoLoading || !ornament.done || !paper.done || !styleReady} onClick={() => void exportFile("png")}>{busy === "png" ? "Creating PNG…" : "Download PNG cover"}<span aria-hidden="true">↓</span></button><button type="button" disabled={!hasVisits || Boolean(busy) || photoLoading || !ornament.done || !paper.done || !styleReady} onClick={() => void exportFile("pdf")}>{busy === "pdf" ? "Creating PDF…" : "Download full PDF"}<span aria-hidden="true">↓</span></button><p>The PNG is a shareable cover. The PDF includes every visited place across as many pages as needed.</p>{photoFailed && <p>The cover photo could not load. Exports will use the illustrated cover.</p>}<p className="passport-status" role="status">{status}</p></div>
+          <section className="passport-step" aria-labelledby="passport-step-one"><span className="passport-step-number">01</span><div><h3 id="passport-step-one">Include places</h3><p className="passport-step-copy">Choose which parts of your travel record make the cut.</p>
+            <label className="passport-check"><input type="checkbox" checked={includeWorld} onChange={(event) => setIncludeWorld(event.target.checked)} /><span>World places <small>{worldIds.length} marked visited</small></span><b aria-hidden="true">{includeWorld ? "✓" : ""}</b></label>
+            <label className="passport-check"><input type="checkbox" checked={includeDistricts} onChange={(event) => setIncludeDistricts(event.target.checked)} /><span>Bangladesh districts <small>{districtIds.length} marked visited</small></span><b aria-hidden="true">{includeDistricts ? "✓" : ""}</b></label>
+          </div></section>
+
+          <section className="passport-step" aria-labelledby="passport-step-two"><span className="passport-step-number">02</span><div><h3 id="passport-step-two">Personalize</h3><p className="passport-step-copy">Add an optional title and choose the photograph on the cover.</p>
+            <label className="passport-field" htmlFor="passport-name">Name on the cover <small>optional · never saved</small></label><input id="passport-name" type="text" value={name} maxLength={40} onChange={(event) => setName(event.target.value)} placeholder="Your name or a title" />
+            {includeDistricts && markedDistricts.length > 0 && <><label className="passport-field" htmlFor="passport-photo">Cover photograph <small>does not claim a visit</small></label><select id="passport-photo" value={featuredDistrictId} onChange={(event) => setFeaturedDistrictId(event.target.value)}><option value="atlas-cover">Sundarbans · editorial cover</option><option value="">First visited district</option>{markedDistricts.map((district) => <option key={district.id} value={district.id}>{districtDisplayName(district.name)}</option>)}</select></>}
+          </div></section>
+
+          <section className="passport-step" aria-labelledby="passport-step-three"><span className="passport-step-number">03</span><div><h3 id="passport-step-three">Choose a cover</h3><p className="passport-step-copy">Three print-inspired treatments. The contents stay the same.</p><div className="passport-style-switch" role="group" aria-label="Passport cover style">{styleOptions.map((option) => <button key={option.id} type="button" className={`passport-style-choice passport-style-${option.id}`} aria-pressed={style === option.id} onClick={() => setStyle(option.id)}><span className="passport-style-swatch" aria-hidden="true"/><span><strong>{option.label}</strong><small>{option.detail}</small></span></button>)}</div></div></section>
+
+          <section className="passport-step passport-export-step" aria-labelledby="passport-step-four"><span className="passport-step-number">04</span><div><h3 id="passport-step-four">Export your keepsake</h3><p className="passport-step-copy">The PDF includes every chosen place. The PNG is a shareable cover.</p>
+            {!hasVisits && <p className="passport-no-visits">Your passport is waiting for its first stamp. <Link href="/bd">Mark a place on the map →</Link></p>}
+            <div className="passport-downloads"><button className="passport-download-primary" type="button" disabled={exportDisabled} onClick={() => void exportFile("pdf")}><span>{busy === "pdf" ? "Creating full PDF…" : "Download full PDF"}<small>{pageCount} {pageCount === 1 ? "page" : "pages"}</small></span><b aria-hidden="true">↓</b></button><button type="button" disabled={exportDisabled} onClick={() => void exportFile("png")}><span>{busy === "png" ? "Creating PNG cover…" : "Download PNG cover"}<small>High-resolution image</small></span><b aria-hidden="true">↓</b></button>{photoFailed && <p>The cover photo could not load. Exports will use the illustrated cover.</p>}<p className="passport-status" role="status">{status}</p></div>
+            <p className="passport-private"><span aria-hidden="true">◇</span><strong>Private by design.</strong> Only marked countries and districts appear. Trip stops, dates and location traces stay out.</p>
+          </div></section>
         </>}
       </section>
-      <section className="passport-preview" aria-label="Passport cover preview"><div className="passport-preview-heading"><span>Live preview</span><span>{placeCount} {placeCount === 1 ? "place" : "places"} · {paginatePassport(data).length + 1} PDF {paginatePassport(data).length === 0 ? "page" : "pages"}</span></div><div className="passport-style-switch" role="group" aria-label="Passport cover style">{styleOptions.map((option) => <button key={option.id} type="button" className={`passport-style-choice passport-style-${option.id}`} aria-pressed={style === option.id} onClick={() => setStyle(option.id)}><span className="passport-style-swatch" aria-hidden="true"/><span><strong>{option.label}</strong><small>{option.detail}</small></span></button>)}</div>{previewUrl && <Image src={previewUrl} alt={`${styleOptions.find((option) => option.id === style)?.label} Atlas passport cover with ${data.world.length} visited world ${data.world.length === 1 ? "place" : "places"} and ${data.districts.length} visited Bangladesh ${data.districts.length === 1 ? "district" : "districts"}`} width={900} height={1260} unoptimized />}{data.photo && photoDataUrl && <details><summary>Cover photo details</summary><p>{data.photo.title} by {data.photo.author} · <a href={data.photo.sourceUrl} target="_blank" rel="noopener noreferrer">Original image</a> · <a href={data.photo.licenseUrl} target="_blank" rel="noopener noreferrer">{data.photo.license}</a></p></details>}</section>
     </div>
     <p className="passport-back"><Link href="/insights">← Back to your atlas in numbers</Link></p>
   </main>;
