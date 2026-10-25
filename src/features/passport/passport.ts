@@ -73,7 +73,7 @@ function coverPhoto(data: PassportData, photoDataUrl?: string): string {
 
 function coverMap(hasDistricts: boolean): string {
   return hasDistricts
-    ? `<g transform="translate(756 554) scale(.67)"><path d="${bangladeshSilhouette}" fill="#28513d" stroke="#174030" stroke-width="1"/></g>`
+    ? `<g transform="translate(756 554) scale(.67)" shape-rendering="geometricPrecision"><path d="${bangladeshSilhouette}" fill="#28513d" stroke="#28513d" stroke-width="3.5" stroke-linejoin="round"/><path d="${bangladeshSilhouette}" fill="none" stroke="#174030" stroke-width="1.2" stroke-linejoin="round"/></g>`
     : `<g transform="translate(799 612)" fill="none" stroke="#27523f"><circle r="45" stroke-width="2"/><ellipse rx="23" ry="45"/><path d="M-45 0h90M-39 -22h78M-39 22h78"/></g>`;
 }
 
