@@ -740,6 +740,19 @@ a { text-underline-offset: .2em; }
 .passport-private > span { position:absolute; left:0; top:17px; color:var(--passport-coral-deep); font-size:15px; }
 .passport-private strong { color:var(--passport-ink); }
 .passport-page .passport-back { max-width:1380px; margin:0 auto; padding:0 42px 56px; color:var(--passport-ink); font-size:12px; font-weight:750; }
+.passport-cover-editor { display:grid; grid-template-columns:104px minmax(0,1fr); gap:10px; align-items:start; }
+.passport-cover-editor > img,.passport-cover-placeholder { width:104px; height:72px; display:block; object-fit:cover; background:linear-gradient(145deg,#d9cdb7,#285e49); }
+.passport-cover-editor > div { min-width:0; display:grid; gap:7px; }
+.passport-cover-editor input[type="file"] { position:absolute; width:1px; height:1px; overflow:hidden; clip:rect(0 0 0 0); white-space:nowrap; }
+.passport-cover-editor select { min-width:0; }
+.passport-cover-editor button { min-height:38px; border:1px solid rgba(18,59,48,.38); color:var(--passport-ink); background:transparent; font-weight:700; cursor:pointer; }
+.passport-memory-editor { display:grid; grid-template-columns:minmax(100px,.38fr) minmax(0,1fr); gap:12px; align-items:start; }
+.passport-memory-place { min-width:0; }
+.passport-memory-place > img,.passport-memory-place > .passport-visit-placeholder { width:100%; height:92px; object-fit:cover; }
+.passport-memory-place select { margin-top:7px; }
+.passport-export-layout { display:grid; grid-template-columns:minmax(0,2fr) minmax(0,1fr); gap:0 20px; }
+.passport-export-layout > div:nth-child(2) { padding-left:20px; border-left:1px solid rgba(18,59,48,.22); }
+.passport-export-layout .passport-downloads { grid-column:1 / -1; }
 
 /* Desktop composition — matched to the approved Passport studio reference. */
 @media (min-width: 1180px) {
@@ -752,7 +765,7 @@ a { text-underline-offset: .2em; }
   .passport-summary dd { margin-top:7px; font-size:25px; }
   .passport-summary div:last-child dd { font-size:19px; }
 
-  .passport-page .passport-studio { max-width:1460px; grid-template-columns:minmax(700px,1.72fr) minmax(400px,.9fr); gap:28px; padding:14px 64px 66px; }
+  .passport-page .passport-studio { max-width:1460px; grid-template-columns:minmax(520px,1.18fr) minmax(500px,1fr); gap:24px; padding:14px 32px 66px; }
   .passport-page .passport-preview { position:relative; }
   .passport-preview-heading { min-height:48px; align-items:center; margin:0; padding:0; }
   .passport-preview-heading span:last-child { display:none; }
@@ -768,14 +781,30 @@ a { text-underline-offset: .2em; }
   .passport-object-caption { max-width:720px; margin-top:12px; }
   .passport-preview details { margin-top:10px; }
 
-  .passport-page .passport-controls { padding-left:28px; border-left:1px solid rgba(18,59,48,.22); }
-  .passport-control-head { padding:0 0 15px; }
+  .passport-page .passport-controls { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); align-items:start; padding-left:24px; border-left:1px solid rgba(18,59,48,.22); }
+  .passport-control-head { grid-column:1 / -1; padding:0 0 13px; }
   .passport-control-head p { margin-bottom:6px; }
-  .passport-control-head h2 { font-size:36px; }
-  .passport-step { grid-template-columns:34px minmax(0,1fr); gap:8px; padding:17px 0 18px; }
+  .passport-control-head h2 { font-size:32px; }
+  .passport-step { display:block; min-width:0; padding:14px 0 15px; }
+  .passport-step > div { min-width:0; }
+  .passport-visit-step { grid-column:1 / -1; }
+  .passport-details-step { grid-column:1; padding-right:14px; }
+  .passport-cover-step { grid-column:2; padding-right:14px; padding-left:14px; border-left:1px solid rgba(18,59,48,.22); }
+  .passport-style-step { grid-column:3; padding-left:14px; border-left:1px solid rgba(18,59,48,.22); }
+  .passport-memory-step { grid-column:1 / span 2; padding-right:16px; }
+  .passport-pages-step { grid-column:3; padding-left:16px; border-left:1px solid rgba(18,59,48,.22); }
+  .passport-export-step { grid-column:1 / -1; }
   .passport-step-number { width:29px; height:29px; display:grid; place-items:center; padding:0; border:1px solid var(--passport-ink); border-radius:50%; color:var(--passport-ink); }
-  .passport-step h3 { font-size:21px; }
-  .passport-step-copy { margin:5px 0 11px; font-size:10px; line-height:1.4; }
+  .passport-step h3 { font-size:19px; }
+  .passport-step-copy { margin:4px 0 9px; font-size:9px; line-height:1.35; }
+  .passport-visit-tools { grid-template-columns:minmax(0,1fr) 132px; margin-bottom:7px; }
+  .passport-page .passport-controls :is(input[type="search"],input[type="date"],textarea),.passport-page .passport-controls select { min-height:40px; padding:7px 9px; }
+  .passport-visit-list { max-height:212px; }
+  .passport-visit-row { min-height:51px; grid-template-columns:58px minmax(0,1fr) 36px 10px; gap:8px; padding:4px 2px 4px 0; }
+  .passport-visit-row > img,.passport-visit-row > .passport-visit-placeholder { width:58px; height:43px; }
+  .passport-visit-row strong { font-size:14px; }
+  .passport-visit-row small { overflow:hidden; margin-top:3px; font-size:8px; line-height:1.25; text-overflow:ellipsis; white-space:nowrap; }
+  .passport-visit-row > i { color:var(--passport-muted); font:400 17px/1 ui-sans-serif,system-ui,sans-serif; }
   .passport-check { min-height:52px; padding:8px 10px 8px 12px; font-size:16px; }
   .passport-check + .passport-check { margin-top:6px; }
   .passport-check input { order:2; width:36px; height:20px; flex:none; margin-left:auto; border:1px solid var(--passport-ink); border-radius:999px; appearance:none; background:rgba(18,59,48,.1); cursor:pointer; }
@@ -784,21 +813,41 @@ a { text-underline-offset: .2em; }
   .passport-check input:checked::before { background:#fff9ed; transform:translateX(16px); }
   .passport-check b { display:none; }
   .passport-check small { margin-top:3px; font-size:9px; }
-  .passport-field { margin:12px 0 6px; font-size:9px; }
+  .passport-field { margin:9px 0 5px; font-size:8px; }
   .passport-detail-grid { grid-template-columns:minmax(0,.84fr) minmax(0,1.16fr); gap:10px; }
   .passport-detail-grid .passport-field { min-height:22px; align-items:end; }
   .passport-page .passport-controls input[type="text"],.passport-page .passport-controls select { min-height:42px; padding:8px 10px; font-size:12px; }
-  .passport-style-switch { gap:6px; }
-  .passport-style-choice { min-height:82px; gap:6px; padding:6px; }
-  .passport-style-choice strong { font-size:13px; }
-  .passport-style-choice small { font-size:7px; }
-  .passport-style-swatch { height:31px; }
+  .passport-cover-editor { grid-template-columns:74px minmax(0,1fr); gap:7px; }
+  .passport-cover-editor > img,.passport-cover-placeholder { width:74px; height:61px; }
+  .passport-cover-editor > div { gap:5px; }
+  .passport-upload-button,.passport-cover-editor button { min-height:32px; padding:7px 6px; font-size:9px; }
+  .passport-cover-editor select { min-height:32px!important; padding:5px 6px!important; font-size:9px!important; }
+  .passport-style-switch { gap:5px; }
+  .passport-style-choice { min-height:67px; gap:0; padding:4px; }
+  .passport-style-choice > span:last-child { position:absolute; width:1px; height:1px; overflow:hidden; clip:rect(0 0 0 0); white-space:nowrap; }
+  .passport-style-swatch { height:57px; }
+  .passport-memory-editor { grid-template-columns:112px minmax(0,1fr); gap:9px; }
+  .passport-memory-place > img,.passport-memory-place > .passport-visit-placeholder { height:82px; }
+  .passport-memory-place select { min-height:35px!important; margin-top:5px; font-size:9px!important; }
+  .passport-memory-grid { grid-template-columns:minmax(0,1fr) auto; gap:7px; }
+  .passport-page .passport-controls textarea { min-height:52px; max-height:70px; }
+  .passport-favorite { font-size:8px; }
+  .passport-page-order li { min-height:37px; grid-template-columns:23px 28px minmax(0,1fr) auto; gap:5px; }
+  .passport-page-order li > img { width:28px; height:31px; object-fit:cover; }
+  .passport-page-order li > strong { font-size:11px; }
+  .passport-page-order li > small { font-size:7px; }
+  .passport-page-order button { width:29px; height:37px; }
+  .passport-page-order button + button { display:none; }
+  .passport-export-layout { grid-template-columns:minmax(0,2fr) minmax(0,1fr); gap:0 13px; }
+  .passport-export-layout > div:nth-child(2) { padding-left:13px; }
   .passport-downloads { display:grid; grid-template-columns:1fr 1fr; gap:7px; }
-  .passport-downloads button { min-width:0; min-height:51px; padding:8px 12px; }
+  .passport-export-layout .passport-downloads { grid-template-columns:1fr 1fr .78fr; }
+  .passport-page .passport-export-layout .passport-downloads button:nth-of-type(3) { grid-column:3; }
+  .passport-downloads button { min-width:0; min-height:47px; padding:7px 10px; }
   .passport-downloads button + button { margin-top:0; }
   .passport-downloads button span { font-size:11px; }
   .passport-downloads > p { grid-column:1 / -1; }
-  .passport-private { margin-top:12px; padding-top:11px; }
+  .passport-private { margin-top:9px; padding-top:9px; }
   .passport-private > span { top:12px; }
   .passport-page .passport-back { max-width:1460px; padding-right:64px; padding-left:64px; }
 }
