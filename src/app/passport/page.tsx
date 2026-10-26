@@ -1,5 +1,5 @@
-import { PassportStudio } from "@/features/passport/PassportStudio";
+import { PassportExperience } from "@/features/passport/PassportExperience";
 
 export default function PassportPage() {
-  return <PassportStudio />;
+  return <PassportExperience />;
 }
