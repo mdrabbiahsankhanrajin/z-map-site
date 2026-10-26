@@ -828,6 +828,7 @@ a { text-underline-offset: .2em; }
   .passport-style-swatch { height:57px; }
   .passport-memory-editor { grid-template-columns:112px minmax(0,1fr); gap:9px; }
   .passport-memory-place > img,.passport-memory-place > .passport-visit-placeholder { height:82px; }
+  .passport-memory-place > img { width:calc(100% - 1px); }
   .passport-memory-place select { min-height:35px!important; margin-top:5px; font-size:9px!important; }
   .passport-memory-grid { grid-template-columns:minmax(0,1fr) auto; gap:7px; }
   .passport-page .passport-controls textarea { min-height:52px; max-height:70px; }
