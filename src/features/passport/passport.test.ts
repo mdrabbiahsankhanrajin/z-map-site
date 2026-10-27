@@ -130,5 +130,7 @@ describe("personal passport", () => {
     expect(sparse).toContain("GERMANY");
     expect(sparse).toContain("World");
     expect(sparse).toContain("places");
+    expect(sparse).toContain("postageInk");
+    expect(sparse).toContain("ATLAS POST · EUROPE");
   });
 });
