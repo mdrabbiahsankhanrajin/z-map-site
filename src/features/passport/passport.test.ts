@@ -16,7 +16,7 @@ describe("personal passport", () => {
     const data = createPassport(worldPlaces.map((place) => place.id), districts.map((place) => place.id), "");
     const pages = paginatePassport(data);
     expect(pages.flatMap((page) => page.names).length).toBe(worldPlaces.length + districts.length);
-    expect(pages.every((page) => page.names.length <= 32)).toBe(true);
+    expect(pages.every((page) => page.names.length <= 8)).toBe(true);
   });
 
   it("escapes optional names in the SVG cover", () => {
@@ -101,5 +101,17 @@ describe("personal passport", () => {
     const travelogue = renderManifestPage(page, 2, "travelogue");
     expect(new Set([archive, expedition, travelogue]).size).toBe(3);
     for (const output of [archive, expedition, travelogue]) expect(output).toContain(page.names[0]);
+  });
+
+  it("gives every interior page a full editorial folio system", () => {
+    const data = createPassport([], districts.slice(0, 9).map((district) => district.id), "");
+    const pages = paginatePassport(data);
+    expect(pages).toHaveLength(2);
+    const output = renderManifestPage(pages[0], 2, "archive", { [pages[0].names[0]]: { date: "2026-10-27", note: "A remembered river morning" } });
+    expect(output).toContain("PERSONAL TRAVEL RECORD");
+    expect(output).toContain("PLACES ON THIS LEAF");
+    expect(output).toContain("A remembered river morning");
+    expect(output).toContain("2026-10-27");
+    expect(output).toContain(bangladeshSoutheastIslet);
   });
 });
