@@ -24,7 +24,7 @@ const styleOptions: { id: PassportStyle; label: string; detail: string }[] = [
 const workspaceTabs = ["studio", "timeline", "collections", "stamps"] as const;
 type WorkspaceTab = typeof workspaceTabs[number];
 type BusyAction = "png" | "pdf" | "page" | "share" | null;
-type VisitItem = { key: string; id: string; kind: "world" | "district"; name: string; region: string; image?: string; imageAlt?: string };
+type VisitItem = { key: string; id: string; kind: "world" | "district"; name: string; region: string; image?: string; rawImage?: `/${string}`; imageAlt?: string };
 
 const pageKey = (page: ManifestPage) => `${page.section}:${page.index}`;
 const blankMemory: PassportMemory = { date: "", note: "", favorite: false };
@@ -54,6 +54,9 @@ export function PassportExperience() {
   const [ornament, setOrnament] = useState<{ done: boolean; dataUrl?: string; lilyDataUrl?: string }>({ done: false });
   const [paper, setPaper] = useState<{ done: boolean; dataUrl?: string }>({ done: false });
   const [coverAssets, setCoverAssets] = useState<{ readyStyles: PassportStyle[]; fontDataUrl?: string; tigerDataUrl?: string; lilyEngravingDataUrl?: string }>({ readyStyles: [] });
+  const [manifestPhotos, setManifestPhotos] = useState<Record<string, string>>({});
+  const [manifestPhotosReady, setManifestPhotosReady] = useState(false);
+  const [manifestPreviewUrls, setManifestPreviewUrls] = useState<string[]>([]);
   const [previewUrl, setPreviewUrl] = useState("");
   const [previewPage, setPreviewPage] = useState(0);
   const [previewMode, setPreviewMode] = useState<"fit" | "actual">("fit");
@@ -65,11 +68,13 @@ export function PassportExperience() {
     const world = worldPlaces.filter((place) => worldIds.includes(place.id)).map((place) => {
       const regionId = featuredRegionForCountry(place.id);
       const note = regionId ? regionNotes[regionId] : undefined;
-      return { key: `world:${place.id}`, id: place.id, kind: "world" as const, name: place.name, region: "World place", image: note ? publicPath(note.image.src as `/${string}`) : undefined, imageAlt: note?.image.alt };
+      const rawImage = note?.image.src as `/${string}` | undefined;
+      return { key: `world:${place.id}`, id: place.id, kind: "world" as const, name: place.name, region: "World place", image: rawImage ? publicPath(rawImage) : undefined, rawImage, imageAlt: note?.image.alt };
     });
     const district = districts.filter((place) => districtIds.includes(place.id)).map((place) => {
       const photo = attractions.find((item) => item.district === place.name);
-      return { key: `district:${place.id}`, id: place.id, kind: "district" as const, name: districtDisplayName(place.name), region: "Bangladesh district", image: photo ? publicPath(photo.image.src) : undefined, imageAlt: photo?.image.alt };
+      const rawImage = photo?.image.src;
+      return { key: `district:${place.id}`, id: place.id, kind: "district" as const, name: districtDisplayName(place.name), region: "Bangladesh district", image: rawImage ? publicPath(rawImage) : undefined, rawImage, imageAlt: photo?.image.alt };
     });
     return [...world, ...district].sort((left, right) => left.name.localeCompare(right.name, "en"));
   }, [worldIds, districtIds]);
@@ -116,9 +121,26 @@ export function PassportExperience() {
     const rank = new Map(workspace.pageOrder.map((key, index) => [key, index]));
     return [...unorderedManifestPages].sort((left, right) => (rank.get(pageKey(left)) ?? 999) - (rank.get(pageKey(right)) ?? 999));
   }, [unorderedManifestPages, workspace.pageOrder]);
-  const manifestPreviewUrls = useMemo(() => manifestPages.map((page, index) => `data:image/svg+xml;charset=utf-8,${encodeURIComponent(renderManifestPage(page, index + 2, style, memoryByName))}`), [manifestPages, style, memoryByName]);
+  const manifestPhotoVisits = useMemo(() => manifestPages.flatMap((page) => page.names.map((name) => includedVisits.find((visit) => visit.name === name && visit.rawImage)).filter((visit): visit is VisitItem & { rawImage: `/${string}` } => Boolean(visit)).slice(0, 3)), [manifestPages, includedVisits]);
+  const manifestAssets = useMemo(() => ({ photoDataByName: manifestPhotos, botanicalDataUrl: ornament.dataUrl, lilyDataUrl: ornament.lilyDataUrl }), [manifestPhotos, ornament.dataUrl, ornament.lilyDataUrl]);
+  const manifestSvgs = useMemo(() => manifestPages.map((page, index) => renderManifestPage(page, index + 2, style, memoryByName, manifestAssets)), [manifestPages, style, memoryByName, manifestAssets]);
   const pageCount = manifestPages.length + 1;
   const currentPreviewPage = Math.min(previewPage, pageCount - 1);
+
+  useEffect(() => {
+    let cancelled = false;
+    setManifestPhotosReady(false);
+    void import("./exportPassport").then(({ loadPassportAsset }) => Promise.all(manifestPhotoVisits.map(async (visit) => [visit.name, await loadPassportAsset(visit.rawImage)] as const))).then((entries) => {
+      if (!cancelled) { setManifestPhotos(Object.fromEntries(entries)); setManifestPhotosReady(true); }
+    }).catch(() => { if (!cancelled) { setManifestPhotos({}); setManifestPhotosReady(true); } });
+    return () => { cancelled = true; };
+  }, [manifestPhotoVisits]);
+
+  useEffect(() => {
+    const urls = manifestSvgs.map((svg) => URL.createObjectURL(new Blob([svg], { type: "image/svg+xml;charset=utf-8" })));
+    setManifestPreviewUrls(urls);
+    return () => urls.forEach((url) => URL.revokeObjectURL(url));
+  }, [manifestSvgs]);
 
   useEffect(() => {
     if (!photoSrc || customCover) return;
@@ -168,7 +190,7 @@ export function PassportExperience() {
   const datedVisits = includedVisits.filter((visit) => workspace.memories[visit.key]?.date).sort((left, right) => (workspace.memories[right.key]?.date ?? "").localeCompare(workspace.memories[left.key]?.date ?? ""));
   const favoriteVisits = includedVisits.filter((visit) => workspace.memories[visit.key]?.favorite);
   const savedPlaces = savedPlaceIds.map((id) => attractions.find((item) => item.id === id)).filter((item): item is (typeof attractions)[number] => Boolean(item));
-  const exportDisabled = !hasVisits || Boolean(busy) || photoLoading || !ornament.done || !paper.done || !styleReady;
+  const exportDisabled = !hasVisits || Boolean(busy) || photoLoading || !ornament.done || !paper.done || !styleReady || !manifestPhotosReady;
 
   function updateWorkspace(update: (current: PassportWorkspaceState) => PassportWorkspaceState) { setWorkspace((current) => update(current)); }
   function toggleVisit(key: string) { updateWorkspace((current) => ({ ...current, excludedVisitKeys: current.excludedVisitKeys.includes(key) ? current.excludedVisitKeys.filter((item) => item !== key) : [...current.excludedVisitKeys, key] })); }
@@ -190,11 +212,11 @@ export function PassportExperience() {
       const { createPassportPng, createPassportPdf, createPassportPagePng, downloadPassport } = await import("./exportPassport");
       const baseName = safeFileName(name || "atlas-passport");
       if (format === "pdf") {
-        const blob = await createPassportPdf(data, photoDataUrl, ornament.dataUrl, paper.dataUrl, ornament.lilyDataUrl, style, coverAssets, manifestPages, memoryByName);
+        const blob = await createPassportPdf(data, photoDataUrl, ornament.dataUrl, paper.dataUrl, ornament.lilyDataUrl, style, coverAssets, manifestPages, memoryByName, manifestAssets);
         downloadPassport(blob, `${baseName}-${style}.pdf`); setStatus(`PDF downloaded with ${pageCount} pages.`);
       } else if (format === "page") {
         const page = manifestPages[currentPreviewPage - 1];
-        const svg = currentPreviewPage === 0 || !page ? cover : renderManifestPage(page, currentPreviewPage + 1, style, memoryByName);
+        const svg = currentPreviewPage === 0 || !page ? cover : renderManifestPage(page, currentPreviewPage + 1, style, memoryByName, manifestAssets);
         downloadPassport(await createPassportPagePng(svg), `${baseName}-page-${currentPreviewPage + 1}.png`); setStatus(`${activePageLabel} exported as a high-resolution PNG.`);
       } else {
         downloadPassport(await createPassportPng(data, photoDataUrl, ornament.dataUrl, paper.dataUrl, ornament.lilyDataUrl, style, coverAssets), `${baseName}-cover.png`); setStatus("Cover downloaded as a high-resolution PNG.");

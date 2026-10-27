@@ -109,9 +109,26 @@ describe("personal passport", () => {
     expect(pages).toHaveLength(2);
     const output = renderManifestPage(pages[0], 2, "archive", { [pages[0].names[0]]: { date: "2026-10-27", note: "A remembered river morning" } });
     expect(output).toContain("PERSONAL TRAVEL RECORD");
-    expect(output).toContain("PLACES ON THIS LEAF");
+    expect(output).toContain("Entries 01 - 08");
     expect(output).toContain("A remembered river morning");
     expect(output).toContain("2026-10-27");
     expect(output).toContain(bangladeshSoutheastIslet);
+  });
+
+  it("uses real supplied visit photography for rich and sparse interior leaves", () => {
+    const richData = createPassport([], districts.slice(0, 8).map((district) => district.id), "");
+    const richPage = paginatePassport(richData)[0];
+    const rich = renderManifestPage(richPage, 2, "archive", {}, { photoDataByName: Object.fromEntries(richPage.names.slice(0, 3).map((name, index) => [name, `data:image/webp;base64,PHOTO${index}`])) });
+    expect(rich).toContain("manifestHero");
+    expect(rich).toContain("PHOTO0");
+    expect(rich).toContain("PHOTO2");
+
+    const sparseData = createPassport(["DEU"], [], "");
+    const sparsePage = paginatePassport(sparseData)[0];
+    const sparse = renderManifestPage(sparsePage, 2, "travelogue", {}, { photoDataByName: { Germany: "data:image/webp;base64,GERMANY" } });
+    expect(sparse).toContain("sparseHero");
+    expect(sparse).toContain("GERMANY");
+    expect(sparse).toContain("World");
+    expect(sparse).toContain("places");
   });
 });
