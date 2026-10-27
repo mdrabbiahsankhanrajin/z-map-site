@@ -56,7 +56,6 @@ export function PassportExperience() {
   const [coverAssets, setCoverAssets] = useState<{ readyStyles: PassportStyle[]; fontDataUrl?: string; tigerDataUrl?: string; lilyEngravingDataUrl?: string }>({ readyStyles: [] });
   const [manifestPhotos, setManifestPhotos] = useState<Record<string, string>>({});
   const [manifestPhotosReady, setManifestPhotosReady] = useState(false);
-  const [manifestPreviewUrls, setManifestPreviewUrls] = useState<string[]>([]);
   const [previewUrl, setPreviewUrl] = useState("");
   const [previewPage, setPreviewPage] = useState(0);
   const [previewMode, setPreviewMode] = useState<"fit" | "actual">("fit");
@@ -124,23 +123,17 @@ export function PassportExperience() {
   const manifestPhotoVisits = useMemo(() => manifestPages.flatMap((page) => page.names.map((name) => includedVisits.find((visit) => visit.name === name && visit.rawImage)).filter((visit): visit is VisitItem & { rawImage: `/${string}` } => Boolean(visit)).slice(0, 3)), [manifestPages, includedVisits]);
   const manifestAssets = useMemo(() => ({ photoDataByName: manifestPhotos, botanicalDataUrl: ornament.dataUrl, lilyDataUrl: ornament.lilyDataUrl }), [manifestPhotos, ornament.dataUrl, ornament.lilyDataUrl]);
   const manifestSvgs = useMemo(() => manifestPages.map((page, index) => renderManifestPage(page, index + 2, style, memoryByName, manifestAssets)), [manifestPages, style, memoryByName, manifestAssets]);
+  const manifestPreviewUrls = useMemo(() => manifestSvgs.map((svg) => `data:image/svg+xml;charset=utf-8,${encodeURIComponent(svg)}`), [manifestSvgs]);
   const pageCount = manifestPages.length + 1;
   const currentPreviewPage = Math.min(previewPage, pageCount - 1);
 
   useEffect(() => {
     let cancelled = false;
-    setManifestPhotosReady(false);
     void import("./exportPassport").then(({ loadPassportAsset }) => Promise.all(manifestPhotoVisits.map(async (visit) => [visit.name, await loadPassportAsset(visit.rawImage)] as const))).then((entries) => {
       if (!cancelled) { setManifestPhotos(Object.fromEntries(entries)); setManifestPhotosReady(true); }
     }).catch(() => { if (!cancelled) { setManifestPhotos({}); setManifestPhotosReady(true); } });
     return () => { cancelled = true; };
   }, [manifestPhotoVisits]);
-
-  useEffect(() => {
-    const urls = manifestSvgs.map((svg) => URL.createObjectURL(new Blob([svg], { type: "image/svg+xml;charset=utf-8" })));
-    setManifestPreviewUrls(urls);
-    return () => urls.forEach((url) => URL.revokeObjectURL(url));
-  }, [manifestSvgs]);
 
   useEffect(() => {
     if (!photoSrc || customCover) return;
