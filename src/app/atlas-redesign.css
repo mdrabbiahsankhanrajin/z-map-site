@@ -241,6 +241,7 @@ a { text-underline-offset: .2em; }
   .map-top-caption { top: 23px; left: 24px; min-height: 39px; padding: 8px 13px; font-size: 16px; }
   .map-legend { left: 22px; bottom: 20px; }
   .map-depth-control { top: 22px; right: 22px; }
+  .atlas-app[data-scope="districts"] .map-depth-control { right: 92px; }
   .map-zoom { top: 112px; right: 22px; }
   .detail-panel { right: 26px; bottom: 26px; width: 316px; max-height: min(520px, calc(100% - 120px)); border: 1px solid var(--chart-line); border-top: 3px solid var(--chart-coral); box-shadow: 0 18px 45px rgba(15, 46, 37, .25); }
   .detail-inner { padding: 25px 25px 23px; }
@@ -429,7 +430,7 @@ a { text-underline-offset: .2em; }
   .map-top-caption::before { width: 7px; height: 7px; }
   .map-state { padding-bottom: max(35dvh, 286px); text-align: center; }
   .map-zoom { top: 118px; }
-  .map-depth-control { top: 200px; }
+  .map-depth-control { top: 218px; }
   .detail-panel { border: 0; border-top: 3px solid var(--chart-coral); border-radius: 0; background-color: var(--chart-paper-light); box-shadow: 0 -10px 30px rgba(12, 44, 35, .22); }
   .detail-panel.sheet-half { height: 35dvh; min-height: 286px; }
   .detail-panel.sheet-half:has(.world-place-card) { height: 44dvh; min-height: 350px; }
