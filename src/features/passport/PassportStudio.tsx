@@ -16,6 +16,12 @@ const styleOptions: { id: PassportStyle; label: string; detail: string }[] = [
   { id: "travelogue", label: "Travelogue", detail: "Editorial journal" },
 ];
 
+function shortPageLabel(section: string) {
+  if (section === "World places") return "World";
+  if (section === "Bangladesh districts") return "Bangladesh";
+  return section;
+}
+
 export function PassportStudio() {
   const [worldIds, setWorldIds] = useState<string[]>([]);
   const [districtIds, setDistrictIds] = useState<string[]>([]);
@@ -131,6 +137,7 @@ export function PassportStudio() {
   const currentPreviewPage = Math.min(previewPage, pageCount - 1);
   const activePreviewUrl = currentPreviewPage === 0 ? previewUrl : manifestPreviewUrls[currentPreviewPage - 1] ?? previewUrl;
   const activePageLabel = currentPreviewPage === 0 ? "Cover" : manifestPages[currentPreviewPage - 1]?.section ?? "Places";
+  const pageNavigation = [{ label: "Cover", fullLabel: "Cover" }, ...manifestPages.map((page) => ({ label: shortPageLabel(page.section), fullLabel: page.section }))];
 
   async function toggleFullscreen() {
     if (!viewerRef.current) return;
@@ -163,9 +170,8 @@ export function PassportStudio() {
             </> : activePreviewUrl && <Image className="passport-active-page" src={activePreviewUrl} alt={`${activePageLabel}, page ${currentPreviewPage + 1} of ${pageCount}`} width={900} height={1260} unoptimized />}
           </div>
           <nav className="passport-pager" aria-label="Passport pages">
-            <button type="button" disabled={currentPreviewPage === 0} onClick={() => setPreviewPage(Math.max(0, currentPreviewPage - 1))} aria-label="Previous passport page">←</button>
-            <span><strong>{activePageLabel}</strong><small>Page {currentPreviewPage + 1} of {pageCount}</small></span>
-            <button type="button" disabled={currentPreviewPage === pageCount - 1} onClick={() => setPreviewPage(Math.min(pageCount - 1, currentPreviewPage + 1))} aria-label="Next passport page">→</button>
+            <p className="passport-page-status" aria-live="polite"><strong>{activePageLabel}</strong><small>Page {currentPreviewPage + 1} of {pageCount}</small></p>
+            <div>{pageNavigation.map((page, index) => <button key={`${page.fullLabel}-${index}`} type="button" aria-current={currentPreviewPage === index ? "page" : undefined} aria-label={`Show ${page.fullLabel} page`} onClick={() => setPreviewPage(index)}><small>{String(index + 1).padStart(2, "0")}</small><span>{page.label}</span></button>)}</div>
           </nav>
         </div>
         <p className="passport-object-caption"><span>Edition {String(Math.max(placeCount, 1)).padStart(3, "0")}</span> A printable cover and a complete place manifest, composed from your Atlas selections.</p>
@@ -189,7 +195,7 @@ export function PassportStudio() {
 
           <section className="passport-step passport-export-step" aria-labelledby="passport-step-four"><span className="passport-step-number">4</span><div><h3 id="passport-step-four">Export your passport</h3><p className="passport-step-copy">Create a print-ready book or a high-resolution cover.</p>
             {!hasVisits && <p className="passport-no-visits">Your passport is waiting for its first stamp. <Link href="/bd">Mark a place on the map →</Link></p>}
-            <div className="passport-downloads"><button className="passport-download-primary" type="button" disabled={exportDisabled} onClick={() => void exportFile("pdf")}><span>{busy === "pdf" ? "Creating full PDF…" : "Download full PDF"}<small>{pageCount} {pageCount === 1 ? "page" : "pages"}</small></span><b aria-hidden="true">↓</b></button><button type="button" disabled={exportDisabled} onClick={() => void exportFile("png")}><span>{busy === "png" ? "Creating PNG cover…" : "Download PNG cover"}<small>High-resolution image</small></span><b aria-hidden="true">↓</b></button>{photoFailed && <p>The cover photo could not load. Exports will use the illustrated cover.</p>}<p className="passport-status" role="status">{status}</p></div>
+            <div className="passport-downloads"><button className="passport-download-primary" type="button" disabled={exportDisabled} onClick={() => void exportFile("pdf")}><span>{busy === "pdf" ? "Creating full PDF…" : "Download full PDF"}<small>{pageCount} {pageCount === 1 ? "page" : "pages"}</small></span></button><button type="button" disabled={exportDisabled} onClick={() => void exportFile("png")}><span>{busy === "png" ? "Creating PNG cover…" : "Download PNG cover"}<small>High-resolution image</small></span></button>{photoFailed && <p>The cover photo could not load. Exports will use the illustrated cover.</p>}<p className="passport-status" role="status">{status}</p></div>
             <p className="passport-private"><span aria-hidden="true">◇</span><strong>Private by design.</strong> Only marked countries and districts appear. Trip stops, dates and location traces stay out.</p>
           </div></section>
         </>}
