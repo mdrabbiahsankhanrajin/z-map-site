@@ -417,11 +417,13 @@ a { text-underline-offset: .2em; }
 .passport-style-choice[aria-pressed="true"] { outline: 2px solid var(--chart-coral); outline-offset: 2px; border-color: var(--chart-coral); box-shadow: none; background: var(--chart-paper-light); }
 
 @media (max-width: 1060px) {
-  .topbar { height: 64px; padding: 0 12px; background-color: rgba(251, 247, 237, .97); border-color: var(--chart-line); }
+  .topbar { height: 64px; padding: 0 12px; background-color: rgba(251, 247, 237, .97); background-image: none; border-color: var(--chart-line); }
   .brand { min-width: 44px; min-height: 44px; justify-content: center; color: var(--chart-ink); }
   .global-search { height: 44px; border-color: var(--chart-line); }
   .global-search button { width: 44px; height: 44px; display: grid; place-items: center; padding: 0; }
+  .top-nav { flex-shrink: 0; }
   .top-nav a { min-width: 44px; min-height: 44px; display: flex; align-items: center; justify-content: center; padding: 0 4px; }
+  .top-nav a:first-child { min-width: 52px; padding-inline: 8px; }
   .top-nav a.current { color: var(--chart-ink); border-color: var(--chart-coral); }
   .map-top-caption { top: 72px; left: 14px; color: var(--chart-ink); background: rgba(251, 247, 237, .86); border: 1px solid var(--chart-line); padding: 7px 9px; text-shadow: none; }
   .map-top-caption::before { width: 7px; height: 7px; }
