@@ -19,6 +19,10 @@ function ProgressTable({ title, rows }: { title: string; rows: ProgressRow[] }) 
   return <section className="insight-section"><h2>{title}</h2><table className="insight-table"><caption>{title} from saved visits in this browser</caption><thead><tr><th scope="col">Area</th><th scope="col">Visited</th><th scope="col">Places</th></tr></thead><tbody>{rows.map((row) => <tr key={row.name}><th scope="row">{row.name}<span className="insight-bar"><span style={{ width: `${row.total ? row.visited / row.total * 100 : 0}%` }} /></span></th><td>{row.visited}</td><td>{row.total}</td></tr>)}</tbody></table></section>;
 }
 
+function continentAsset(name: string) {
+  return publicPath(`/data/insights-atlas/${name.toLowerCase().replaceAll(" ", "-")}.svg`);
+}
+
 export function Insights() {
   const [snapshot, setSnapshot] = useState<Snapshot | null>(null);
   const [showAll, setShowAll] = useState(false);
@@ -42,10 +46,10 @@ export function Insights() {
 
   return <main className="atlas-content-page insights-page">
     <TravelHeader active="insights" />
-    <section className="content-intro insights-hero"><div><p className="content-locale">Personal atlas · on this device</p><h1>Your atlas, in numbers</h1><p>These counts come only from places you marked and stops you saved here. They are not site visitor analytics.</p></div><div className="insights-map" aria-hidden="true"><span className="insights-route"><i /><i /><i /></span><strong>YOUR WORLD</strong><small>Every marked place adds to the story</small></div></section>
+    <section className="content-intro insights-hero"><div><p className="content-locale">Personal atlas · on this device</p><h1>Your atlas, in numbers</h1><p>These counts come only from places you marked and stops you saved here. They are not site visitor analytics.</p></div><div className="insights-map"><div className="insights-map-copy"><strong>Your world</strong><small>Every marked place adds to the story.</small><span>{snapshot ? `${snapshot.world} of ${worldPlaces.length} ${snapshot.world === 1 ? "place" : "places"} marked` : "Reading your atlas…"}</span></div><div className="insights-globe" aria-hidden="true"><Image src={continentAsset("World")} alt="" width={320} height={190} unoptimized /><span className="insights-route"><i /><i /><i /></span></div></div></section>
     {snapshot ? <div className="insights-layout">
       <div className="insight-totals"><div><strong>{snapshot.world}</strong><span>of {worldPlaces.length} world places visited</span></div><div><strong>{snapshot.districts}</strong><span>of 64 Bangladesh districts visited</span></div><div><strong>{snapshot.stops}</strong><span>stops in your trip plan</span></div></div>
-      <section className="continent-ribbon" aria-label="World progress by continent"><header><span>World progress</span><strong>{snapshot.world} places marked</strong></header><div>{snapshot.continents.map((row) => <article key={row.name}><span className="continent-glyph" aria-hidden="true">◇</span><strong>{row.name}</strong><small>{row.visited} / {row.total}</small><i><b style={{ width: `${row.total ? row.visited / row.total * 100 : 0}%` }} /></i></article>)}</div></section>
+      <section className="continent-ribbon" aria-label="World progress by continent"><header><span>World progress</span><strong>{snapshot.world} {snapshot.world === 1 ? "place" : "places"} marked</strong></header><div>{snapshot.continents.map((row) => <article key={row.name}><span className="continent-glyph" aria-hidden="true"><Image src={continentAsset(row.name)} alt="" width={320} height={190} unoptimized /></span><span className="continent-copy"><strong>{row.name}</strong><small>{row.visited} / {row.total}</small><i><b style={{ width: `${row.total ? row.visited / row.total * 100 : 0}%` }} /></i></span></article>)}</div></section>
       <section className="passport-section" aria-label="Your Bangladesh photo passport">
         <header><div><h2>Your Bangladesh passport</h2><p>Districts you mark visited become entries here. Saved only on this device.</p><Link className="passport-export-link" href="/passport">Design &amp; download your passport →</Link></div><span>{snapshot.districts} / 64</span></header>
         {snapshot.visitedDistricts.length ? <><div className="passport-grid">{snapshot.visitedDistricts.slice(0, showAll ? undefined : 8).map((name) => {

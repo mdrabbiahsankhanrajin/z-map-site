@@ -1,0 +1,79 @@
+import { mkdir, readFile, writeFile } from "node:fs/promises";
+import path from "node:path";
+
+const root = process.cwd();
+const source = JSON.parse(await readFile(path.join(root, "public/data/world-display.geojson"), "utf8"));
+const output = path.join(root, "public/data/insights-atlas");
+const continentNames = ["Africa", "Antarctica", "Asia", "Europe", "North America", "Oceania", "South America"];
+
+function ringsOf(geometry) {
+  if (!geometry) return [];
+  if (geometry.type === "Polygon") return geometry.coordinates.slice(0, 1);
+  if (geometry.type === "MultiPolygon") return geometry.coordinates.map((polygon) => polygon[0]);
+  return [];
+}
+
+function distanceToSegment(point, start, end) {
+  const dx = end[0] - start[0];
+  const dy = end[1] - start[1];
+  if (!dx && !dy) return Math.hypot(point[0] - start[0], point[1] - start[1]);
+  const t = Math.max(0, Math.min(1, ((point[0] - start[0]) * dx + (point[1] - start[1]) * dy) / (dx * dx + dy * dy)));
+  return Math.hypot(point[0] - (start[0] + t * dx), point[1] - (start[1] + t * dy));
+}
+
+function simplify(points, tolerance = 0.22) {
+  if (points.length <= 4) return points;
+  let farthest = 0;
+  let index = 0;
+  for (let i = 1; i < points.length - 1; i += 1) {
+    const distance = distanceToSegment(points[i], points[0], points.at(-1));
+    if (distance > farthest) {
+      farthest = distance;
+      index = i;
+    }
+  }
+  if (farthest <= tolerance) return [points[0], points.at(-1)];
+  return [...simplify(points.slice(0, index + 1), tolerance).slice(0, -1), ...simplify(points.slice(index), tolerance)];
+}
+
+function adjustedLongitude(longitude, name) {
+  if (name === "Oceania" && longitude < 80) return longitude + 360;
+  if (name === "North America" && longitude > 0) return longitude - 360;
+  return longitude;
+}
+
+function buildSvg(name, features) {
+  const rings = features.flatMap((feature) => ringsOf(feature.geometry)).map((ring) => simplify(ring.map(([longitude, latitude]) => [adjustedLongitude(longitude, name), -latitude]))).filter((ring) => ring.length >= 3);
+  const points = rings.flat();
+  const minX = Math.min(...points.map(([x]) => x));
+  const maxX = Math.max(...points.map(([x]) => x));
+  const minY = Math.min(...points.map(([, y]) => y));
+  const maxY = Math.max(...points.map(([, y]) => y));
+  const width = 320;
+  const height = 190;
+  const padding = 8;
+  const scale = Math.min((width - padding * 2) / Math.max(1, maxX - minX), (height - padding * 2) / Math.max(1, maxY - minY));
+  const offsetX = (width - (maxX - minX) * scale) / 2;
+  const offsetY = (height - (maxY - minY) * scale) / 2;
+  const paths = rings.map((ring) => {
+    const commands = ring.map(([x, y], index) => `${index ? "L" : "M"}${((x - minX) * scale + offsetX).toFixed(2)} ${((y - minY) * scale + offsetY).toFixed(2)}`).join(" ");
+    return `<path d="${commands} Z"/>`;
+  }).join("");
+  return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${width} ${height}" role="img"><g fill="#91a18d" stroke="#f7f1e3" stroke-width="0.65" stroke-linejoin="round" vector-effect="non-scaling-stroke">${paths}</g></svg>`;
+}
+
+await mkdir(output, { recursive: true });
+const targets = ["World", ...continentNames, "Other areas"];
+for (const name of targets) {
+  const features = name === "World"
+    ? source.features
+    : name === "Other areas"
+      ? source.features.filter((feature) => !continentNames.includes(feature.properties?.continent))
+      : source.features.filter(
+          (feature) =>
+            feature.properties?.continent === name &&
+            !(name === "Europe" && feature.properties?.id === "RUS"),
+        );
+  const slug = name.toLowerCase().replaceAll(" ", "-");
+  await writeFile(path.join(output, `${slug}.svg`), buildSvg(name, features));
+}
