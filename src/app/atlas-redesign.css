@@ -427,6 +427,7 @@ a { text-underline-offset: .2em; }
   .top-nav a.current { color: var(--chart-ink); border-color: var(--chart-coral); }
   .map-top-caption { top: 72px; left: 14px; color: var(--chart-ink); background: rgba(251, 247, 237, .86); border: 1px solid var(--chart-line); padding: 7px 9px; text-shadow: none; }
   .map-top-caption::before { width: 7px; height: 7px; }
+  .map-state { padding-bottom: max(35dvh, 286px); text-align: center; }
   .map-zoom { top: 118px; }
   .map-depth-control { top: 200px; }
   .detail-panel { border: 0; border-top: 3px solid var(--chart-coral); border-radius: 0; background-color: var(--chart-paper-light); box-shadow: 0 -10px 30px rgba(12, 44, 35, .22); }
