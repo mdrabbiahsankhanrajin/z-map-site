@@ -129,7 +129,7 @@ export function RegionExplorer({ country }: { country: Place }) {
           {active && <button className={`visit-action ${selected.includes(active.id) ? "is-marked" : ""}`} type="button" aria-pressed={selected.includes(active.id)} onClick={() => toggle(active.id)}><span>{selected.includes(active.id) ? "✓ Marked as visited" : "Mark as visited"}</span><span aria-hidden="true">{selected.includes(active.id) ? "−" : "+"}</span></button>}
           {active && outline && !note && <GeoSilhouette name={active.displayName ?? active.name} path={outline} />}
           {note && active && <WorldPlaceCard regionId={active.id} />}
-          <button type="button" className="browse-button" onClick={() => setSheetMode("expanded")}>Browse regions <span aria-hidden="true">→</span></button>
+          <button type="button" className="browse-button" onClick={() => setSheetMode("expanded")}>Browse regions</button>
           <div className="detail-rule" />
           <div className="detail-progress" aria-live="polite"><span>Region progress</span><strong>{selected.length} <small>of {regions.length} regions</small></strong></div>
           <div className="progress-track"><span style={{ width: `${regions.length ? selected.length / regions.length * 100 : 0}%` }} /></div>

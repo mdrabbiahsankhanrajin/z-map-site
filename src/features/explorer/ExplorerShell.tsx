@@ -127,7 +127,7 @@ function Detail({ scope, place, marked, onToggle, onClose, selectedCount, totalP
       {attraction && place && <div className="place-photo"><Link href={`/discover?district=${encodeURIComponent(place.name)}`} aria-label={`Explore photographed places in ${place.displayName ?? place.name}`}><PlacePhoto src={attraction.image.src} alt={attraction.image.alt} sizes="(max-width: 1060px) calc(100vw - 44px), 310px" /></Link><small>{attraction.title} · Photo: <a href={attraction.image.sourceUrl} target="_blank" rel="noreferrer">{attraction.image.author}</a> · <a href={attraction.image.licenseUrl} target="_blank" rel="noreferrer">{attraction.image.license}</a>{attraction.image.note && <> · {attraction.image.note}</>}</small></div>}
       {scope === "world" && place && <WorldPlaceCard countryId={place.id} />}
       {place && <GeoSilhouette name={place.displayName ?? place.name} src={publicPath(`/data/silhouettes/${scope}/${place.id}.svg`)} />}
-      <button type="button" className="browse-button" onClick={onBrowse}>Browse {scope === "world" ? "places" : "districts"} <span aria-hidden="true">→</span></button>
+      <button type="button" className="browse-button" onClick={onBrowse}>Browse {scope === "world" ? "places" : "districts"}</button>
       <nav className="journey-links" aria-label="More ways to explore">{scope === "districts" && <><Link href={place ? `/discover?district=${encodeURIComponent(place.name)}` : "/discover"}>Places & photos</Link><Link href="/planner">Plan a trip</Link></>}<Link href="/insights">Your atlas in numbers</Link></nav>
 
       <div className="detail-rule" />
