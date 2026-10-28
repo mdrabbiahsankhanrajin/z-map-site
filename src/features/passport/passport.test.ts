@@ -113,6 +113,8 @@ describe("personal passport", () => {
     expect(output).toContain("A remembered river morning");
     expect(output).toContain("2026-10-27");
     expect(output).toContain(bangladeshSoutheastIslet);
+    expect(output).toContain('clipPath id="manifestMasthead"');
+    expect(output).toContain('textLength="356"');
   });
 
   it("uses real supplied visit photography for rich and sparse interior leaves", () => {
