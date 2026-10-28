@@ -115,6 +115,8 @@ describe("personal passport", () => {
     expect(output).toContain(bangladeshSoutheastIslet);
     expect(output).toContain('clipPath id="manifestMasthead"');
     expect(output).toContain('textLength="356"');
+    expect(output).toContain("DISTRICT RECORD · RIVER COUNTRY");
+    expect(output).toContain("DISTRICT EDGE");
   });
 
   it("uses real supplied visit photography for rich and sparse interior leaves", () => {
