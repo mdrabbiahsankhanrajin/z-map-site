@@ -6,8 +6,33 @@ import { useEffect, useRef, useState, type KeyboardEvent, type PointerEvent } fr
 type PreviewPage = { src: string; label: string; alt: string };
 type Turn = { from: number; to: number; direction: "next" | "previous" };
 
+export function spreadAnchor(index: number, pageCount: number) {
+  const lastIndex = Math.max(0, pageCount - 1);
+  if (index <= 0) return 0;
+  if (index >= lastIndex) return lastIndex;
+  if (index === 1) return 1;
+  return index % 2 === 0 ? index : index - 1;
+}
+
+export function spreadAnchors(pageCount: number) {
+  const lastIndex = Math.max(0, pageCount - 1);
+  const anchors = lastIndex > 0 ? [0, 1] : [0];
+  for (let index = 2; index < lastIndex; index += 2) anchors.push(index);
+  if (lastIndex > 1) anchors.push(lastIndex);
+  return anchors;
+}
+
+export function spreadPages(index: number, pageCount: number) {
+  const lastIndex = Math.max(0, pageCount - 1);
+  const isOpen = index > 0 && index < lastIndex;
+  if (!isOpen) return { left: null, right: index };
+  if (index === 1) return { left: null, right: 1 };
+  if (index % 2 !== 0) return { left: index - 1, right: index };
+  return { left: index, right: index + 1 < lastIndex ? index + 1 : null };
+}
+
 export function PassportBookPreview({ pages, pageIndex, mode, onPageChange }: { pages: PreviewPage[]; pageIndex: number; mode: "fit" | "actual"; onPageChange: (index: number) => void }) {
-  const safeIndex = Math.min(pageIndex, Math.max(0, pages.length - 1));
+  const safeIndex = Math.max(0, Math.min(pageIndex, Math.max(0, pages.length - 1)));
   const [displayedIndex, setDisplayedIndex] = useState(safeIndex);
   const [turn, setTurn] = useState<Turn | null>(null);
   const displayedRef = useRef(safeIndex);
@@ -17,7 +42,8 @@ export function PassportBookPreview({ pages, pageIndex, mode, onPageChange }: { 
     if (safeIndex === displayedRef.current) return;
     let finishTimer = 0;
     const startTimer = window.setTimeout(() => {
-      if (mode === "actual" || window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+      const staysOnCurrentSpread = spreadAnchor(safeIndex, pages.length) === spreadAnchor(displayedRef.current, pages.length);
+      if (mode === "actual" || staysOnCurrentSpread || window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
         displayedRef.current = safeIndex;
         setDisplayedIndex(safeIndex);
         setTurn(null);
@@ -32,7 +58,7 @@ export function PassportBookPreview({ pages, pageIndex, mode, onPageChange }: { 
       }, 680);
     }, 0);
     return () => { window.clearTimeout(startTimer); window.clearTimeout(finishTimer); };
-  }, [safeIndex, mode]);
+  }, [safeIndex, mode, pages.length]);
 
   const visibleIndex = Math.min(displayedIndex, Math.max(0, pages.length - 1));
   const visiblePage = pages[visibleIndex];
@@ -41,14 +67,18 @@ export function PassportBookPreview({ pages, pageIndex, mode, onPageChange }: { 
   const renderedIndex = turn ? turn.to : visibleIndex;
   const lastPageIndex = Math.max(0, pages.length - 1);
   const isOpenSpread = renderedIndex > 0 && renderedIndex < lastPageIndex;
-  const leftPageIndex = !isOpenSpread || renderedIndex === 1 ? null : renderedIndex % 2 === 0 ? renderedIndex : renderedIndex - 1;
-  const rightPageIndex = !isOpenSpread ? renderedIndex : renderedIndex === 1 ? 1 : renderedIndex % 2 === 0 ? Math.min(renderedIndex + 1, lastPageIndex - 1) : renderedIndex;
+  const { left: leftPageIndex, right: rightPageIndex } = spreadPages(renderedIndex, pages.length);
   const leftPage = leftPageIndex === null ? undefined : pages[leftPageIndex];
-  const rightPage = pages[rightPageIndex] ?? visiblePage;
+  const rightPage = rightPageIndex === null ? pages[renderedIndex] ?? visiblePage : pages[rightPageIndex] ?? visiblePage;
+  const isInsideBackCover = isOpenSpread && rightPageIndex === null;
 
   function changePage(direction: -1 | 1) {
     if (turn) return;
-    const nextIndex = Math.max(0, Math.min(pages.length - 1, displayedRef.current + direction));
+    const anchors = spreadAnchors(pages.length);
+    const currentAnchor = spreadAnchor(displayedRef.current, pages.length);
+    const currentPosition = Math.max(0, anchors.indexOf(currentAnchor));
+    const nextPosition = Math.max(0, Math.min(anchors.length - 1, currentPosition + direction));
+    const nextIndex = anchors[nextPosition];
     if (nextIndex !== displayedRef.current) onPageChange(nextIndex);
   }
 
@@ -94,7 +124,7 @@ export function PassportBookPreview({ pages, pageIndex, mode, onPageChange }: { 
     {isOpenSpread && <div className={`passport-page-left${leftPage ? "" : " is-inside-cover"}`} aria-hidden="true">
       {leftPage && <Image src={leftPage.src} alt="" width={900} height={1260} unoptimized />}
     </div>}
-    <div className="passport-page-base">
+    <div className={`passport-page-base${isInsideBackCover ? " is-inside-cover" : ""}`}>
       <Image src={rightPage.src} alt={turn ? "" : rightPage.alt} width={900} height={1260} priority={safeIndex === 0} unoptimized />
     </div>
     {turn && fromPage && toPage && <div className={`passport-turning-sheet is-${turn.direction}`} aria-hidden="true">

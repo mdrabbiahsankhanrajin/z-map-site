@@ -689,6 +689,9 @@ a { text-underline-offset: .2em; }
 .passport-page-left::after { background:linear-gradient(270deg,rgba(22,39,31,.18),rgba(22,39,31,.05) 4%,transparent 14%,transparent 88%,rgba(82,65,43,.045)); }
 .passport-page-left.is-inside-cover { background:linear-gradient(135deg,rgba(18,59,48,.035),transparent 48%),#f7efdf; }
 .passport-page-left.is-inside-cover::before { position:absolute; inset:5.5%; border:1px solid rgba(184,139,79,.24); border-radius:8px 1px 1px 8px; content:""; }
+.passport-page-base.is-inside-cover { background:linear-gradient(225deg,rgba(18,59,48,.035),transparent 48%),#f7efdf; }
+.passport-page-base.is-inside-cover::before { position:absolute; inset:5.5%; z-index:1; border:1px solid rgba(184,139,79,.24); border-radius:1px 8px 8px 1px; content:""; }
+.passport-page-base.is-inside-cover img { opacity:0; }
 .passport-page-left img { width:100%; height:100%; display:block; object-fit:cover; }
 .passport-flipbook.is-spread { width:min(94%,720px); aspect-ratio:10/7; }
 .passport-flipbook.is-spread .passport-cover-shell { inset:-1.8% -1.5% -2.7%; border-radius:16px 16px 18px 18px; }
@@ -949,6 +952,9 @@ a { text-underline-offset: .2em; }
   .passport-flipbook.is-spread .passport-page-base,.passport-flipbook.is-spread .passport-turning-sheet { inset:0; border-radius:3px 10px 11px 3px; }
   .passport-flipbook.is-spread .passport-book-gutter { left:0; background:linear-gradient(90deg,rgba(24,43,34,.24),rgba(24,43,34,.04) 46%,transparent); }
   .passport-flipbook.is-spread .passport-book-stitch { display:none; }
+  .passport-flipbook.is-spread .passport-page-base.is-inside-cover { background:#f8f1e3; }
+  .passport-flipbook.is-spread .passport-page-base.is-inside-cover::before { display:none; }
+  .passport-flipbook.is-spread .passport-page-base.is-inside-cover img { opacity:1; }
   .passport-preview .passport-cover-image,.passport-preview .passport-inside-page,.passport-empty-page { height:82%; }
   .passport-active-page { max-height:min(128vw,560px); }
   .passport-control-head h2 { font-size:38px; }
