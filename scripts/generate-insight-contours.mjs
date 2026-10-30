@@ -1,5 +1,6 @@
 import { mkdir, readFile, writeFile } from "node:fs/promises";
 import path from "node:path";
+import { geoGraticule10, geoOrthographic, geoPath } from "d3-geo";
 
 const root = process.cwd();
 const source = JSON.parse(await readFile(path.join(root, "public/data/world-display.geojson"), "utf8"));
@@ -62,6 +63,26 @@ function buildSvg(name, features) {
   return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${width} ${height}" role="img"><g fill="#91a18d" stroke="#f7f1e3" stroke-width="0.65" stroke-linejoin="round" vector-effect="non-scaling-stroke">${paths}</g></svg>`;
 }
 
+function buildGlobeSvg(features) {
+  const size = 640;
+  const projection = geoOrthographic()
+    .rotate([25, -15])
+    .translate([size / 2, size / 2])
+    .scale(302)
+    .clipAngle(90)
+    .precision(0.7);
+  const renderPath = geoPath(projection);
+  const sphere = renderPath({ type: "Sphere" });
+  const graticule = renderPath(geoGraticule10());
+  const land = features
+    .map((feature) => renderPath(feature))
+    .filter(Boolean)
+    .map((data) => `<path d="${data}"/>`)
+    .join("");
+
+  return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${size} ${size}" role="img"><path d="${sphere}" fill="#f4f0e4"/><path d="${graticule}" fill="none" stroke="#6d8778" stroke-width="0.8" opacity="0.28"/><g fill="#91a18d" stroke="#f7f1e3" stroke-width="1.05" stroke-linejoin="round">${land}</g><path d="${sphere}" fill="none" stroke="#345b4b" stroke-width="1.4" opacity="0.72"/></svg>`;
+}
+
 await mkdir(output, { recursive: true });
 const targets = ["World", ...continentNames, "Other areas"];
 for (const name of targets) {
@@ -77,3 +98,4 @@ for (const name of targets) {
   const slug = name.toLowerCase().replaceAll(" ", "-");
   await writeFile(path.join(output, `${slug}.svg`), buildSvg(name, features));
 }
+await writeFile(path.join(output, "world-globe.svg"), buildGlobeSvg(source.features));

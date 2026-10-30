@@ -1051,10 +1051,9 @@ a { text-underline-offset: .2em; }
 .insights-map-copy span::before { width: clamp(44px,3.2vw,64px); border-top: 2px solid var(--chart-brass); content: ""; }
 .insights-globe { position: relative; justify-self: end; width: min(43vw, 620px); aspect-ratio: 1; }
 .insights-globe::before { position: absolute; inset: -4%; border: 1px solid rgba(52,91,75,.32); border-radius: 50%; content: ""; }
-.insights-globe-disc { position: absolute; inset: 0; overflow: hidden; border: 1.5px solid rgba(44,86,70,.62); border-radius: 50%; background: rgba(146,161,141,.08); }
-.insights-globe-disc::before { position: absolute; inset: 0; z-index: 2; border-radius: 50%; background: repeating-radial-gradient(ellipse at center, transparent 0 24%, rgba(47,85,70,.16) 24.2% 24.45%, transparent 24.7% 49%), linear-gradient(90deg, transparent calc(50% - .5px), rgba(47,85,70,.2) calc(50% - .5px) calc(50% + .5px), transparent calc(50% + .5px)); mix-blend-mode: multiply; content: ""; pointer-events: none; }
-.insights-globe-disc > img { position: absolute; top: 17%; left: -16%; width: 132%; height: 66%; object-fit: fill; opacity: .78; filter: saturate(.68) contrast(.92); }
-.insights-route { position: absolute; inset: 7%; z-index: 3; width: 86%; height: 86%; overflow: visible; }
+.insights-globe-disc { position: absolute; inset: 0; overflow: hidden; border-radius: 50%; background: rgba(146,161,141,.08); }
+.insights-globe-disc > img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: contain; opacity: .88; mix-blend-mode: multiply; }
+.insights-route { position: absolute; inset: 0; z-index: 3; width: 100%; height: 100%; overflow: visible; }
 .insights-route path { fill: none; stroke: rgba(230,105,71,.8); stroke-width: 4; stroke-dasharray: 12 10; }
 .insights-route circle { fill: var(--chart-coral); stroke: var(--chart-paper-light); stroke-width: 7; }
 .continent-ribbon { position: relative; margin: -18px 0 72px; padding: 30px 0 16px; color: var(--chart-ink); border: 1px solid var(--chart-line); border-width: 1px 0; background: transparent; }
