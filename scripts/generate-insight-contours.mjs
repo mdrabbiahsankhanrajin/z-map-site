@@ -1,6 +1,6 @@
 import { mkdir, readFile, writeFile } from "node:fs/promises";
 import path from "node:path";
-import { geoGraticule10, geoOrthographic, geoPath } from "d3-geo";
+import { geoArea, geoGraticule10, geoOrthographic, geoPath } from "d3-geo";
 
 const root = process.cwd();
 const source = JSON.parse(await readFile(path.join(root, "public/data/world-display.geojson"), "utf8"));
@@ -35,6 +35,32 @@ function simplify(points, tolerance = 0.22) {
   }
   if (farthest <= tolerance) return [points[0], points.at(-1)];
   return [...simplify(points.slice(0, index + 1), tolerance).slice(0, -1), ...simplify(points.slice(index), tolerance)];
+}
+
+function simplifyRing(ring, tolerance = 0.1) {
+  const first = ring[0];
+  const last = ring.at(-1);
+  const isClosed = first && last && first[0] === last[0] && first[1] === last[1];
+  const openRing = isClosed ? ring.slice(0, -1) : ring;
+  const reduced = simplify(openRing, tolerance);
+  if (reduced.length < 3) return ring;
+  return [...reduced, reduced[0]];
+}
+
+function simplifyPolygon(polygon) {
+  const coordinates = polygon.map((ring) => simplifyRing(ring));
+  return geoArea({ type: "Polygon", coordinates }) > Math.PI * 2
+    ? coordinates.map((ring) => [...ring].reverse())
+    : coordinates;
+}
+
+function simplifyFeature(feature) {
+  const geometry = feature.geometry?.type === "Polygon"
+    ? { type: "Polygon", coordinates: simplifyPolygon(feature.geometry.coordinates) }
+    : feature.geometry?.type === "MultiPolygon"
+      ? { type: "MultiPolygon", coordinates: feature.geometry.coordinates.map(simplifyPolygon) }
+      : feature.geometry;
+  return { type: "Feature", properties: { id: feature.properties?.id }, geometry };
 }
 
 function adjustedLongitude(longitude, name) {
@@ -84,6 +110,7 @@ function buildGlobeSvg(features) {
 }
 
 await mkdir(output, { recursive: true });
+const globeFeatures = source.features.map(simplifyFeature);
 const targets = ["World", ...continentNames, "Other areas"];
 for (const name of targets) {
   const features = name === "World"
@@ -98,4 +125,5 @@ for (const name of targets) {
   const slug = name.toLowerCase().replaceAll(" ", "-");
   await writeFile(path.join(output, `${slug}.svg`), buildSvg(name, features));
 }
-await writeFile(path.join(output, "world-globe.svg"), buildGlobeSvg(source.features));
+await writeFile(path.join(output, "world-globe.svg"), buildGlobeSvg(globeFeatures));
+await writeFile(path.join(output, "world-globe-data.geojson"), JSON.stringify({ type: "FeatureCollection", features: globeFeatures }));

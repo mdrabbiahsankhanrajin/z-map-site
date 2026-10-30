@@ -12,6 +12,7 @@ import { parseSavedSelection } from "@/features/explorer/state";
 import { parseTrip } from "@/features/planner/state";
 import { TravelHeader } from "@/components/TravelHeader";
 import { progressByContinent, progressByDivision, type ProgressRow } from "./stats";
+import { InsightsGlobe } from "./InsightsGlobe";
 
 type Snapshot = { world: number; districts: number; stops: number; visitedDistricts: string[]; continents: ProgressRow[]; divisions: ProgressRow[] };
 
@@ -46,7 +47,7 @@ export function Insights() {
 
   return <main className="atlas-content-page insights-page">
     <TravelHeader active="insights" />
-    <section className="content-intro insights-hero"><div className="insights-map"><div className="insights-map-copy"><strong>Your world</strong><small>Every marked place adds to the story.</small><span>{snapshot ? `${snapshot.world} of ${worldPlaces.length} ${snapshot.world === 1 ? "place" : "places"} marked` : "Reading your atlas…"}</span></div><div className="insights-globe" aria-hidden="true"><span className="insights-globe-disc"><Image src={publicPath("/data/insights-atlas/world-globe.svg")} alt="" width={640} height={640} loading="eager" unoptimized /></span><svg className="insights-route" viewBox="0 0 640 640"><path d="M 86 520 C 155 480 177 419 224 357 C 287 274 385 245 468 185 C 514 151 551 119 582 87" /><circle cx="124" cy="490" r="10" /><circle cx="226" cy="354" r="10" /><circle cx="461" cy="190" r="10" /><circle cx="560" cy="108" r="10" /></svg></div></div></section>
+    <section className="content-intro insights-hero"><div className="insights-map"><div className="insights-map-copy"><strong>Your world</strong><small>Every marked place adds to the story.</small><span>{snapshot ? `${snapshot.world} of ${worldPlaces.length} ${snapshot.world === 1 ? "place" : "places"} marked` : "Reading your atlas…"}</span></div><div className="insights-globe" aria-hidden="true"><InsightsGlobe /><svg className="insights-route" viewBox="0 0 640 640"><path d="M 86 520 C 155 480 177 419 224 357 C 287 274 385 245 468 185 C 514 151 551 119 582 87" /><circle cx="124" cy="490" r="10" /><circle cx="226" cy="354" r="10" /><circle cx="461" cy="190" r="10" /><circle cx="560" cy="108" r="10" /></svg></div></div></section>
     {snapshot ? <div className="insights-layout">
       <div className="insight-totals"><div><strong>{snapshot.world}</strong><span>of {worldPlaces.length} world places visited</span></div><div><strong>{snapshot.districts}</strong><span>of 64 Bangladesh districts visited</span></div><div><strong>{snapshot.stops}</strong><span>stops in your trip plan</span></div></div>
       <section className="continent-ribbon" aria-label="World progress by continent"><header><span>World progress</span><strong>{snapshot.world} {snapshot.world === 1 ? "place" : "places"} marked</strong></header><div>{snapshot.continents.map((row) => <article key={row.name}><span className="continent-glyph" aria-hidden="true"><Image src={continentAsset(row.name)} alt="" width={320} height={190} unoptimized /></span><span className="continent-copy"><strong>{row.name}</strong><small>{row.visited} / {row.total}</small><i><b style={{ width: `${row.total ? row.visited / row.total * 100 : 0}%` }} /></i></span></article>)}</div></section>
