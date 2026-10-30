@@ -38,8 +38,13 @@ export function PassportBookPreview({ pages, pageIndex, mode, onPageChange }: { 
   const visiblePage = pages[visibleIndex];
   const fromPage = turn ? pages[turn.from] : undefined;
   const toPage = turn ? pages[turn.to] : undefined;
-  const leftPageIndex = turn ? Math.max(0, turn.to - 1) : Math.max(0, visibleIndex - 1);
-  const leftPage = pages[leftPageIndex];
+  const renderedIndex = turn ? turn.to : visibleIndex;
+  const lastPageIndex = Math.max(0, pages.length - 1);
+  const isOpenSpread = renderedIndex > 0 && renderedIndex < lastPageIndex;
+  const leftPageIndex = !isOpenSpread || renderedIndex === 1 ? null : renderedIndex % 2 === 0 ? renderedIndex : renderedIndex - 1;
+  const rightPageIndex = !isOpenSpread ? renderedIndex : renderedIndex === 1 ? 1 : renderedIndex % 2 === 0 ? Math.min(renderedIndex + 1, lastPageIndex - 1) : renderedIndex;
+  const leftPage = leftPageIndex === null ? undefined : pages[leftPageIndex];
+  const rightPage = pages[rightPageIndex] ?? visiblePage;
 
   function changePage(direction: -1 | 1) {
     if (turn) return;
@@ -74,7 +79,7 @@ export function PassportBookPreview({ pages, pageIndex, mode, onPageChange }: { 
   if (mode === "actual") return <Image className="passport-active-page" src={pages[safeIndex]?.src ?? visiblePage.src} alt={pages[safeIndex]?.alt ?? visiblePage.alt} width={900} height={1260} unoptimized />;
 
   return <div
-    className={`passport-flipbook ${visibleIndex === 0 ? "is-cover" : "is-spread"}`}
+    className={`passport-flipbook ${isOpenSpread ? "is-spread" : renderedIndex === 0 ? "is-cover" : "is-back-cover"}`}
     role="group"
     aria-label={`Interactive passport preview. ${pages[safeIndex]?.label ?? visiblePage.label}, page ${safeIndex + 1} of ${pages.length}. Swipe or use the arrow keys to change pages.`}
     tabIndex={0}
@@ -83,19 +88,21 @@ export function PassportBookPreview({ pages, pageIndex, mode, onPageChange }: { 
     onPointerUp={finishPointer}
     onPointerCancel={finishPointer}
   >
-    {visibleIndex > 0 && leftPage && <div className="passport-page-left" aria-hidden="true">
-      <Image src={leftPage.src} alt="" width={900} height={1260} unoptimized />
+    <span className="passport-cover-shell" aria-hidden="true" />
+    <span className="passport-page-block passport-page-block-left" aria-hidden="true" />
+    <span className="passport-page-block passport-page-block-right" aria-hidden="true" />
+    {isOpenSpread && <div className={`passport-page-left${leftPage ? "" : " is-inside-cover"}`} aria-hidden="true">
+      {leftPage && <Image src={leftPage.src} alt="" width={900} height={1260} unoptimized />}
     </div>}
-    <div className="passport-page-stack" aria-hidden="true" />
-    <div className="passport-page-stack passport-page-stack-two" aria-hidden="true" />
     <div className="passport-page-base">
-      <Image src={(turn ? toPage : visiblePage)?.src ?? visiblePage.src} alt={turn ? "" : visiblePage.alt} width={900} height={1260} priority={safeIndex === 0} unoptimized />
+      <Image src={rightPage.src} alt={turn ? "" : rightPage.alt} width={900} height={1260} priority={safeIndex === 0} unoptimized />
     </div>
     {turn && fromPage && toPage && <div className={`passport-turning-sheet is-${turn.direction}`} aria-hidden="true">
       <span className="passport-sheet-face passport-sheet-front"><Image src={turn.direction === "next" ? fromPage.src : toPage.src} alt="" width={900} height={1260} unoptimized /></span>
       <span className="passport-sheet-face passport-sheet-back"><Image src={turn.direction === "next" ? toPage.src : fromPage.src} alt="" width={900} height={1260} unoptimized /></span>
     </div>}
     <span className="passport-book-gutter" aria-hidden="true" />
+    <span className="passport-book-stitch" aria-hidden="true" />
     <span className="passport-swipe-hint" aria-hidden="true">Swipe the page</span>
   </div>;
 }
