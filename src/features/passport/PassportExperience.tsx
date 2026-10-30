@@ -13,6 +13,7 @@ import { publicPath } from "@/lib/publicPath";
 import { parseSavedSelection } from "@/features/explorer/state";
 import { parseSavedPlaces, SAVED_PLACES_KEY } from "@/features/discovery/savedPlaces";
 import { createPassport, paginatePassport, renderManifestPage, renderPassportCover, type ManifestPage, type PassportData, type PassportStyle } from "./passport";
+import { createPassportBookPages } from "./exportPassport";
 import { emptyPassportWorkspace, moveItem, PASSPORT_WORKSPACE_KEY, parsePassportWorkspace, passportAchievements, serializePassportWorkspace, type PassportMemory, type PassportWorkspaceState } from "./passportWorkspace";
 import { PassportBookPreview } from "./PassportBookPreview";
 
@@ -24,7 +25,7 @@ const styleOptions: { id: PassportStyle; label: string; detail: string }[] = [
 
 const workspaceTabs = ["studio", "timeline", "collections", "stamps"] as const;
 type WorkspaceTab = typeof workspaceTabs[number];
-type BusyAction = "png" | "pdf" | "page" | "share" | null;
+type BusyAction = "png" | "pdf" | "book" | "page" | "share" | null;
 type VisitItem = { key: string; id: string; kind: "world" | "district"; name: string; region: string; image?: string; rawImage?: `/${string}`; imageAlt?: string };
 
 const pageKey = (page: ManifestPage) => `${page.section}:${page.index}`;
@@ -126,11 +127,17 @@ export function PassportExperience() {
   }, [unorderedManifestPages, workspace.pageOrder]);
   const manifestPhotoVisits = useMemo(() => manifestPages.flatMap((page) => page.names.map((name) => includedVisits.find((visit) => visit.name === name && visit.rawImage)).filter((visit): visit is VisitItem & { rawImage: `/${string}` } => Boolean(visit)).slice(0, 3)), [manifestPages, includedVisits]);
   const manifestAssets = useMemo(() => ({ photoDataByName: manifestPhotos, botanicalDataUrl: ornament.dataUrl, lilyDataUrl: ornament.lilyDataUrl }), [manifestPhotos, ornament.dataUrl, ornament.lilyDataUrl]);
-  const manifestSvgs = useMemo(() => manifestPages.map((page, index) => renderManifestPage(page, index + 2, style, memoryByName, manifestAssets)), [manifestPages, style, memoryByName, manifestAssets]);
+  const manifestSvgs = useMemo(() => manifestPages.map((page, index) => renderManifestPage(page, index + 3, style, memoryByName, manifestAssets)), [manifestPages, style, memoryByName, manifestAssets]);
   const manifestPreviewUrls = useMemo(() => manifestSvgs.map((svg) => `data:image/svg+xml;charset=utf-8,${encodeURIComponent(svg)}`), [manifestSvgs]);
-  const pageCount = manifestPages.length + 1;
+  const pageCount = manifestPages.length + 4;
   const currentPreviewPage = Math.min(previewPage, pageCount - 1);
-  const pageNavigation = [{ label: "Cover", fullLabel: "Cover" }, ...manifestPages.map((page) => ({ label: shortPageLabel(page.section), fullLabel: page.section }))];
+  const pageNavigation = useMemo(() => [
+    { label: "Front", fullLabel: "Front cover" },
+    { label: "Opening", fullLabel: "Opening page" },
+    ...manifestPages.map((page) => ({ label: shortPageLabel(page.section), fullLabel: page.section })),
+    { label: "Closing", fullLabel: "Closing page" },
+    { label: "Back", fullLabel: "Back cover" },
+  ], [manifestPages]);
 
   useEffect(() => {
     let cancelled = false;
@@ -172,17 +179,19 @@ export function PassportExperience() {
   }, [style, styleReady, coverAssets.fontDataUrl]);
 
   const cover = useMemo(() => renderPassportCover(data, photoDataUrl, ornament.dataUrl, paper.dataUrl, ornament.lilyDataUrl, style, coverAssets), [data, photoDataUrl, ornament.dataUrl, ornament.lilyDataUrl, paper.dataUrl, style, coverAssets]);
+  const bookSvgs = useMemo(() => createPassportBookPages(data, photoDataUrl, ornament.dataUrl, paper.dataUrl, ornament.lilyDataUrl, style, coverAssets, manifestPages, memoryByName, manifestAssets), [data, photoDataUrl, ornament.dataUrl, paper.dataUrl, ornament.lilyDataUrl, style, coverAssets, manifestPages, memoryByName, manifestAssets]);
   useEffect(() => {
     const url = URL.createObjectURL(new Blob([cover], { type: "image/svg+xml;charset=utf-8" }));
     const frame = requestAnimationFrame(() => setPreviewUrl(url));
     return () => { cancelAnimationFrame(frame); URL.revokeObjectURL(url); };
   }, [cover]);
 
-  const activePageLabel = currentPreviewPage === 0 ? "Cover" : manifestPages[currentPreviewPage - 1]?.section ?? "Places";
-  const previewPages = useMemo(() => [
-    ...(previewUrl ? [{ src: previewUrl, label: "Cover", alt: `${styleOptions.find((option) => option.id === style)?.label} Atlas passport cover with ${includedWorldIds.length} world places and ${includedDistrictIds.length} Bangladesh districts` }] : []),
-    ...manifestPreviewUrls.map((src, index) => ({ src, label: manifestPages[index]?.section ?? "Places", alt: `${manifestPages[index]?.section ?? "Places"}, page ${index + 2} of ${pageCount}` })),
-  ], [previewUrl, style, includedWorldIds.length, includedDistrictIds.length, manifestPreviewUrls, manifestPages, pageCount]);
+  const activePageLabel = pageNavigation[currentPreviewPage]?.fullLabel ?? "Passport page";
+  const previewPages = useMemo(() => bookSvgs.map((svg, index) => ({
+    src: `data:image/svg+xml;charset=utf-8,${encodeURIComponent(svg)}`,
+    label: pageNavigation[index]?.fullLabel ?? `Page ${index + 1}`,
+    alt: `${pageNavigation[index]?.fullLabel ?? "Passport page"}, page ${index + 1} of ${pageCount}`,
+  })), [bookSvgs, pageNavigation, pageCount]);
   const activeMemoryVisitKey = includedVisits.some((visit) => visit.key === memoryVisitKey) ? memoryVisitKey : includedVisits[0]?.key ?? "";
   const selectedMemoryVisit = includedVisits.find((visit) => visit.key === activeMemoryVisitKey);
   const selectedMemory = selectedMemoryVisit ? workspace.memories[selectedMemoryVisit.key] ?? blankMemory : blankMemory;
@@ -206,19 +215,19 @@ export function PassportExperience() {
     setCustomCover({ name: file.name, dataUrl }); setStatus("Custom cover photo added for this session."); event.target.value = "";
   }
 
-  async function exportFile(format: "png" | "pdf" | "page") {
+  async function exportFile(format: "png" | "pdf" | "book" | "page") {
     if (exportDisabled) return;
     setBusy(format); setStatus("");
     try {
-      const { createPassportPng, createPassportPdf, createPassportPagePng, downloadPassport } = await import("./exportPassport");
+      const { createPassportBook, createPassportPng, createPassportPdf, createPassportPagePng, downloadPassport } = await import("./exportPassport");
       const baseName = safeFileName(name || "atlas-passport");
       if (format === "pdf") {
         const blob = await createPassportPdf(data, photoDataUrl, ornament.dataUrl, paper.dataUrl, ornament.lilyDataUrl, style, coverAssets, manifestPages, memoryByName, manifestAssets);
         downloadPassport(blob, `${baseName}-${style}.pdf`); setStatus(`PDF downloaded with ${pageCount} pages.`);
+      } else if (format === "book") {
+        downloadPassport(createPassportBook(bookSvgs, name.trim() || "My Atlas Passport"), `${baseName}-${style}-book.html`); setStatus(`Offline book downloaded with ${pageCount} pages.`);
       } else if (format === "page") {
-        const page = manifestPages[currentPreviewPage - 1];
-        const svg = currentPreviewPage === 0 || !page ? cover : renderManifestPage(page, currentPreviewPage + 1, style, memoryByName, manifestAssets);
-        downloadPassport(await createPassportPagePng(svg), `${baseName}-page-${currentPreviewPage + 1}.png`); setStatus(`${activePageLabel} exported as a high-resolution PNG.`);
+        downloadPassport(await createPassportPagePng(bookSvgs[currentPreviewPage] ?? cover), `${baseName}-page-${currentPreviewPage + 1}.png`); setStatus(`${activePageLabel} exported as a high-resolution PNG.`);
       } else {
         downloadPassport(await createPassportPng(data, photoDataUrl, ornament.dataUrl, paper.dataUrl, ornament.lilyDataUrl, style, coverAssets), `${baseName}-cover.png`); setStatus("Cover downloaded as a high-resolution PNG.");
       }
@@ -258,8 +267,8 @@ export function PassportExperience() {
         <section className="passport-step passport-cover-step" aria-labelledby="passport-photo-heading"><div><h3 id="passport-photo-heading">Cover photo</h3><p className="passport-step-copy">Choose an Atlas photo or your own.</p><div className="passport-cover-editor">{(customCover?.dataUrl || photoSrc) ? <Image src={customCover?.dataUrl || publicPath(photoSrc as `/${string}`)} alt="Current passport cover photograph" width={104} height={72} unoptimized /> : <span className="passport-cover-placeholder" aria-hidden="true"/>}<div><label className="passport-upload-button" htmlFor="passport-cover-upload">Change photo</label><input id="passport-cover-upload" type="file" accept="image/*" onChange={(event) => void handleCoverUpload(event)} />{includedDistrictIds.length > 0 && !customCover && <select id="passport-photo" aria-label="Atlas cover photograph" value={featuredDistrictId} onChange={(event) => setFeaturedDistrictId(event.target.value)}><option value="atlas-cover">Sundarbans</option><option value="">First visited district</option>{markedDistricts.map((district) => <option key={district.id} value={district.id}>{districtDisplayName(district.name)}</option>)}</select>}{customCover && <button type="button" onClick={() => setCustomCover(undefined)}>Use Atlas photo</button>}</div></div></div></section>
         <section className="passport-step passport-style-step" aria-labelledby="passport-style"><div><h3 id="passport-style">Cover style</h3><p className="passport-step-copy">Applied to every page.</p><div className="passport-style-switch" role="group" aria-label="Passport cover style">{styleOptions.map((option) => <button key={option.id} type="button" className={`passport-style-choice passport-style-${option.id}`} aria-label={`${option.label}: ${option.detail}`} aria-pressed={style === option.id} onClick={() => setStyle(option.id)}><span className="passport-style-swatch" aria-hidden="true"/><span><strong>{option.label}</strong><small>{option.detail}</small></span></button>)}</div></div></section>
         <section className="passport-step passport-memory-step" aria-labelledby="passport-memory"><div><div className="passport-memory-title"><div><span>Personal field note</span><h3 id="passport-memory">Memory details</h3></div><p>Add only what you remember. Nothing is inferred.</p></div>{selectedMemoryVisit ? <div className="passport-memory-editor"><div className="passport-memory-place"><div className="passport-memory-photo">{selectedMemoryVisit.image ? <Image src={selectedMemoryVisit.image} alt={selectedMemoryVisit.imageAlt ?? ""} width={160} height={118} unoptimized /> : <span className="passport-visit-placeholder" aria-hidden="true">{selectedMemoryVisit.name.slice(0, 1)}</span>}<span aria-hidden="true">{String(includedVisits.findIndex((visit) => visit.key === activeMemoryVisitKey) + 1).padStart(2, "0")}</span></div><label className="passport-memory-place-label" htmlFor="passport-memory-place">Place</label><select id="passport-memory-place" aria-label="Memory place" value={activeMemoryVisitKey} onChange={(event) => setMemoryVisitKey(event.target.value)}>{includedVisits.map((visit) => <option key={visit.key} value={visit.key}>{visit.name}</option>)}</select></div><div className="passport-memory-fields"><header><span>Current entry</span><strong>{selectedMemoryVisit.name}</strong></header><div className="passport-memory-grid"><div><label className="passport-field" htmlFor="passport-memory-date">Visit date <small>optional</small></label><input id="passport-memory-date" type="date" value={selectedMemory.date} max={new Date().toISOString().slice(0, 10)} onInput={(event) => updateMemory(selectedMemoryVisit.key, { date: event.currentTarget.value })} /></div><label className="passport-favorite"><input type="checkbox" checked={selectedMemory.favorite} onChange={(event) => updateMemory(selectedMemoryVisit.key, { favorite: event.target.checked })} /><span aria-hidden="true">★</span><b>Favorite</b></label></div><label className="passport-field" htmlFor="passport-memory-note">Memory note <small>{selectedMemory.note.length} / 240</small></label><textarea id="passport-memory-note" value={selectedMemory.note} maxLength={240} onChange={(event) => updateMemory(selectedMemoryVisit.key, { note: event.target.value })} placeholder="The light, the sounds, the detail you want to keep…" /><div className="passport-memory-prompts" aria-label="Memory note starters"><span>Start with</span>{["The view", "A small detail", "How it felt"].map((prompt) => <button key={prompt} type="button" onClick={() => updateMemory(selectedMemoryVisit.key, { note: selectedMemory.note ? `${selectedMemory.note} ${prompt.toLowerCase()}…` : `${prompt}…` })}>{prompt}</button>)}</div></div></div> : <p className="passport-inline-empty">Include a marked place to add a memory.</p>}</div></section>
-        <section className="passport-step passport-pages-step" aria-labelledby="passport-pages"><div><h3 id="passport-pages">Arrange pages</h3><p className="passport-step-copy">Set the preview and PDF order.</p><ol className="passport-page-order"><li><span>01</span>{previewUrl && <Image src={previewUrl} alt="Passport cover thumbnail" width={36} height={50} unoptimized />}<strong>Cover</strong><small>Fixed</small></li>{manifestPages.map((page, index) => <li key={pageKey(page)}><span>{String(index + 2).padStart(2, "0")}</span>{manifestPreviewUrls[index] && <Image src={manifestPreviewUrls[index]} alt="" width={36} height={50} unoptimized />}<strong>{page.section}</strong><div><button type="button" disabled={index === 0} onClick={() => movePage(index, -1)} aria-label={`Move ${page.section} earlier`}>Earlier</button><button type="button" disabled={index === manifestPages.length - 1} onClick={() => movePage(index, 1)} aria-label={`Move ${page.section} later`}>Later</button></div></li>)}</ol></div></section>
-        <section className="passport-step passport-export-step" aria-labelledby="passport-export"><div><div className="passport-export-layout"><div><h3 id="passport-export">Export your passport</h3><p className="passport-step-copy">Download the whole book or the page in view.</p></div><div><h3>Share passport</h3><p className="passport-step-copy">Place names only.</p></div><div className="passport-downloads"><button className="passport-download-primary" type="button" disabled={exportDisabled} onClick={() => void exportFile("pdf")}><span>{busy === "pdf" ? "Creating PDF…" : "Download PDF"}<small>{pageCount} {pageCount === 1 ? "page" : "pages"}</small></span></button><button type="button" disabled={exportDisabled} onClick={() => void exportFile("page")}><span>{busy === "page" ? "Creating page…" : "Export current page"}<small>High-resolution PNG</small></span></button><button type="button" disabled={exportDisabled} onClick={() => void sharePassport()}><span>{busy === "share" ? "Opening share…" : "Share passport"}<small>Private summary</small></span></button>{photoFailed && <p>The cover photo could not load. Exports will use the illustrated cover.</p>}<p className="passport-status" role="status">{status}</p></div></div>{!hasVisits && <p className="passport-no-visits">Your passport is waiting for its first stamp. <Link href="/bd">Mark a place on the map →</Link></p>}<p className="passport-private"><span aria-hidden="true">◇</span><strong>Private by design.</strong> Notes and dates stay in this browser. Sharing includes place names only.</p></div></section>
+        <section className="passport-step passport-pages-step" aria-labelledby="passport-pages"><div><h3 id="passport-pages">Arrange pages</h3><p className="passport-step-copy">Set the preview, PDF, and book order.</p><ol className="passport-page-order"><li><span>01</span>{previewUrl && <Image src={previewUrl} alt="Passport front cover thumbnail" width={36} height={50} unoptimized />}<strong>Front cover</strong><small>Fixed</small></li><li><span>02</span>{previewPages[1] && <Image src={previewPages[1].src} alt="" width={36} height={50} unoptimized />}<strong>Opening page</strong><small>Fixed</small></li>{manifestPages.map((page, index) => <li key={pageKey(page)}><span>{String(index + 3).padStart(2, "0")}</span>{manifestPreviewUrls[index] && <Image src={manifestPreviewUrls[index]} alt="" width={36} height={50} unoptimized />}<strong>{page.section}</strong><div><button type="button" disabled={index === 0} onClick={() => movePage(index, -1)} aria-label={`Move ${page.section} earlier`}>Earlier</button><button type="button" disabled={index === manifestPages.length - 1} onClick={() => movePage(index, 1)} aria-label={`Move ${page.section} later`}>Later</button></div></li>)}<li><span>{String(manifestPages.length + 3).padStart(2, "0")}</span>{previewPages[pageCount - 2] && <Image src={previewPages[pageCount - 2].src} alt="" width={36} height={50} unoptimized />}<strong>Closing page</strong><small>Fixed</small></li><li><span>{String(manifestPages.length + 4).padStart(2, "0")}</span>{previewPages[pageCount - 1] && <Image src={previewPages[pageCount - 1].src} alt="" width={36} height={50} unoptimized />}<strong>Back cover</strong><small>Fixed</small></li></ol></div></section>
+        <section className="passport-step passport-export-step" aria-labelledby="passport-export"><div><div className="passport-export-layout"><div><h3 id="passport-export">Export your passport</h3><p className="passport-step-copy">Choose a print PDF, offline book, or the page in view.</p></div><div><h3>Share passport</h3><p className="passport-step-copy">Place names only.</p></div><div className="passport-downloads"><button className="passport-download-primary" type="button" disabled={exportDisabled} onClick={() => void exportFile("pdf")}><span>{busy === "pdf" ? "Creating PDF…" : "Download PDF"}<small>{pageCount} print-ready pages</small></span></button><button className="passport-download-book" type="button" disabled={exportDisabled} onClick={() => void exportFile("book")}><span>{busy === "book" ? "Building book…" : "Download book"}<small>Offline interactive HTML</small></span></button><button type="button" disabled={exportDisabled} onClick={() => void exportFile("page")}><span>{busy === "page" ? "Creating page…" : "Export current page"}<small>High-resolution PNG</small></span></button><button type="button" disabled={exportDisabled} onClick={() => void sharePassport()}><span>{busy === "share" ? "Opening share…" : "Share passport"}<small>Private summary</small></span></button>{photoFailed && <p>The cover photo could not load. Exports will use the illustrated cover.</p>}<p className="passport-status" role="status">{status}</p></div></div>{!hasVisits && <p className="passport-no-visits">Your passport is waiting for its first stamp. <Link href="/bd">Mark a place on the map →</Link></p>}<p className="passport-private"><span aria-hidden="true">◇</span><strong>Private by design.</strong> Notes and dates stay in this browser. Sharing includes place names only.</p></div></section>
       </>}</section>
     </div>}
 

@@ -3,6 +3,7 @@ import districts from "../../data/districts.json";
 import { worldPlaces } from "../../data/worldPlaces";
 import { createPassport, paginatePassport, renderManifestPage, renderPassportCover } from "./passport";
 import { bangladeshSoutheastIslet, bangladeshWesternIslands } from "./bangladeshSilhouette";
+import { createPassportBook, createPassportBookPages } from "./exportPassport";
 
 describe("personal passport", () => {
   it("uses only known marked visits and deduplicates them", () => {
@@ -117,6 +118,29 @@ describe("personal passport", () => {
     expect(output).toContain('textLength="356"');
     expect(output).toContain("DISTRICT RECORD · RIVER COUNTRY");
     expect(output).toContain("DISTRICT EDGE");
+  });
+
+  it("builds a complete book with designed front, opening, closing, and back pages", () => {
+    const data = createPassport(["DEU"], [districts[0].id], "River Reader");
+    const manifests = paginatePassport(data);
+    const pages = createPassportBookPages(data, undefined, undefined, "data:image/webp;base64,PAPER", undefined, "archive", undefined, manifests);
+    expect(pages).toHaveLength(manifests.length + 4);
+    expect(pages[0]).toContain("PERSONAL TRAVEL RECORD");
+    expect(pages[1]).toContain("THIS PASSPORT BELONGS TO");
+    expect(pages.at(-2)).toContain("THE JOURNEY");
+    expect(pages.at(-1)).toContain("YOUR PLACES. YOUR RECORD.");
+  });
+
+  it("packages the book as a self-contained offline reader without arrow-only controls", async () => {
+    const blob = createPassportBook(["<svg xmlns=\"http://www.w3.org/2000/svg\"/>", "<svg xmlns=\"http://www.w3.org/2000/svg\"/>"] , "River & Road");
+    const output = await blob.text();
+    expect(blob.type).toBe("text/html;charset=utf-8");
+    expect(output).toContain("Offline Atlas book");
+    expect(output).toContain("River &amp; Road");
+    expect(output).toContain(">Previous</button>");
+    expect(output).toContain(">Next</button>");
+    expect(output).not.toContain(">‹</button>");
+    expect(output).not.toContain(">›</button>");
   });
 
   it("uses real supplied visit photography for rich and sparse interior leaves", () => {

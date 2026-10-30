@@ -552,7 +552,6 @@ a { text-underline-offset: .2em; }
 .passport-inline-empty { margin:0; padding:18px 4px; color:var(--passport-muted); font-size:12px; line-height:1.5; }
 .passport-inline-empty :is(button,a),.passport-feature-empty button { min-height:42px; display:inline-flex; align-items:center; margin-top:8px; padding:0 14px; border:1px solid var(--passport-ink); color:var(--passport-ink); background:transparent; font-weight:750; cursor:pointer; }
 .passport-page .passport-downloads { grid-template-columns:1fr 1fr; }
-.passport-page .passport-downloads button:nth-of-type(3) { grid-column:1 / -1; }
 .passport-mobile-action { display:none; }
 
 .passport-feature-view { max-width:1320px; min-height:600px; margin:0 auto; padding:56px 64px 88px; }
@@ -762,6 +761,8 @@ a { text-underline-offset: .2em; }
 .passport-downloads button { width:100%; min-height:62px; display:flex; align-items:center; justify-content:flex-start; gap:18px; margin:0; padding:11px 15px; border:1px solid var(--passport-ink); border-radius:0; color:var(--passport-ink); background:transparent; text-align:left; cursor:pointer; }
 .passport-downloads button + button { margin-top:9px; }
 .passport-downloads button.passport-download-primary { color:#fff9ed; border-color:var(--passport-coral); background:var(--passport-coral); }
+.passport-downloads button.passport-download-book { color:#fff9ed; border-color:var(--passport-ink); background:var(--passport-ink); }
+.passport-downloads button.passport-download-book:hover:not(:disabled) { border-color:var(--passport-coral-deep); background:var(--passport-coral-deep); }
 .passport-downloads button:hover:not(:disabled) { color:#fff9ed; border-color:var(--passport-ink); background:var(--passport-ink); }
 .passport-downloads button:disabled { cursor:not-allowed; opacity:.45; }
 .passport-downloads button span { font:700 13px/1.2 ui-sans-serif,system-ui,sans-serif; }
@@ -900,8 +901,7 @@ a { text-underline-offset: .2em; }
   .passport-export-layout { grid-template-columns:minmax(0,2fr) minmax(0,1fr); gap:0 13px; }
   .passport-export-layout > div:nth-child(2) { padding-left:13px; }
   .passport-downloads { display:grid; grid-template-columns:1fr 1fr; gap:7px; }
-  .passport-export-layout .passport-downloads { grid-template-columns:1fr 1fr .78fr; }
-  .passport-page .passport-export-layout .passport-downloads button:nth-of-type(3) { grid-column:3; }
+  .passport-export-layout .passport-downloads { grid-template-columns:1fr 1fr 1fr .78fr; }
   .passport-downloads button { min-width:0; min-height:47px; padding:7px 10px; }
   .passport-downloads button + button { margin-top:0; }
   .passport-downloads button span { font-size:11px; }

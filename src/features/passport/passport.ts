@@ -4,6 +4,7 @@ import districts from "../../data/districts.json";
 import { featuredRegionForCountry, regionNotes } from "../../data/regionNotes";
 import { worldPlaces } from "../../data/worldPlaces";
 import { bangladeshSilhouette, bangladeshSoutheastIslet, bangladeshWesternIslands } from "./bangladeshSilhouette";
+import { renderBookFrontCover } from "./passportBookPages";
 
 export const PASSPORT_WIDTH = 900;
 export const PASSPORT_HEIGHT = 1260;
@@ -208,7 +209,8 @@ function renderTravelogueCover(data: PassportData, photoDataUrl?: string, lilyDa
 export function renderPassportCover(data: PassportData, photoDataUrl?: string, botanicalDataUrl?: string, paperDataUrl?: string, lilyDataUrl?: string, style: PassportStyle = "archive", assets?: CoverAssets): string {
   if (style === "expedition") return renderExpeditionCover(data, photoDataUrl, botanicalDataUrl, assets);
   if (style === "travelogue") return renderTravelogueCover(data, photoDataUrl, lilyDataUrl, paperDataUrl, assets);
-  return renderArchiveCover(data, photoDataUrl, botanicalDataUrl, paperDataUrl, lilyDataUrl);
+  if (!photoDataUrl && !paperDataUrl) return renderArchiveCover(data, photoDataUrl, botanicalDataUrl, paperDataUrl, lilyDataUrl);
+  return renderBookFrontCover(data, photoDataUrl, paperDataUrl, style);
 }
 
 export function renderManifestPage(page: ManifestPage, documentPage: number, style: PassportStyle = "archive", memories: Record<string, PassportMemoryLine> = {}, assets: ManifestAssets = {}): string {
