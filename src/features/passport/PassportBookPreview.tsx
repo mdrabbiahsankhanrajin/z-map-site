@@ -38,6 +38,8 @@ export function PassportBookPreview({ pages, pageIndex, mode, onPageChange }: { 
   const visiblePage = pages[visibleIndex];
   const fromPage = turn ? pages[turn.from] : undefined;
   const toPage = turn ? pages[turn.to] : undefined;
+  const leftPageIndex = turn ? Math.max(0, turn.to - 1) : Math.max(0, visibleIndex - 1);
+  const leftPage = pages[leftPageIndex];
 
   function changePage(direction: -1 | 1) {
     if (turn) return;
@@ -72,7 +74,7 @@ export function PassportBookPreview({ pages, pageIndex, mode, onPageChange }: { 
   if (mode === "actual") return <Image className="passport-active-page" src={pages[safeIndex]?.src ?? visiblePage.src} alt={pages[safeIndex]?.alt ?? visiblePage.alt} width={900} height={1260} unoptimized />;
 
   return <div
-    className="passport-flipbook"
+    className={`passport-flipbook ${visibleIndex === 0 ? "is-cover" : "is-spread"}`}
     role="group"
     aria-label={`Interactive passport preview. ${pages[safeIndex]?.label ?? visiblePage.label}, page ${safeIndex + 1} of ${pages.length}. Swipe or use the arrow keys to change pages.`}
     tabIndex={0}
@@ -81,6 +83,9 @@ export function PassportBookPreview({ pages, pageIndex, mode, onPageChange }: { 
     onPointerUp={finishPointer}
     onPointerCancel={finishPointer}
   >
+    {visibleIndex > 0 && leftPage && <div className="passport-page-left" aria-hidden="true">
+      <Image src={leftPage.src} alt="" width={900} height={1260} unoptimized />
+    </div>}
     <div className="passport-page-stack" aria-hidden="true" />
     <div className="passport-page-stack passport-page-stack-two" aria-hidden="true" />
     <div className="passport-page-base">

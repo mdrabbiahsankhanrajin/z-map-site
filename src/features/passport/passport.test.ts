@@ -138,4 +138,13 @@ describe("personal passport", () => {
     expect(sparse).toContain("postageEdge");
     expect(sparse).toContain("REISEN VERBINDET DIE WELT");
   });
+
+  it("keeps sparse Bangladesh pages in the districts composition", () => {
+    const page = { section: "Bangladesh districts" as const, names: ["Cox's Bazar", "Dhaka"], index: 1, total: 1 };
+    const output = renderManifestPage(page, 2, "archive", {}, { photoDataByName: { "Cox's Bazar": "data:image/webp;base64,COX", Dhaka: "data:image/webp;base64,DHAKA" } });
+
+    expect(output).toContain("Bangladesh");
+    expect(output).toContain("DISTRICTS");
+    expect(output).not.toContain(">World</text>");
+  });
 });
