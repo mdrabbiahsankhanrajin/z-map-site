@@ -131,6 +131,24 @@ describe("personal passport", () => {
     expect(pages.at(-1)).toContain("YOUR PLACES. YOUR RECORD.");
   });
 
+  it("drives the book boundaries from the current places, order, dates, memories, favorites, and name", () => {
+    const data = createPassport(["DEU"], [districts[0].id], "River Reader");
+    const manifests = paginatePassport(data).reverse();
+    const memories = {
+      [data.districts[0]]: { date: "2026-01-04", note: "Morning light across the old brick", favorite: true },
+      Germany: { date: "2026-09-18", note: "A mountain road worth remembering" },
+    };
+    const pages = createPassportBookPages(data, undefined, undefined, "data:image/webp;base64,PAPER", undefined, "archive", undefined, manifests, memories);
+    expect(pages[0]).toContain("River Reader");
+    expect(pages[1]).toContain("2 RECORDED");
+    expect(pages[1]).toContain("2026-01-04 — 2026-09-18");
+    expect(pages.at(-2)).toContain("Morning light across the old brick");
+    expect(pages.at(-2)).toContain("1 FAVORITE");
+    expect(pages.at(-1)).toContain("RIVER READER");
+    expect(pages.at(-1)).toContain("2 MEMORIES");
+    expect(pages[2]).toContain(manifests[0].section === "World places" ? "World" : "Bangladesh");
+  });
+
   it("packages the book as a self-contained offline reader without arrow-only controls", async () => {
     const blob = createPassportBook(["<svg xmlns=\"http://www.w3.org/2000/svg\"/>", "<svg xmlns=\"http://www.w3.org/2000/svg\"/>"] , "River & Road");
     const output = await blob.text();

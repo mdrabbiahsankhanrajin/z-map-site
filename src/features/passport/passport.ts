@@ -14,7 +14,7 @@ export type PassportStyle = typeof PASSPORT_STYLES[number];
 export type PassportPhoto = { src: `/${string}`; place: string; title: string; author: string; license: string; licenseUrl: string; sourceUrl: string };
 export type PassportData = { name: string; world: string[]; districts: string[]; photo?: PassportPhoto };
 export type ManifestPage = { section: "World places" | "Bangladesh districts"; names: string[]; index: number; total: number };
-export type PassportMemoryLine = { date?: string; note?: string };
+export type PassportMemoryLine = { date?: string; note?: string; favorite?: boolean };
 export type ManifestAssets = { photoDataByName?: Record<string, string>; botanicalDataUrl?: string; lilyDataUrl?: string };
 
 const bangladeshOrnament = `${bangladeshSilhouette} ${bangladeshWesternIslands} ${bangladeshSoutheastIslet}`;

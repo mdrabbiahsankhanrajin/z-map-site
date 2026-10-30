@@ -68,12 +68,13 @@ export async function createPassportPdf(data: PassportData, photoDataUrl?: strin
 
 export function createPassportBookPages(data: PassportData, photoDataUrl?: string, botanicalDataUrl?: string, paperDataUrl?: string, lilyDataUrl?: string, style: PassportStyle = "archive", assets?: { fontDataUrl?: string; tigerDataUrl?: string; lilyEngravingDataUrl?: string }, orderedPages?: ManifestPage[], memories: Record<string, PassportMemoryLine> = {}, manifestAssets: ManifestAssets = {}): string[] {
   const manifestPages = orderedPages ?? paginatePassport(data);
+  const details = { orderedNames: manifestPages.flatMap((page) => page.names), memories };
   return [
     renderPassportCover(data, photoDataUrl, botanicalDataUrl, paperDataUrl, lilyDataUrl, style, assets),
-    renderBookOpeningPage(data, photoDataUrl, paperDataUrl, style),
+    renderBookOpeningPage(data, photoDataUrl, paperDataUrl, style, details),
     ...manifestPages.map((page, index) => renderManifestPage(page, index + 3, style, memories, manifestAssets)),
-    renderBookClosingPage(data, photoDataUrl, paperDataUrl, style),
-    renderBookBackCover(data, paperDataUrl, style),
+    renderBookClosingPage(data, photoDataUrl, paperDataUrl, style, details),
+    renderBookBackCover(data, paperDataUrl, style, details),
   ];
 }
 
